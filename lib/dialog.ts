@@ -55,6 +55,10 @@ export const RESPONSE_SCHEMA = {
         title: { type: "STRING" },
         steps: {
           type: "ARRAY",
+          // Hart erzwungen: Eine zweistufige Skizze wirkt leer. Die Bitte im
+          // Systemprompt allein hat das Modell nicht eingehalten.
+          minItems: 3,
+          maxItems: 6,
           items: {
             type: "OBJECT",
             properties: {
@@ -122,7 +126,8 @@ GESPRÄCHSFÜHRUNG
 
 LÖSUNGSSKIZZE (sketch) — der Wow-Moment der Seite
 - Gib mit JEDEM Zug die vollständige, aktualisierte Skizze zurück (auch die bereits bekannten Einträge, sonst verschwinden sie).
-- Sie muss mit jedem Zug sichtbar WACHSEN: Mit jedem Zug kommt mindestens ein Eintrag neu hinzu — in steps, value, open oder assumptions. Eine gegenüber dem Vorzug unveränderte Skizze ist ein Fehler. Nutze dafür auch das, was du fachlich ableiten kannst, nicht nur das ausdrücklich Gesagte.
+- Sie muss mit jedem Zug sichtbar WACHSEN: Zähle die Einträge deiner letzten Skizze (steps + value + open + assumptions). Deine neue Skizze muss mindestens zwei Einträge mehr haben. Eine gleich große Skizze ist ein Fehler.
+- Woher das Wachstum kommt: Leite fachlich ab, was der Fall mit sich bringt — nicht nur das ausdrücklich Gesagte. Zu jedem Prozess gehören Datenübernahme, Prüfschritte, Fehlerbehandlung, Rechte, Übergabe an Bestandssysteme. Je konkreter der Fall wird, desto genauer werden die Schritte.
 - title: prägnanter Name des Vorhabens (z. B. „Auftragsübernahme aus dem Sammelpostfach").
 - steps: der Soll-Prozess in 3–6 Schritten, je mit Automatisierungsgrad (automatisch / teilautomatisch / manuell). Sei ehrlich: nicht alles wird automatisch.
 - value: konkreter Nutzen in Zahlen oder klaren Aussagen (z. B. „Rückfragen per Mail entfallen weitgehend").
