@@ -106,6 +106,12 @@ export default function Startseite() {
                 <div className="plate__key">Betrieb</div>
                 <div className="plate__val">ab 990 €/Monat, monatlich kündbar</div>
               </div>
+              <div className="plate__row">
+                <div className="plate__key">Kapazität</div>
+                <div className="plate__val">
+                  <b>2 Projektplätze</b> je Monat — mehr nehme ich nicht an
+                </div>
+              </div>
             </div>
           </div>
 
@@ -274,10 +280,64 @@ export default function Startseite() {
         </div>
       </section>
 
+      {/* ─── Belege ──────────────────────────────────────────── */}
+      <section className="band">
+        <div className="band__inner">
+          <div className="pos">D</div>
+          <div className="stack">
+            <div>
+              <div className="label">Belege</div>
+              <h2>Gebaut, gemessen, läuft.</h2>
+            </div>
+
+            <div className="show">
+              <div className="show__karte">
+                <div className="show__mass">&gt;32 h → ~6 h</div>
+                <div className="show__titel">Reporting ohne Handarbeit</div>
+                <p className="show__text">
+                  Monatliches Berichtswesen: vorher Formulare, verstreute Quellen und
+                  händisches Zusammenschreiben — danach eine Datenbank, automatische
+                  Erinnerungen und KI-entworfene Berichtstexte, die ein Mensch freigibt.
+                </p>
+                <div className="show__quelle">SDAX-Industrieunternehmen · anonymisiert</div>
+              </div>
+
+              <div className="show__karte">
+                <div className="show__mass">1 Team · täglich</div>
+                <div className="show__titel">Postfach, das sich selbst sortiert</div>
+                <p className="show__text">
+                  Ein Sammelpostfach mit Kundenanfragen: Das System liest, ordnet zu,
+                  legt den Vorgang an und entwirft die Antwort. Freigegeben wird von
+                  Menschen — genutzt vom gesamten Serviceteam.
+                </p>
+                <div className="show__quelle">SDAX-Industrieunternehmen · anonymisiert</div>
+              </div>
+
+              <div className="show__karte">
+                <div className="show__mass">3 Apps · im Store</div>
+                <div className="show__titel">End-to-end, allein gebaut</div>
+                <p className="show__text">
+                  Drei eigene iOS-Apps, veröffentlicht im App Store — mit Backend,
+                  Datenbank, KI-Anbindung, Datenschutz und Betrieb. Der Beweis, dass
+                  hier jemand liefert und nicht nur berät.
+                </p>
+                <div className="show__quelle">eigene Produkte · öffentlich</div>
+              </div>
+            </div>
+
+            <p className="prose">
+              Aus laufenden Kundenprojekten zeige ich keine Interna — auch Ihre später
+              nicht. Im Gespräch führe ich Ihnen stattdessen <strong>klickbare
+              Nachbauten mit Beispieldaten</strong> vor.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* ─── Preise ──────────────────────────────────────────── */}
       <section className="band" id="preise">
         <div className="band__inner">
-          <div className="pos">D</div>
+          <div className="pos">E</div>
           <div className="stack">
             <div>
               <div className="label">Preise</div>
@@ -313,6 +373,12 @@ export default function Startseite() {
             </div>
 
             <p className="note">{UNVERBINDLICHKEIT}</p>
+
+            <p className="note">
+              Zum Einordnen: Eine Sachbearbeitungsstelle kostet 45.000–60.000 € — pro
+              Jahr, jedes Jahr. Ein Pilot kostet einmalig weniger als zwei Monatsgehälter
+              davon und kündigt nie.
+            </p>
           </div>
         </div>
       </section>
@@ -320,7 +386,7 @@ export default function Startseite() {
       {/* ─── Manifest ────────────────────────────────────────── */}
       <section className="band">
         <div className="band__inner">
-          <div className="pos">E</div>
+          <div className="pos">F</div>
           <div className="stack">
             <div>
               <div className="label">Wie ich arbeite</div>
@@ -357,7 +423,7 @@ export default function Startseite() {
       {/* ─── Wer baut ────────────────────────────────────────── */}
       <section className="band">
         <div className="band__inner">
-          <div className="pos">F</div>
+          <div className="pos">G</div>
           <div className="stack">
             <div>
               <div className="label">Wer baut</div>
@@ -427,7 +493,7 @@ export default function Startseite() {
       <footer>
         <div>vierwochen — Individualsoftware für den Mittelstand</div>
         <div>
-          <span className="todo">PLATZHALTER</span> Impressum · Datenschutz · AGB
+          <a href="/impressum">Impressum</a> · <a href="/datenschutz">Datenschutz</a> · <a href="/agb">AGB</a>
         </div>
       </footer>
     </div>

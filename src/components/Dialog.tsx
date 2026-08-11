@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Skizze } from '@/lib/dialog';
 import { SKIZZE_LEER } from '@/lib/dialog';
+import Buchung from './Buchung';
 
 interface Nachricht {
   rolle: 'user' | 'model';
@@ -196,11 +197,13 @@ export default function Dialog({ start }: { start: string }) {
             {annahmen.length > 0 && (
               <p className="note">Annahmen: {annahmen.join(' · ')}</p>
             )}
-            <div className="actions">
-              {/* TODO: echte Terminbuchung gegen die Calendar-API */}
-              <a className="btn btn--primary" href="mailto:PLATZHALTER@vierwochen.de?subject=Erstgespräch">
-                Erstgespräch vereinbaren
-              </a>
+
+            <div className="buch__rahmen">
+              <div className="dlg__gate-titel">
+                Der nächste Schritt: 15 Minuten, in denen wir prüfen, ob die
+                Einschätzung hält.
+              </div>
+              <Buchung email={email} fall={skizze.prozess || skizze.titel} />
             </div>
           </div>
         )}

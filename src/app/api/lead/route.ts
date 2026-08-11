@@ -1,13 +1,12 @@
 import { NextRequest } from 'next/server';
+import { anlegen } from '@/lib/firestore';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * Nimmt die geschäftliche E-Mail-Adresse am Ende des Dialogs entgegen.
- *
- * Ablage in Firestore folgt; bis dahin landet der Lead im Log, damit während
- * der Vorschau nichts verloren geht. Der Endpunkt prüft, dass es sich um eine
- * geschäftliche Adresse handelt — Freemail wird freundlich abgewiesen.
+ * Nimmt die geschäftliche E-Mail-Adresse am Ende des Dialogs entgegen und
+ * legt den Lead samt Skizze und Verlauf in Firestore ab. Freemail wird
+ * freundlich abgewiesen — die Auswertung geht an ein Unternehmen.
  */
 
 const FREEMAIL = new Set([
@@ -46,8 +45,18 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // TODO Firestore: Lead mit Skizze und Verlauf ablegen, Bestätigung senden.
-  console.log('LEAD', JSON.stringify({ email, zeit: new Date().toISOString() }));
+  try {
+    await anlegen('leads', {
+      email,
+      skizze: JSON.stringify(daten.skizze ?? null).slice(0, 20000),
+      verlauf: JSON.stringify(daten.verlauf ?? null).slice(0, 40000),
+      erstellt: new Date().toISOString(),
+    });
+  } catch (fehler) {
+    // Der Besucher soll sein Ergebnis sehen, auch wenn der Speicher hakt.
+    console.error('Lead speichern fehlgeschlagen:', fehler);
+    console.log('LEAD-NOTNAGEL', JSON.stringify({ email, zeit: new Date().toISOString() }));
+  }
 
   return Response.json({ ok: true });
 }
