@@ -129,8 +129,11 @@ export const VERTEX = {
     return env("VERTEX_LOCATION") ?? "europe-west4";
   },
   get model() {
-    // Gemini 3.5 Flash-Lite: schnell und günstig, ausgelegt auf hohes Aufkommen.
+    // Flash-Lite: schnell und günstig, ausgelegt auf hohes Aufkommen.
+    // Bewusst die 2.5er-Reihe: Gemini 3.x ist im regionalen Endpunkt
+    // europe-west4 nicht verfügbar (nur global), und der globale Endpunkt
+    // würde die EU-Zusage der Datenschutzerklärung aufheben.
     // Über VERTEX_MODEL ohne Code-Änderung umstellbar.
-    return env("VERTEX_MODEL") ?? "gemini-3.5-flash-lite";
+    return env("VERTEX_MODEL") ?? "gemini-2.5-flash-lite";
   },
 } as const;
