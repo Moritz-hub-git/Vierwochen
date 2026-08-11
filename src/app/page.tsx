@@ -420,10 +420,87 @@ export default function Startseite() {
         </div>
       </section>
 
-      {/* ─── Wer baut ────────────────────────────────────────── */}
+
+      {/* ─── Einwände ────────────────────────────────────────── */}
       <section className="band">
         <div className="band__inner">
           <div className="pos">G</div>
+          <div className="stack">
+            <div>
+              <div className="label">Bevor Sie fragen</div>
+              <h2>Was Sie jetzt vermutlich denken.</h2>
+            </div>
+
+            <div className="faq">
+              <details>
+                <summary>„Vier Wochen — das kann nicht ernst gemeint sein."</summary>
+                <p>
+                  Für einen abgegrenzten Prozess ist es das. Nicht, weil hier schneller
+                  getippt wird, sondern weil ein Großteil der klassischen Projektzeit gar
+                  nicht ins Bauen fließt: Sie geht in Lastenhefte, Abstimmungsrunden,
+                  Angebotsschleifen und Wartezeiten zwischen Gewerken. Das fällt hier weg
+                  — und was tatsächlich gebaut wird, entsteht KI-gestützt. Passt Ihr
+                  Vorhaben nicht in vier Wochen, sage ich das im Erstgespräch, statt es zu
+                  versprechen.
+                </p>
+              </details>
+
+              <details>
+                <summary>„Was passiert, wenn Sie ausfallen? Dann steht unsere Software."</summary>
+                <p>
+                  Der berechtigtste Einwand von allen. Deshalb: Code, Daten und Zugänge
+                  gehören Ihnen ab der Abnahme vollständig, die Dokumentation gehört zum
+                  Lieferumfang, und es kommt bewusst kein exotischer Technik-Stack zum
+                  Einsatz, sondern verbreitete Standards — jeder Entwickler und jedes
+                  Systemhaus kann übernehmen. Mein Maßstab ist Software, die ohne mich
+                  weiterläuft; das eine Werkzeug, das ich zuletzt in einem Konzern gebaut
+                  habe, tut das seit meinem Wechsel unverändert.
+                </p>
+              </details>
+
+              <details>
+                <summary>„Unsere IT wird das nicht mitmachen."</summary>
+                <p>
+                  Kenne ich — ich habe in einem börsennotierten Konzern monatelang
+                  Gremien durchlaufen, um überhaupt bauen zu dürfen. Deshalb rede ich früh
+                  mit Ihrer IT statt an ihr vorbei: Betrieb in Ihrer Umgebung oder in
+                  einer europäischen Cloud, Anbindung über offizielle Schnittstellen,
+                  keine Schatten-IT, Dokumentation und Übergabe inklusive. Wenn Ihre IT
+                  begründete Einwände hat, sind das meist gute Einwände.
+                </p>
+              </details>
+
+              <details>
+                <summary>„KI und unsere Daten — ist das datenschutzkonform?"</summary>
+                <p>
+                  Verarbeitung in der EU, Auftragsverarbeitungsvertrag, keine Nutzung
+                  Ihrer Daten zum Training fremder Modelle. Und häufiger als gedacht
+                  braucht die Lösung überhaupt kein Sprachmodell, sondern eine saubere
+                  Datenbank und einen aufgeräumten Ablauf — dann stellt sich die Frage
+                  gar nicht. Was Ihr Fall wirklich braucht, klären wir vor dem Angebot,
+                  nicht danach.
+                </p>
+              </details>
+
+              <details>
+                <summary>„Und wenn am Ende etwas anderes herauskommt als besprochen?"</summary>
+                <p>
+                  Dafür steht im Festangebot auf einer Seite, was das Werk können muss —
+                  die Abnahmekriterien. Erfüllt es sie nicht, stelle ich keine Rechnung.
+                  Sie sehen außerdem jede Woche den echten Stand im laufenden System, nicht
+                  eine Statusfolie. Ein Fehlschlag fällt damit spätestens in Woche zwei
+                  auf, nicht bei der Übergabe.
+                </p>
+              </details>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Wer baut ────────────────────────────────────────── */}
+      <section className="band">
+        <div className="band__inner">
+          <div className="pos">H</div>
           <div className="stack">
             <div>
               <div className="label">Wer baut</div>

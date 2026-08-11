@@ -1169,3 +1169,72 @@ footer {
   padding-top: 0.4rem;
   border-top: 1px dashed var(--rule);
 }
+
+/* ─── Einwandbehandlung ───────────────────────────────────── */
+
+.faq {
+  border-top: 1px solid var(--rule-soft);
+}
+
+.faq details {
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.faq summary {
+  cursor: pointer;
+  padding-block: 1.05rem;
+  font-size: var(--step-1);
+  font-weight: 650;
+  letter-spacing: -0.014em;
+  line-height: 1.35;
+  list-style: none;
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  gap: 1rem;
+  align-items: baseline;
+}
+
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq summary::before {
+  content: '+';
+  font-family: var(--font-mono);
+  font-size: var(--step-1);
+  color: var(--signal);
+  font-weight: 400;
+  justify-self: start;
+}
+
+.faq details[open] summary::before {
+  content: '−';
+}
+
+.faq summary:hover {
+  color: var(--signal);
+}
+
+.faq details > p {
+  padding: 0 0 1.15rem 3.5rem;
+  color: var(--ink-2);
+  max-width: var(--measure);
+  font-size: var(--step--1);
+}
+
+@media (max-width: 30rem) {
+  .faq summary {
+    grid-template-columns: 1.5rem minmax(0, 1fr);
+    gap: 0.6rem;
+    font-size: var(--step-0);
+  }
+  .faq details > p {
+    padding-left: 2.1rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .faq details[open] > p {
+    animation: msg-ein 220ms ease-out;
+  }
+}
