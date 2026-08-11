@@ -2,35 +2,32 @@
 #
 # vierwochen.de — Einrichtung der Google-Cloud-Umgebung
 #
-# So benutzt du das Skript:
-#   1. In der Google Cloud Console oben rechts auf das Terminal-Symbol klicken (Cloud Shell).
-#      Dort ist gcloud bereits installiert und du bist angemeldet — nichts zu installieren.
-#   2. Die Variablen im Abschnitt EINSTELLUNGEN prüfen (mindestens PROJECT_ID).
-#   3. Skript einfügen und ausführen.
+# Ausfuehren in der Cloud Shell (Terminal-Symbol oben rechts in der Console).
+# Dort ist gcloud installiert und du bist angemeldet — nichts zu installieren.
 #
-# Das Skript legt nichts an, was Geld kostet, solange keine Anfragen laufen:
-# Cloud Run skaliert auf null, Firestore und Artifact Registry sind im Leerlauf
-# praktisch kostenfrei. Trotzdem: Budget-Alarm setzen (siehe Handarbeit am Ende).
+# Das Skript ist wiederholbar: Bereits vorhandene Ressourcen werden uebersprungen.
 
 set -euo pipefail
 
 # ─── EINSTELLUNGEN ────────────────────────────────────────────────────────────
 
-PROJECT_ID="vierwochen-prod"        # anpassen, falls dein Projekt anders heißt
-REGION_APP="europe-west3"           # Frankfurt — Cloud Run und Artifact Registry
-REGION_AI="europe-west4"            # Vertex AI (Gemini); EU-Region, ggf. anpassen
-FIRESTORE_LOCATION="eur3"           # Europa-Multiregion
-SA_NAME="vierwochen-app"            # Dienstkonto der Anwendung
-REPO_NAME="vierwochen"              # Artifact-Registry-Repository
+PROJECT_ID="vierwochen"
+REGION_APP="europe-west3"       # Frankfurt — Cloud Run, Artifact Registry, Trigger
+REGION_AI="europe-west4"        # Vertex AI (Gemini)
+FIRESTORE_LOCATION="eur3"       # Europa-Multiregion
+APP_SA_NAME="vierwochen-app"    # Laufzeit: die Anwendung selbst
+BUILD_SA_NAME="vierwochen-build" # Bau: Cloud Build
+REPO_NAME="vierwochen"
 
 # ──────────────────────────────────────────────────────────────────────────────
 
-SA_EMAIL="${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
+APP_SA="${APP_SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
+BUILD_SA="${BUILD_SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
 
 echo "▸ Projekt setzen: ${PROJECT_ID}"
 gcloud config set project "${PROJECT_ID}" --quiet
 
-echo "▸ Schnittstellen aktivieren (dauert ein bis zwei Minuten)"
+echo "▸ Schnittstellen aktivieren (ein bis zwei Minuten)"
 gcloud services enable \
   run.googleapis.com \
   cloudbuild.googleapis.com \
@@ -42,25 +39,26 @@ gcloud services enable \
   iamcredentials.googleapis.com \
   --quiet
 
-echo "▸ Firestore-Datenbank anlegen (Native Mode, ${FIRESTORE_LOCATION})"
+echo "▸ Firestore-Datenbank (Native Mode, ${FIRESTORE_LOCATION})"
 gcloud firestore databases create \
   --location="${FIRESTORE_LOCATION}" \
   --type=firestore-native \
   --quiet || echo "  (existiert bereits — übersprungen)"
 
-echo "▸ Artifact Registry anlegen (${REGION_APP})"
+echo "▸ Artifact Registry (${REGION_APP})"
 gcloud artifacts repositories create "${REPO_NAME}" \
   --repository-format=docker \
   --location="${REGION_APP}" \
   --description="Container der vierwochen-Anwendung" \
   --quiet || echo "  (existiert bereits — übersprungen)"
 
-echo "▸ Dienstkonto der Anwendung anlegen"
-gcloud iam service-accounts create "${SA_NAME}" \
+# ─── Laufzeit-Dienstkonto: unter dieser Identität läuft die Anwendung ─────────
+
+echo "▸ Laufzeit-Dienstkonto ${APP_SA_NAME}"
+gcloud iam service-accounts create "${APP_SA_NAME}" \
   --display-name="vierwochen Anwendung" \
   --quiet || echo "  (existiert bereits — übersprungen)"
 
-echo "▸ Rollen vergeben"
 for ROLE in \
   roles/aiplatform.user \
   roles/datastore.user \
@@ -68,67 +66,93 @@ for ROLE in \
   roles/logging.logWriter
 do
   gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
-    --member="serviceAccount:${SA_EMAIL}" \
-    --role="${ROLE}" \
-    --condition=None \
-    --quiet > /dev/null
+    --member="serviceAccount:${APP_SA}" \
+    --role="${ROLE}" --condition=None --quiet > /dev/null
   echo "  ✓ ${ROLE}"
 done
 
-echo "▸ Cloud Build erlauben, nach Cloud Run zu deployen"
-PROJECT_NUMBER="$(gcloud projects describe "${PROJECT_ID}" --format='value(projectNumber)')"
-CLOUDBUILD_SA="${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com"
-for ROLE in roles/run.admin roles/iam.serviceAccountUser roles/artifactregistry.writer
+# ─── Bau-Dienstkonto ─────────────────────────────────────────────────────────
+#
+# Google hat die Cloud-Build-Dienstkonten umgestellt: In Projekten, die nach der
+# Umstellung angelegt wurden, gibt es das alte Konto
+# PROJEKTNUMMER@cloudbuild.gserviceaccount.com nicht mehr. Ein Trigger muss
+# deshalb ausdrücklich ein Dienstkonto mitbekommen — sonst scheitert das Anlegen
+# mit "Request contains an invalid argument".
+
+echo "▸ Bau-Dienstkonto ${BUILD_SA_NAME}"
+gcloud iam service-accounts create "${BUILD_SA_NAME}" \
+  --display-name="vierwochen Bau" \
+  --quiet || echo "  (existiert bereits — übersprungen)"
+
+for ROLE in \
+  roles/run.admin \
+  roles/artifactregistry.writer \
+  roles/logging.logWriter \
+  roles/cloudbuild.builds.builder
 do
   gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
-    --member="serviceAccount:${CLOUDBUILD_SA}" \
-    --role="${ROLE}" \
-    --condition=None \
-    --quiet > /dev/null || echo "  (Hinweis: ${ROLE} konnte nicht gesetzt werden — siehe Handarbeit)"
+    --member="serviceAccount:${BUILD_SA}" \
+    --role="${ROLE}" --condition=None --quiet > /dev/null
   echo "  ✓ ${ROLE}"
 done
+
+echo "▸ Bau-Konto darf das Laufzeit-Konto verwenden"
+gcloud iam service-accounts add-iam-policy-binding "${APP_SA}" \
+  --member="serviceAccount:${BUILD_SA}" \
+  --role="roles/iam.serviceAccountUser" \
+  --quiet > /dev/null
+
+PROJECT_NUMBER="$(gcloud projects describe "${PROJECT_ID}" --format='value(projectNumber)')"
 
 cat <<INFO
 
 ════════════════════════════════════════════════════════════════════
-FERTIG. Diese Werte brauche ich von dir (alle unkritisch):
+FERTIG.
 
   Projekt-ID            ${PROJECT_ID}
   Projektnummer         ${PROJECT_NUMBER}
   Region Anwendung      ${REGION_APP}
   Region Vertex AI      ${REGION_AI}
-  Dienstkonto           ${SA_EMAIL}
+  Laufzeit-Dienstkonto  ${APP_SA}
+  Bau-Dienstkonto       ${BUILD_SA}
 
 ════════════════════════════════════════════════════════════════════
-NOCH VON HAND ZU ERLEDIGEN (vier Schritte, ca. 10 Minuten):
+TRIGGER ANLEGEN
 
-1) ABRECHNUNG UND BUDGET
-   Abrechnung mit dem Projekt verknüpfen und unter
-   "Abrechnung → Budgets" einen Alarm setzen (Vorschlag: 50 € pro Monat,
-   Benachrichtigung bei 50/90/100 Prozent).
+Erst das Repository verbinden (Console: Cloud Build → Trigger →
+Repository verbinden → GitHub). Danach:
 
-2) GITHUB MIT CLOUD BUILD VERBINDEN
-   Cloud Build → Trigger → "Repository verbinden" → GitHub → dieses
-   Repository auswählen. Danach Trigger anlegen:
-     Ereignis  : Push auf Branch
-     Branch    : ^main$   (oder der Branch, auf dem gebaut wird)
-     Konfig    : cloudbuild.yaml   (lege ich im Repository an)
-   Ab dann deployt jeder Push automatisch — genau das macht den Bau autonom.
+  gcloud builds triggers create github \\
+    --name=vierwochen-main \\
+    --region=${REGION_APP} \\
+    --repo-owner=Moritz-hub-git \\
+    --repo-name=vierwochen \\
+    --branch-pattern='^main\$' \\
+    --build-config=cloudbuild.yaml \\
+    --service-account=projects/${PROJECT_ID}/serviceAccounts/${BUILD_SA}
 
-3) KALENDER FREIGEBEN
-   Google Kalender → Einstellungen des Buchungskalenders →
-   "Für bestimmte Personen freigeben" → diese Adresse eintragen:
-     ${SA_EMAIL}
-   Berechtigung: "Termine ändern".
-
-4) DOMAIN
-   vierwochen.de bei einem deutschen Registrar registrieren.
-   Die Verknüpfung mit Cloud Run machen wir später gemeinsam.
+Wichtig: Trigger und Repository-Verbindung müssen in derselben Region
+liegen. Wurde das Repository global verbunden, dann --region=global.
 
 ════════════════════════════════════════════════════════════════════
-WICHTIG: Erzeuge KEINEN Dienstkonto-Schlüssel und schicke ihn nirgendwohin.
-Die Anwendung authentifiziert sich auf Cloud Run über ihre eigene Identität.
-Ein Schlüssel wäre ein unnötiges Risiko.
+OHNE TRIGGER SOFORT AUSLIEFERN (zum Testen)
+
+  git clone https://github.com/Moritz-hub-git/vierwochen.git
+  cd vierwochen
+  gcloud run deploy vierwochen --source . \\
+    --region=${REGION_APP} \\
+    --service-account=${APP_SA} \\
+    --allow-unauthenticated \\
+    --set-env-vars=GOOGLE_CLOUD_PROJECT=${PROJECT_ID},VERTEX_LOCATION=${REGION_AI}
+
+════════════════════════════════════════════════════════════════════
+NOCH VON HAND
+
+1) Budget-Alarm setzen (Abrechnung → Budgets, Vorschlag: 50 € pro Monat).
+2) Buchungskalender freigeben für: ${APP_SA}  (Recht: "Termine ändern").
+3) Domain vierwochen.de bei einem deutschen Registrar registrieren.
+
+Erzeuge KEINE Dienstkonto-Schlüssel. Sie werden nirgends gebraucht.
 ════════════════════════════════════════════════════════════════════
 
 INFO
