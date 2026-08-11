@@ -32,8 +32,7 @@ kommentieren, weiterbauen.
   - Läuft es nach vier Wochen nicht → kostet es nichts
   - 12 Monate Gewährleistung
   - Code, Daten und Zugänge gehören dem Kunden (kein Lock-in)
-  - Betrieb optional ab 990 €/Monat, monatlich kündbar
-  - Ehrliche Kapazität: 2 Projektplätze pro Monat
+  - Betrieb optional monatlich kündbar
 
 ---
 
@@ -98,7 +97,6 @@ eigene Seite so gut ist, wird meine Software auch gut".
 4. **Der Weg** — die vier Wochen als Zeitschiene: Einschätzung → Erstgespräch →
    Festangebot → Bau → Abnahme → Betrieb.
 5. **Belege** — anonymisierte Fälle und eigene Produkte (Inhalte siehe Abschnitt 9).
-6. **Preise** — öffentlich, tabellarisch, ohne „auf Anfrage", mit Kostenanker.
 7. **Einwandbehandlung** — siehe Verkaufspsychologie Punkt 7.
 8. **Wie ich arbeite** — fünf harte Zusagen als Manifest.
 9. **Wer baut** — Person, Belege, ehrliche Grenzen.
@@ -110,12 +108,11 @@ eigene Seite so gut ist, wird meine Software auch gut".
 
 ### Ablauf
 
-1. **Einstieg:** Ein Feld auf der Startseite: „Beschreiben Sie den Ablauf, der Sie am
-   meisten Zeit kostet." Nach dem Absenden öffnet sich der Dialog.
-2. **Rückfragen:** Höchstens sechs, **eine pro Nachricht**. Adaptiv: Wer ausführlich
+1. **Einstieg:** Untern in der Fußleiste dauerhaft ein AI chafenster wie bei ChatGPT mit wechselnden inspiration texten.
+2. **Rückfragen:** Höchstens drei, **eine pro Nachricht**. Adaptiv: Wer ausführlich
    antwortet, wird schneller durchgelassen.
 3. **Lösungsskizze:** Parallel zum Gespräch baut sich sichtbar ein Bild des Falls auf —
-   Prozessschritte im Vorher/Nachher-Vergleich, beteiligte Rollen, Systeme, Datenquellen,
+   Prozessschritte, Timeline, kundenvalue
    Automatisierungsgrad, offene Punkte. Das Modell liefert je Zug strukturiertes JSON,
    daraus wird die Skizze gerendert. **Sie muss mit jedem Zug sichtbar wachsen** — das ist
    der Wow-Moment der Seite.
@@ -151,17 +148,8 @@ eigene Seite so gut ist, wird meine Software auch gut".
 
 ---
 
-## 6. Preislogik — das Modell rechnet nicht
+## 6. Preislogik — 
 
-Das Modell **klassifiziert nur**, es nennt niemals Beträge. Die Spannen liegen in einer
-Konfigurationsdatei, die ohne Codeänderung anpassbar ist.
-
-| Kategorie | Spanne | Dauer | Merkmale |
-|---|---|---|---|
-| Werkstück | 2.500 € | 1 Woche | Prototyp, keine Integration, wird bei Beauftragung verrechnet |
-| Pilot | 9.800–14.000 € | 4 Wochen | Ein Prozess, produktiv, höchstens eine Anbindung |
-| Ausbaustufe | 15.000–40.000 € | 8 Wochen | Mehrere Prozesse, ERP-/DMS-Anbindung, Rollen und Rechte |
-| Erst ins Gespräch | — | — | Regulatorik, Altsystem-Ablösung, unklare Datenlage, >200 Nutzer |
 
 Jede Ausgabe trägt sichtbar: **unverbindliche Ersteinschätzung, kein Angebot.** Alle
 Beträge netto zzgl. USt.
