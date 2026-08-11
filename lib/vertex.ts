@@ -92,14 +92,14 @@ function repairJsonTruncated(text: string): unknown {
  * Fragt nur die Metadaten ab — kostet keine Tokens. Nützlich nach einem
  * Modellwechsel: Ist das Modell in der Region unbekannt, antwortet Vertex 404.
  */
-export async function probeModel(): Promise<{
+export async function probeModel(candidate?: string): Promise<{
   ok: boolean;
   model: string;
   location: string;
   status?: number;
   error?: string;
 }> {
-  const model = VERTEX.model;
+  const model = candidate ?? VERTEX.model;
   const location = VERTEX.location;
   const project = VERTEX.project;
   if (!project) {
@@ -107,17 +107,29 @@ export async function probeModel(): Promise<{
   }
   try {
     const client = await auth.getClient();
+    // Kleinstmöglicher echter Aufruf: sagt verlässlich, ob das Modell in dieser
+    // Region antwortet. Eine reine Metadatenabfrage tut das nicht.
     await client.request({
-      url: `https://${location}-aiplatform.googleapis.com/v1/projects/${project}/locations/${location}/publishers/google/models/${model}`,
-      method: "GET",
-      timeout: 15_000,
+      url: `https://${location}-aiplatform.googleapis.com/v1/projects/${project}/locations/${location}/publishers/google/models/${model}:generateContent`,
+      method: "POST",
+      data: {
+        contents: [{ role: "user", parts: [{ text: "ping" }] }],
+        generationConfig: { maxOutputTokens: 1, temperature: 0 },
+      },
+      timeout: 30_000,
     });
     return { ok: true, model, location };
   } catch (err) {
     const status = (err as { response?: { status?: number } })?.response?.status;
-    const message = err instanceof Error ? err.message : String(err);
-    console.error(`[vertex] Modellprüfung fehlgeschlagen (${model} in ${location}):`, message);
-    return { ok: false, model, location, status, error: message.slice(0, 300) };
+    const data = (err as { response?: { data?: unknown } })?.response?.data;
+    const upstream =
+      typeof data === "object" && data !== null
+        ? JSON.stringify(data).slice(0, 400)
+        : err instanceof Error
+          ? err.message.slice(0, 400)
+          : String(err).slice(0, 400);
+    console.error(`[vertex] Modellprüfung fehlgeschlagen (${model} in ${location}):`, upstream);
+    return { ok: false, model, location, status, error: upstream };
   }
 }
 
