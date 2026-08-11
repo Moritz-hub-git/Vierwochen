@@ -1,29 +1,17 @@
 # Bau und Auslieferung von vierwochen.de
 #
-# Laeuft bei jedem Push auf main. Bewusst defensiv gebaut: Der erste Schritt
-# legt die Container-Ablage an, falls sie fehlt — genau daran ist der Build
-# zuvor gescheitert. Keine Sonder-Maschinentypen, keine Annahmen ueber
-# vorhandene Ressourcen.
+# Laeuft bei jedem Push auf main.
+# Die Artifact-Registry-Ablage "vierwochen" in europe-west3 existiert bereits;
+# sie wird hier bewusst nicht mehr geprueft oder angelegt, um eine unnoetige
+# Fehlerquelle zu vermeiden.
+#
+# Das Dienstkonto, unter dem dieser Build laeuft, braucht:
+#   roles/artifactregistry.writer   (Image ablegen)
+#   roles/run.admin                 (nach Cloud Run ausliefern)
+#   roles/iam.serviceAccountUser    (auf dem Laufzeitkonto handeln)
+#   roles/logging.logWriter         (Protokolle schreiben)
 
 steps:
-  - id: Ablage-pruefen
-    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
-    entrypoint: bash
-    args:
-      - -c
-      - |
-        set -e
-        if ! gcloud artifacts repositories describe vierwochen \
-              --location=europe-west3 >/dev/null 2>&1; then
-          echo "Artifact-Registry-Ablage fehlt — wird angelegt."
-          gcloud artifacts repositories create vierwochen \
-            --repository-format=docker \
-            --location=europe-west3 \
-            --description="Container der vierwochen-Anwendung"
-        else
-          echo "Ablage vorhanden."
-        fi
-
   - id: Bauen
     name: gcr.io/cloud-builders/docker
     args:
