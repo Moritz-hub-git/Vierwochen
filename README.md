@@ -36,8 +36,8 @@ Datenschutzerklärung und AGB stehen.
 - [x] Gerüst, Container, Auslieferung
 - [x] Startseite mit Leistungsschild, Ablauf, Preisen, Manifest
 - [x] Preislogik als Konfiguration (`src/lib/pricing.ts`)
-- [ ] Projekt-Dialog mit Gemini über Vertex AI
-- [ ] Lösungsskizze, die sich im Dialog aufbaut
-- [ ] E-Mail-Gate und Speicherung in Firestore
+- [x] Projekt-Dialog mit Gemini über Vertex AI (Dienstkonto, kein Schlüssel)
+- [x] Lösungsskizze, die sich im Dialog aufbaut
+- [x] E-Mail-Gate (Freemail-Prüfung) — Firestore-Ablage folgt
 - [ ] Terminbuchung gegen die Google-Calendar-API
 - [ ] Impressum, Datenschutz, AGB
