@@ -87,6 +87,40 @@ function repairJsonTruncated(text: string): unknown {
   throw new Error("JSON-Antwort nicht reparierbar (gekürzt)");
 }
 
+/**
+ * Prüft, ob das konfigurierte Modell in der eingestellten Region bereitsteht.
+ * Fragt nur die Metadaten ab — kostet keine Tokens. Nützlich nach einem
+ * Modellwechsel: Ist das Modell in der Region unbekannt, antwortet Vertex 404.
+ */
+export async function probeModel(): Promise<{
+  ok: boolean;
+  model: string;
+  location: string;
+  status?: number;
+  error?: string;
+}> {
+  const model = VERTEX.model;
+  const location = VERTEX.location;
+  const project = VERTEX.project;
+  if (!project) {
+    return { ok: false, model, location, error: "GOOGLE_CLOUD_PROJECT ist nicht gesetzt." };
+  }
+  try {
+    const client = await auth.getClient();
+    await client.request({
+      url: `https://${location}-aiplatform.googleapis.com/v1/projects/${project}/locations/${location}/publishers/google/models/${model}`,
+      method: "GET",
+      timeout: 15_000,
+    });
+    return { ok: true, model, location };
+  } catch (err) {
+    const status = (err as { response?: { status?: number } })?.response?.status;
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`[vertex] Modellprüfung fehlgeschlagen (${model} in ${location}):`, message);
+    return { ok: false, model, location, status, error: message.slice(0, 300) };
+  }
+}
+
 export async function generateStructured(options: {
   contents: Content[];
   systemInstruction: string;

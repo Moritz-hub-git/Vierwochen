@@ -129,6 +129,8 @@ export const VERTEX = {
     return env("VERTEX_LOCATION") ?? "europe-west4";
   },
   get model() {
-    return env("VERTEX_MODEL") ?? "gemini-2.5-flash";
+    // Gemini 3.5 Flash-Lite: schnell und günstig, ausgelegt auf hohes Aufkommen.
+    // Über VERTEX_MODEL ohne Code-Änderung umstellbar.
+    return env("VERTEX_MODEL") ?? "gemini-3.5-flash-lite";
   },
 } as const;
