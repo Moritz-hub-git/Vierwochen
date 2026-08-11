@@ -129,11 +129,15 @@ export const VERTEX = {
     return env("VERTEX_LOCATION") ?? "europe-west4";
   },
   get model() {
-    // Flash-Lite: schnell und günstig, ausgelegt auf hohes Aufkommen.
-    // Bewusst die 2.5er-Reihe: Gemini 3.x ist im regionalen Endpunkt
-    // europe-west4 nicht verfügbar (nur global), und der globale Endpunkt
-    // würde die EU-Zusage der Datenschutzerklärung aufheben.
+    // In europe-west4 stehen nur gemini-2.5-{pro,flash,flash-lite} bereit
+    // (geprüft). Gemini 3.x gibt es dort nicht, sondern nur global — und der
+    // globale Endpunkt würde die EU-Zusage der Datenschutzerklärung aufheben.
+    //
+    // Flash statt Flash-Lite: Der Dialog stellt viele Regeln gleichzeitig
+    // (max. 3 Fragen, ≤60 Wörter, nichts wiederholen, JSON-Schema). Flash-Lite
+    // bricht dabei zuerst ein und wiederholt den Nutzer. Der Unterschied kostet
+    // rund einen Cent je Gespräch — an dieser Stelle die falsche Sparsamkeit.
     // Über VERTEX_MODEL ohne Code-Änderung umstellbar.
-    return env("VERTEX_MODEL") ?? "gemini-2.5-flash-lite";
+    return env("VERTEX_MODEL") ?? "gemini-2.5-flash";
   },
 } as const;
