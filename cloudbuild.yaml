@@ -1,35 +1,51 @@
 # Bau und Auslieferung von vierwochen.de
 #
-# Wird von einem Cloud-Build-Trigger bei jedem Push auf den Branch ausgefuehrt.
-# Voraussetzung: Artifact-Registry-Repository "vierwochen" in europe-west3 und
-# das Dienstkonto vierwochen-app (beides legt setup-gcp.sh an).
+# Laeuft bei jedem Push auf main. Bewusst defensiv gebaut: Der erste Schritt
+# legt die Container-Ablage an, falls sie fehlt — genau daran ist der Build
+# zuvor gescheitert. Keine Sonder-Maschinentypen, keine Annahmen ueber
+# vorhandene Ressourcen.
 
 steps:
+  - id: Ablage-pruefen
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -e
+        if ! gcloud artifacts repositories describe vierwochen \
+              --location=europe-west3 >/dev/null 2>&1; then
+          echo "Artifact-Registry-Ablage fehlt — wird angelegt."
+          gcloud artifacts repositories create vierwochen \
+            --repository-format=docker \
+            --location=europe-west3 \
+            --description="Container der vierwochen-Anwendung"
+        else
+          echo "Ablage vorhanden."
+        fi
+
   - id: Bauen
     name: gcr.io/cloud-builders/docker
     args:
       - build
       - -t
-      - europe-west3-docker.pkg.dev/$PROJECT_ID/vierwochen/app:$SHORT_SHA
-      - -t
-      - europe-west3-docker.pkg.dev/$PROJECT_ID/vierwochen/app:latest
+      - europe-west3-docker.pkg.dev/$PROJECT_ID/vierwochen/app:$BUILD_ID
       - .
 
   - id: Hochladen
     name: gcr.io/cloud-builders/docker
     args:
       - push
-      - --all-tags
-      - europe-west3-docker.pkg.dev/$PROJECT_ID/vierwochen/app
+      - europe-west3-docker.pkg.dev/$PROJECT_ID/vierwochen/app:$BUILD_ID
 
   - id: Ausliefern
-    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
     entrypoint: gcloud
     args:
       - run
       - deploy
       - vierwochen
-      - --image=europe-west3-docker.pkg.dev/$PROJECT_ID/vierwochen/app:$SHORT_SHA
+      - --image=europe-west3-docker.pkg.dev/$PROJECT_ID/vierwochen/app:$BUILD_ID
       - --region=europe-west3
       - --platform=managed
       - --service-account=vierwochen-app@$PROJECT_ID.iam.gserviceaccount.com
@@ -40,12 +56,9 @@ steps:
       - --cpu=1
       - --timeout=120s
       - --set-env-vars=GOOGLE_CLOUD_PROJECT=$PROJECT_ID,VERTEX_LOCATION=europe-west4
-
-images:
-  - europe-west3-docker.pkg.dev/$PROJECT_ID/vierwochen/app:$SHORT_SHA
+      - --quiet
 
 options:
   logging: CLOUD_LOGGING_ONLY
-  machineType: E2_HIGHCPU_8
 
-timeout: 1200s
+timeout: 1800s
