@@ -1,0 +1,33 @@
+# Auslieferung nach PROMPT.md §9: bauen, hochladen, ausrollen. Nicht mehr.
+# Alle Ressourcen (Artifact Registry, Cloud Run, Dienstkonten) existieren bereits.
+steps:
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - europe-west3-docker.pkg.dev/$PROJECT_ID/vierwochen/app:$BUILD_ID
+      - .
+
+  - id: push
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - europe-west3-docker.pkg.dev/$PROJECT_ID/vierwochen/app:$BUILD_ID
+
+  - id: deploy
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - vierwochen
+      - --image=europe-west3-docker.pkg.dev/$PROJECT_ID/vierwochen/app:$BUILD_ID
+      - --region=europe-west3
+      - --service-account=vierwochen-app@$PROJECT_ID.iam.gserviceaccount.com
+      - --allow-unauthenticated
+      - --set-env-vars=GOOGLE_CLOUD_PROJECT=$PROJECT_ID,VERTEX_LOCATION=europe-west4
+
+# Pflicht bei eigenem Bau-Dienstkonto, sonst schlägt der Build fehl (PROMPT.md §9).
+options:
+  logging: CLOUD_LOGGING_ONLY
