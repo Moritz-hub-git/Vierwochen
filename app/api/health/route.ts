@@ -31,9 +31,14 @@ export async function GET(req: Request) {
   // Optionaler Modellname, um nach einem Wechsel Kandidaten zu prüfen, ohne neu
   // auszurollen. Bewusst eng gefasst: nur Gemini-Kennungen, und der Aufruf
   // hängt an der Minutenbegrenzung je IP.
-  const candidate = new URL(req.url).searchParams.get("model") ?? undefined;
+  const params = new URL(req.url).searchParams;
+  const candidate = params.get("model") ?? undefined;
+  const candidateLocation = params.get("location") ?? undefined;
   if (candidate && !/^gemini-[a-z0-9.-]{1,40}$/.test(candidate)) {
     return NextResponse.json({ ...base, probe: { ok: false, error: "Ungültiger Modellname." } }, { status: 400 });
   }
-  return NextResponse.json({ ...base, probe: await probeModel(candidate) });
+  if (candidateLocation && !/^[a-z0-9-]{2,20}$/.test(candidateLocation)) {
+    return NextResponse.json({ ...base, probe: { ok: false, error: "Ungültiger Standort." } }, { status: 400 });
+  }
+  return NextResponse.json({ ...base, probe: await probeModel(candidate, candidateLocation) });
 }

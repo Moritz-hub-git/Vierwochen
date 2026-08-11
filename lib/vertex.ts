@@ -92,7 +92,15 @@ function repairJsonTruncated(text: string): unknown {
  * Fragt nur die Metadaten ab — kostet keine Tokens. Nützlich nach einem
  * Modellwechsel: Ist das Modell in der Region unbekannt, antwortet Vertex 404.
  */
-export async function probeModel(candidate?: string): Promise<{
+/**
+ * Basis-URL für einen Standort. Der globale Endpunkt hat kein Regionspräfix,
+ * regionale und Multiregion-Endpunkte (z. B. `eu`) haben eines.
+ */
+export function apiHost(location: string): string {
+  return location === "global" ? "aiplatform.googleapis.com" : `${location}-aiplatform.googleapis.com`;
+}
+
+export async function probeModel(candidate?: string, candidateLocation?: string): Promise<{
   ok: boolean;
   model: string;
   location: string;
@@ -100,7 +108,7 @@ export async function probeModel(candidate?: string): Promise<{
   error?: string;
 }> {
   const model = candidate ?? VERTEX.model;
-  const location = VERTEX.location;
+  const location = candidateLocation ?? VERTEX.location;
   const project = VERTEX.project;
   if (!project) {
     return { ok: false, model, location, error: "GOOGLE_CLOUD_PROJECT ist nicht gesetzt." };
@@ -110,7 +118,7 @@ export async function probeModel(candidate?: string): Promise<{
     // Kleinstmöglicher echter Aufruf: sagt verlässlich, ob das Modell in dieser
     // Region antwortet. Eine reine Metadatenabfrage tut das nicht.
     await client.request({
-      url: `https://${location}-aiplatform.googleapis.com/v1/projects/${project}/locations/${location}/publishers/google/models/${model}:generateContent`,
+      url: `https://${apiHost(location)}/v1/projects/${project}/locations/${location}/publishers/google/models/${model}:generateContent`,
       method: "POST",
       data: {
         contents: [{ role: "user", parts: [{ text: "ping" }] }],
@@ -143,7 +151,7 @@ export async function generateStructured(options: {
   if (!project) {
     throw new Error("GOOGLE_CLOUD_PROJECT ist nicht gesetzt — Vertex AI nicht konfiguriert.");
   }
-  const url = `https://${VERTEX.location}-aiplatform.googleapis.com/v1/projects/${project}/locations/${VERTEX.location}/publishers/google/models/${VERTEX.model}:generateContent`;
+  const url = `https://${apiHost(VERTEX.location)}/v1/projects/${project}/locations/${VERTEX.location}/publishers/google/models/${VERTEX.model}:generateContent`;
 
   const client = await auth.getClient();
   const body = {
