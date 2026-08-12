@@ -19,6 +19,7 @@ export interface DialogResult {
   priceMax: number;
   scope: string[];
   weeks: { week: number; label: string }[];
+  savings?: { annualEuro: number; basis: string };
 }
 
 export interface DialogTurn {

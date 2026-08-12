@@ -1265,10 +1265,99 @@ button, input, textarea, select {
 
 .result-tier { color: var(--accent); font-weight: 700; font-size: 0.9rem; }
 
+.result-price-note {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: -0.1rem;
+}
+
+/* Kostenanker: Der Preis bekommt ein Gegengewicht (PROMPT.md §2.4). */
+.roi {
+  margin-top: 1.2rem;
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.roi-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.35rem 0;
+}
+
+.roi-row + .roi-row { border-top: 1px dashed var(--border); }
+
+.roi-label {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.roi-value {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+
+.roi-value.roi-cost { color: var(--danger); }
+
+.roi-unit {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.roi-payback {
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.92rem;
+  color: var(--text);
+}
+
+.roi-payback strong { color: var(--accent); }
+
+.roi-payback-long {
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.roi-payback-long strong { color: var(--text); }
+
+.roi-basis {
+  margin-top: 0.5rem;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+/* Risiko-Umkehr unmittelbar an der Zahl (PROMPT.md §2.3). */
+.guarantee {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  margin-top: 1.2rem;
+  padding: 0.9rem 1.05rem;
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.guarantee svg {
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
 .result-disclaimer {
   font-size: 0.8rem;
   color: var(--text-muted);
-  margin-top: 0.5rem;
+  margin-top: 0.9rem;
   padding-top: 0.75rem;
   border-top: 1px solid var(--border);
 }
@@ -1432,6 +1521,106 @@ button, input, textarea, select {
   border-color: var(--accent);
   background: var(--accent-soft);
   color: var(--accent);
+}
+
+/* Bestätigungsschritt: erscheint erst nach der Slotwahl. */
+.booking-confirm {
+  margin-top: 0.3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  animation: msgIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.booking-chosen {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 12px;
+  padding: 0.6rem 0.9rem;
+  font-weight: 700;
+  font-size: 0.92rem;
+  margin-bottom: 0.9rem;
+}
+
+.booking-chosen svg { flex-shrink: 0; }
+
+.booking-scarcity {
+  margin: 0.8rem 0 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Leise Alternative für Besucher ohne Termin-Bereitschaft. */
+.gate-toggle {
+  display: block;
+  width: 100%;
+  margin-top: 0.9rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.87rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.gate-toggle:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.gate-inline {
+  margin-top: 0.9rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  animation: msgIn 0.3s ease;
+}
+
+.gate-inline label {
+  display: block;
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  margin-bottom: 0.6rem;
+  line-height: 1.45;
+}
+
+.gate-inline-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.gate-inline-row input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  padding: 0.6rem 0.85rem;
+  font-size: 0.92rem;
+}
+
+.gate-inline-row input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--glow);
+}
+
+.gate-inline-row .btn { flex-shrink: 0; }
+
+.gate-done {
+  margin-top: 0.9rem;
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: 0.88rem;
 }
 
 .booking-success {

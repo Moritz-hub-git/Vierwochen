@@ -28,6 +28,15 @@ export interface DialogResult {
   priceMax: number;
   scope: string[];
   weeks: { week: number; label: string }[];
+  /**
+   * Was der heutige Zustand pro Jahr kostet. Nur gesetzt, wenn der Nutzer
+   * belastbare Mengenangaben gemacht hat — nie geraten (PROMPT.md §2.6:
+   * Autorität nur durch Artefakte, keine erfundenen Zahlen).
+   */
+  savings?: {
+    annualEuro: number;
+    basis: string;
+  };
 }
 
 export interface DialogTurn {
@@ -92,6 +101,14 @@ export const RESPONSE_SCHEMA = {
             required: ["week", "label"],
           },
         },
+        savings: {
+          type: "OBJECT",
+          properties: {
+            annualEuro: { type: "NUMBER" },
+            basis: { type: "STRING" },
+          },
+          required: ["annualEuro", "basis"],
+        },
       },
       required: ["tier", "priceMin", "priceMax", "scope", "weeks"],
     },
@@ -139,6 +156,10 @@ ERGEBNIS (phase=result)
 ${tierLines}
 - weeks: genau 4 Einträge (Woche 1–4) mit konkretem, fallbezogenem Inhalt. Woche 1 enthält Festangebot und Start, Woche 4 endet mit Abnahme.
 - scope: 3–6 Punkte, was im Festpreis enthalten ist.
+- savings: Was der heutige Zustand pro Jahr kostet. NUR ausfüllen, wenn der Nutzer belastbare Mengen genannt hat (Stunden, Tage, Personen, Stückzahlen). Hat er keine genannt, lasse savings vollständig weg — erfinde niemals Zahlen.
+  Rechne mit 300 € Vollkosten je Personentag (entspricht 45.000–60.000 € Jahreskosten einer Sachbearbeitungsstelle auf ~200 Arbeitstage) und 45 Arbeitswochen im Jahr.
+  Beispiel: „zwei Personen je einen Tag pro Woche" → 2 × 45 = 90 Personentage → annualEuro 27000, basis: „2 Personentage pro Woche × 45 Wochen × 300 € Vollkosten je Tag".
+  basis muss die Rechnung nachvollziehbar in einem Satz enthalten, damit der Nutzer sie prüfen kann.
 - reply beim Ergebnis: 1–2 Sätze Einordnung + Hinweis, dass die Einschätzung unverbindlich ist und das Erstgespräch der nächste Schritt ist. Preise nicht im reply wiederholen, sie stehen im result.
 
 FORMAT
@@ -218,6 +239,17 @@ export function normalizeTurn(raw: unknown): DialogTurn {
       scope: strings(r.scope),
       weeks,
     };
+    // Nur übernehmen, wenn plausibel — lieber nichts zeigen als eine Fantasiezahl.
+    const sv = r.savings as Record<string, unknown> | undefined;
+    if (
+      sv &&
+      typeof sv.annualEuro === "number" &&
+      sv.annualEuro > 0 &&
+      typeof sv.basis === "string" &&
+      sv.basis.trim() !== ""
+    ) {
+      turn.result.savings = { annualEuro: sv.annualEuro, basis: sv.basis };
+    }
   }
   return turn;
 }

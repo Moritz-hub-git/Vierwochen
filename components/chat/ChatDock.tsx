@@ -34,7 +34,7 @@ export default function ChatDock() {
   const [result, setResult] = useState<DialogResult | null>(null);
   const [phase, setPhase] = useState<"question" | "result" | "reject">("question");
   const [busy, setBusy] = useState(false);
-  const [gateUser, setGateUser] = useState<{ email: string; name: string } | null>(null);
+  const [booked, setBooked] = useState(false);
   const [draft, setDraft] = useState("");
   const [dockDraft, setDockDraft] = useState("");
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
@@ -184,8 +184,9 @@ export default function ChatDock() {
     .filter(Boolean)
     .join(" — ");
 
-  const showGate = phase === "result" && result !== null && !gateUser;
-  const showBooking = phase === "result" && result !== null && gateUser !== null;
+  // Ergebnis, dann direkt die Terminwahl. Die E-Mail wird im Bestätigungs-
+  // schritt der Buchung erhoben, nicht als Mauer davor (siehe Booking.tsx).
+  const showBooking = phase === "result" && result !== null && !booked;
 
   return (
     <>
@@ -280,20 +281,15 @@ export default function ChatDock() {
 
               <aside className="panel-sketch" aria-label="Lösungsskizze und Ergebnis">
                 {result && <ResultCard result={result} />}
-                {showGate && (
-                  <EmailGate
-                    dialogId={dialogIdRef.current}
-                    sketchTitle={sketch?.title ?? ""}
-                    onDone={(email, name) => setGateUser({ email, name })}
-                  />
-                )}
-                {showBooking && gateUser && (
-                  <Booking
-                    email={gateUser.email}
-                    name={gateUser.name}
-                    dialogId={dialogIdRef.current}
-                    caseSummary={caseSummary}
-                  />
+                {showBooking && (
+                  <>
+                    <Booking
+                      dialogId={dialogIdRef.current}
+                      caseSummary={caseSummary}
+                      onBooked={() => setBooked(true)}
+                    />
+                    <EmailGate dialogId={dialogIdRef.current} sketchTitle={sketch?.title ?? ""} />
+                  </>
                 )}
                 <SketchView sketch={sketch} />
               </aside>
