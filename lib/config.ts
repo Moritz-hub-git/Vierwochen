@@ -126,18 +126,18 @@ export const VERTEX = {
     return env("GOOGLE_CLOUD_PROJECT");
   },
   get location() {
-    return env("VERTEX_LOCATION") ?? "europe-west4";
+    // Bewusste Entscheidung (Rücksprache 2026-08-12): gemini-3.5-flash-lite
+    // steht im regionalen Endpunkt europe-west4 nicht bereit und im
+    // EU-Multiregion-Endpunkt (eu) nicht zuverlässig erreichbar (geprüft:
+    // 404 trotz korrektem .rep.-Hostnamen). Einzig verfügbar: der globale
+    // Endpunkt. Damit ist die Verarbeitung nicht mehr auf die EU begrenzt —
+    // die Datenschutzerklärung (app/datenschutz/page.tsx, Abschnitt 4) ist
+    // entsprechend angepasst. Über VERTEX_LOCATION ohne Code-Änderung
+    // rückstellbar auf einen regionalen EU-Endpunkt.
+    return env("VERTEX_LOCATION") ?? "global";
   },
   get model() {
-    // In europe-west4 stehen nur gemini-2.5-{pro,flash,flash-lite} bereit
-    // (geprüft). Gemini 3.x gibt es dort nicht, sondern nur global — und der
-    // globale Endpunkt würde die EU-Zusage der Datenschutzerklärung aufheben.
-    //
-    // Flash statt Flash-Lite: Der Dialog stellt viele Regeln gleichzeitig
-    // (max. 3 Fragen, ≤60 Wörter, nichts wiederholen, JSON-Schema). Flash-Lite
-    // bricht dabei zuerst ein und wiederholt den Nutzer. Der Unterschied kostet
-    // rund einen Cent je Gespräch — an dieser Stelle die falsche Sparsamkeit.
     // Über VERTEX_MODEL ohne Code-Änderung umstellbar.
-    return env("VERTEX_MODEL") ?? "gemini-2.5-flash";
+    return env("VERTEX_MODEL") ?? "gemini-3.5-flash-lite";
   },
 } as const;

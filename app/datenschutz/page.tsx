@@ -39,16 +39,24 @@ export default function Datenschutz() {
         Auftragsverarbeitungsvertrag nach Art. 28 DSGVO geschlossen.
       </p>
 
-      <h2>4. KI-Dialog (Vertex AI, EU)</h2>
+      <h2>4. KI-Dialog (Vertex AI)</h2>
       <p>
         Für die Ersteinschätzung werden Ihre Eingaben im Dialog an das KI-Modell
         Gemini über Google Vertex AI übermittelt und dort verarbeitet. Die
-        Verarbeitung erfolgt in der EU (Region europe-west4, Niederlande). Ihre
-        Eingaben werden von Google nicht zum Training von Modellen verwendet.
-        Bitte geben Sie im Dialog keine besonderen Kategorien personenbezogener
-        Daten (Art. 9 DSGVO) und keine Betriebsgeheimnisse ein, die für die
-        Einschätzung nicht erforderlich sind. Rechtsgrundlage ist Art. 6 Abs. 1
-        lit. b DSGVO (vorvertragliche Maßnahme auf Ihre Anfrage).
+        Verarbeitung erfolgt über den globalen Endpunkt von Vertex AI: Google
+        leitet die Anfrage an einen Standort mit freier Kapazität weiter, der
+        auch außerhalb der EU/des EWR liegen kann. Für diesen Verarbeitungsschritt
+        ist daher eine Übermittlung in Drittländer, einschließlich der USA,
+        nicht ausgeschlossen; sie stützt sich auf die EU-Standardvertragsklauseln
+        mit Google bzw. den Angemessenheitsbeschluss der EU-Kommission für das
+        EU-US Data Privacy Framework. Hosting, Datenbank und Terminbuchung
+        bleiben davon unberührt und laufen weiterhin in der EU (siehe Abschnitte
+        3, 5 und 6). Ihre Eingaben werden von Google nicht zum Training von
+        Modellen verwendet. Bitte geben Sie im Dialog keine besonderen
+        Kategorien personenbezogener Daten (Art. 9 DSGVO) und keine
+        Betriebsgeheimnisse ein, die für die Einschätzung nicht erforderlich
+        sind. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (vorvertragliche
+        Maßnahme auf Ihre Anfrage) i. V. m. Art. 46 DSGVO für die Übermittlung.
       </p>
 
       <h2>5. Speicherung von Dialogen und Kontaktdaten (Leads)</h2>
@@ -87,10 +95,12 @@ export default function Datenschutz() {
       <h2>8. Empfänger und Drittlandtransfer</h2>
       <p>
         Empfänger der Daten ist Google als Auftragsverarbeiter (Hosting, Datenbank,
-        Vertex AI, Calendar). Die Verarbeitung erfolgt in EU-Rechenzentren. Soweit
-        in Einzelfällen ein Zugriff aus Drittländern nicht ausgeschlossen werden
-        kann, stützt er sich auf den Angemessenheitsbeschluss für das EU-US Data
-        Privacy Framework bzw. EU-Standardvertragsklauseln.
+        Vertex AI, Calendar). Hosting, Datenbank und Terminbuchung laufen in
+        EU-Rechenzentren. Der KI-Dialog (Abschnitt 4) läuft über den globalen
+        Vertex-AI-Endpunkt; hier ist eine Verarbeitung außerhalb der EU/des EWR,
+        einschließlich der USA, möglich. Diese Übermittlung stützt sich auf den
+        Angemessenheitsbeschluss der EU-Kommission für das EU-US Data Privacy
+        Framework bzw. auf EU-Standardvertragsklauseln mit Google.
       </p>
 
       <h2>9. Ihre Rechte</h2>

@@ -26,7 +26,9 @@ steps:
       - --region=europe-west3
       - --service-account=vierwochen-app@$PROJECT_ID.iam.gserviceaccount.com
       - --allow-unauthenticated
-      - --set-env-vars=GOOGLE_CLOUD_PROJECT=$PROJECT_ID,VERTEX_LOCATION=europe-west4
+      # VERTEX_LOCATION=global: gemini-3.5-flash-lite steht in europe-west4
+      # nicht bereit (siehe lib/config.ts). Datenschutzerklärung angepasst.
+      - --set-env-vars=GOOGLE_CLOUD_PROJECT=$PROJECT_ID,VERTEX_LOCATION=global
 
 # Pflicht bei eigenem Bau-Dienstkonto, sonst schlägt der Build fehl (PROMPT.md §9).
 options:
