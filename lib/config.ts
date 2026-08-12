@@ -45,6 +45,18 @@ export const PRICING_TIERS = [
   },
 ] as const;
 
+/**
+ * Grundlage des Kostenankers (PROMPT.md §2.4). Bewusst im Code und nicht im
+ * Modell: Das Sprachmodell nennt nur die Menge, gerechnet wird hier — ein
+ * Rechenfehler in dieser Zahl kostet sofort die Glaubwürdigkeit.
+ * 300 € je Personentag entspricht 45.000–60.000 € Jahreskosten einer
+ * Sachbearbeitungsstelle auf rund 200 Arbeitstage.
+ */
+export const COST_ANCHOR = {
+  euroPerPersonDay: 300,
+  workWeeksPerYear: 45,
+} as const;
+
 export const PRICE_DISCLAIMER =
   "Unverbindliche Ersteinschätzung, kein Angebot. Alle Beträge netto zzgl. USt.";
 

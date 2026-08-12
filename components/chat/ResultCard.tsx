@@ -62,7 +62,10 @@ export default function ResultCard({ result }: { result: DialogResult }) {
               sollten wir im Gespräch prüfen, bevor Sie Geld ausgeben.
             </div>
           )}
-          <div className="roi-basis">Überschlag auf Basis Ihrer Angaben: {savings.basis}</div>
+          <div className="roi-basis">
+            Überschlag auf Basis Ihrer Angabe{savings.quote ? ` („${savings.quote}")` : ""}:{" "}
+            {savings.basis}. Rechnen Sie gern mit Ihren eigenen Sätzen nach.
+          </div>
         </div>
       )}
 

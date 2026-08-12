@@ -6,7 +6,7 @@
  * Frühere Modell-Züge werden als Roh-JSON in die Historie zurückgegeben, damit
  * das Modell seine eigene Skizze sieht und wachsen lässt.
  */
-import { PRICING_TIERS } from "./config";
+import { COST_ANCHOR, PRICING_TIERS } from "./config";
 import type { Content } from "./vertex";
 
 export interface SketchStep {
@@ -32,8 +32,14 @@ export interface DialogResult {
    * Was der heutige Zustand pro Jahr kostet. Nur gesetzt, wenn der Nutzer
    * belastbare Mengenangaben gemacht hat — nie geraten (PROMPT.md §2.6:
    * Autorität nur durch Artefakte, keine erfundenen Zahlen).
+   *
+   * Das Modell liefert ausschließlich die Menge (personDaysPerWeek) und deren
+   * Herkunft im Klartext. Der Eurobetrag wird serverseitig gerechnet — ein
+   * früherer Test zeigte, dass das Modell sich hier um Faktor 2 verrechnet.
    */
   savings?: {
+    personDaysPerWeek: number;
+    quote: string;
     annualEuro: number;
     basis: string;
   };
@@ -104,10 +110,10 @@ export const RESPONSE_SCHEMA = {
         savings: {
           type: "OBJECT",
           properties: {
-            annualEuro: { type: "NUMBER" },
-            basis: { type: "STRING" },
+            personDaysPerWeek: { type: "NUMBER" },
+            quote: { type: "STRING" },
           },
-          required: ["annualEuro", "basis"],
+          required: ["personDaysPerWeek", "quote"],
         },
       },
       required: ["tier", "priceMin", "priceMax", "scope", "weeks"],
@@ -156,10 +162,10 @@ ERGEBNIS (phase=result)
 ${tierLines}
 - weeks: genau 4 Einträge (Woche 1–4) mit konkretem, fallbezogenem Inhalt. Woche 1 enthält Festangebot und Start, Woche 4 endet mit Abnahme.
 - scope: 3–6 Punkte, was im Festpreis enthalten ist.
-- savings: Was der heutige Zustand pro Jahr kostet. NUR ausfüllen, wenn der Nutzer belastbare Mengen genannt hat (Stunden, Tage, Personen, Stückzahlen). Hat er keine genannt, lasse savings vollständig weg — erfinde niemals Zahlen.
-  Rechne mit 300 € Vollkosten je Personentag (entspricht 45.000–60.000 € Jahreskosten einer Sachbearbeitungsstelle auf ~200 Arbeitstage) und 45 Arbeitswochen im Jahr.
-  Beispiel: „zwei Personen je einen Tag pro Woche" → 2 × 45 = 90 Personentage → annualEuro 27000, basis: „2 Personentage pro Woche × 45 Wochen × 300 € Vollkosten je Tag".
-  basis muss die Rechnung nachvollziehbar in einem Satz enthalten, damit der Nutzer sie prüfen kann.
+- savings: NUR ausfüllen, wenn der Nutzer belastbare Mengen für den heutigen Aufwand genannt hat (Stunden, Tage, Personen). Hat er keine genannt, lasse savings vollständig weg — erfinde niemals Zahlen.
+  - personDaysPerWeek: der heutige Aufwand in Personentagen pro Woche, als Zahl. Rechne Stunden mit 8 Stunden je Tag um. Beispiele: „zwei Kolleginnen je einen Tag pro Woche" → 2. „Ein halber Tag pro Woche" → 0.5. „12 Stunden pro Woche" → 1.5.
+  - quote: die Angabe des Nutzers in seinen Worten, kurz, z. B. „zwei Kolleginnen je einen Tag pro Woche".
+  Rechne selbst KEINE Eurobeträge aus — das übernimmt die Anwendung.
 - reply beim Ergebnis: 1–2 Sätze Einordnung + Hinweis, dass die Einschätzung unverbindlich ist und das Erstgespräch der nächste Schritt ist. Preise nicht im reply wiederholen, sie stehen im result.
 
 FORMAT
@@ -239,16 +245,21 @@ export function normalizeTurn(raw: unknown): DialogTurn {
       scope: strings(r.scope),
       weeks,
     };
-    // Nur übernehmen, wenn plausibel — lieber nichts zeigen als eine Fantasiezahl.
+    // Eurobetrag hier rechnen, nicht im Modell. Nur plausible Mengen übernehmen:
+    // unter 0,1 Personentagen je Woche ist es kein Argument, über 20 unrealistisch.
     const sv = r.savings as Record<string, unknown> | undefined;
-    if (
-      sv &&
-      typeof sv.annualEuro === "number" &&
-      sv.annualEuro > 0 &&
-      typeof sv.basis === "string" &&
-      sv.basis.trim() !== ""
-    ) {
-      turn.result.savings = { annualEuro: sv.annualEuro, basis: sv.basis };
+    const days = typeof sv?.personDaysPerWeek === "number" ? sv.personDaysPerWeek : null;
+    if (days !== null && days >= 0.1 && days <= 20) {
+      const annualEuro = Math.round(
+        days * COST_ANCHOR.workWeeksPerYear * COST_ANCHOR.euroPerPersonDay
+      );
+      const dayLabel = Number.isInteger(days) ? String(days) : days.toFixed(1).replace(".", ",");
+      turn.result.savings = {
+        personDaysPerWeek: days,
+        quote: typeof sv?.quote === "string" ? sv.quote : "",
+        annualEuro,
+        basis: `${dayLabel} Personentage pro Woche × ${COST_ANCHOR.workWeeksPerYear} Wochen × ${COST_ANCHOR.euroPerPersonDay} € Vollkosten je Tag`,
+      };
     }
   }
   return turn;
