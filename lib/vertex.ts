@@ -93,11 +93,19 @@ function repairJsonTruncated(text: string): unknown {
  * Modellwechsel: Ist das Modell in der Region unbekannt, antwortet Vertex 404.
  */
 /**
- * Basis-URL für einen Standort. Der globale Endpunkt hat kein Regionspräfix,
- * regionale und Multiregion-Endpunkte (z. B. `eu`) haben eines.
+ * Basis-URL für einen Standort.
+ * - Global: kein Regionspräfix (`aiplatform.googleapis.com`).
+ * - Multiregion (`eu`, `us`): eigener Hostname mit `.rep.` — NICHT das
+ *   reguläre Regionsschema. Quelle: Vertex-AI-Doku „Multi-region endpoints"
+ *   (https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/locations).
+ *   Ein früherer Versuch mit `eu-aiplatform.googleapis.com` traf keinen
+ *   echten Endpunkt und lieferte fälschlich einen 404.
+ * - Reguläre Region: `{location}-aiplatform.googleapis.com`.
  */
 export function apiHost(location: string): string {
-  return location === "global" ? "aiplatform.googleapis.com" : `${location}-aiplatform.googleapis.com`;
+  if (location === "global") return "aiplatform.googleapis.com";
+  if (location === "eu" || location === "us") return `aiplatform.${location}.rep.googleapis.com`;
+  return `${location}-aiplatform.googleapis.com`;
 }
 
 export async function probeModel(candidate?: string, candidateLocation?: string): Promise<{
