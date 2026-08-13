@@ -45,11 +45,31 @@ export interface DialogResult {
   };
 }
 
+/**
+ * Bedienelement, das der Zug im Chat anbietet.
+ *
+ * Zweck ist nicht Bequemlichkeit, sondern Beteiligung: Wer seine Zahl selbst
+ * einstellt, baut sein eigenes Angebot mit und bricht seltener ab.
+ */
+export interface DialogInput {
+  kind: "chips" | "number";
+  /** chips: 2–4 kurze, sich ausschließende Antwortmöglichkeiten. */
+  options?: string[];
+  /** number: Beschriftung des Stellers, z. B. „Personen". */
+  label?: string;
+  unit?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  preset?: number;
+}
+
 export interface DialogTurn {
   reply: string;
   phase: "question" | "result" | "reject";
   sketch: Sketch;
   result?: DialogResult;
+  input?: DialogInput;
 }
 
 export interface ChatMessage {
@@ -118,6 +138,20 @@ export const RESPONSE_SCHEMA = {
       },
       required: ["tier", "priceMin", "priceMax", "scope", "weeks"],
     },
+    input: {
+      type: "OBJECT",
+      properties: {
+        kind: { type: "STRING", enum: ["chips", "number"] },
+        options: { type: "ARRAY", items: { type: "STRING" } },
+        label: { type: "STRING" },
+        unit: { type: "STRING" },
+        min: { type: "NUMBER" },
+        max: { type: "NUMBER" },
+        step: { type: "NUMBER" },
+        preset: { type: "NUMBER" },
+      },
+      required: ["kind"],
+    },
   },
   required: ["reply", "phase", "sketch"],
 } as const;
@@ -141,6 +175,13 @@ GESPRÄCHSFÜHRUNG
 - So geht es richtig: ein bis zwei Sätze Substanz, die der Nutzer noch nicht hat — eine fachliche Einschätzung, eine Konsequenz, eine typische Stolperfalle, eine Größenordnung — und daraus abgeleitet genau eine Frage.
 - Beispiel für Ton und Aufbau: „Bei Sage entscheidet meist die Artikelnummer über den Aufwand: Sind die Nummern in beiden Welten identisch, ist der Abgleich reine Fleißarbeit für die Maschine. Wie werden die Nummern heute vergeben?"
 - Niemals nach etwas fragen, das der Nutzer schon gesagt hat.
+
+BEDIENELEMENTE (input) — nutze sie, wo sie passen
+Deine Frage darf ein Bedienelement mitliefern, damit der Nutzer nur tippen statt schreiben muss. Das erhöht die Beteiligung deutlich. Setze input NUR bei phase=question und nur, wenn es wirklich passt.
+- kind="number" bei jeder Mengenfrage (Personen, Stunden, Tage, Stückzahlen). Setze label (z. B. „Personen"), unit (z. B. „Personen" oder „Stunden pro Woche"), min, max, step und preset auf einen realistischen Startwert. Beispiel: „Wie viele Personen machen das?" → kind=number, label="Personen", unit="Personen", min=1, max=20, step=1, preset=2.
+- kind="chips" bei kleiner, vorhersehbarer Auswahl: 2–4 kurze Möglichkeiten (je höchstens 5 Wörter), die sich ausschließen. Beispiel: „Läuft das über ein Bestandssystem?" → options: ["Ja, über unser ERP", "Nur Excel", "Weiß ich nicht"].
+- Lass input weg bei offenen Fragen, bei denen die Antwort erzählt werden muss.
+- Der Text in reply muss auch ohne das Bedienelement vollständig verständlich sein — es ist eine Abkürzung, kein Ersatz für die Frage.
 - Wer ausführlich antwortet, wird schneller durchgelassen: Reichen die Informationen, frage nicht weiter, sondern liefere das Ergebnis.
 - Kurze Antworten akzeptieren. „Keine" ist eine Antwort.
 - Auf Verwirrung („bitte was?", „versteh ich nicht") die Frage neu und einfacher stellen, mit einem Beispiel.
@@ -154,7 +195,7 @@ LÖSUNGSSKIZZE (sketch) — der Wow-Moment der Seite
 - title: prägnanter Name des Vorhabens (z. B. „Auftragsübernahme aus dem Sammelpostfach").
 - steps: der Soll-Prozess in 3–6 Schritten, je mit Automatisierungsgrad (automatisch / teilautomatisch / manuell). Sei ehrlich: nicht alles wird automatisch.
 - value: konkreter Nutzen in Zahlen oder klaren Aussagen (z. B. „Rückfragen per Mail entfallen weitgehend").
-- open: offene Punkte, die das Erstgespräch klären muss.
+- open: offene Punkte, die das Erstgespräch klären muss. Solange du noch fragst, steht hier IMMER mindestens ein Punkt — der Nutzer soll sehen, woran es noch hängt. Deine nächste Frage soll genau einen dieser Punkte schließen.
 - assumptions: Annahmen, die du triffst.
 
 ERGEBNIS (phase=result)
@@ -230,6 +271,34 @@ export function normalizeTurn(raw: unknown): DialogTurn {
       assumptions: strings(sketchRaw.assumptions),
     },
   };
+
+  // Bedienelement nur übernehmen, wenn es brauchbar ist — ein halbes Element
+  // ist schlimmer als keines.
+  const inp = obj.input as Record<string, unknown> | undefined;
+  if (phase === "question" && inp) {
+    if (inp.kind === "chips") {
+      const options = strings(inp.options)
+        .map((o) => o.trim())
+        .filter((o) => o.length > 0 && o.length <= 40)
+        .slice(0, 4);
+      if (options.length >= 2) turn.input = { kind: "chips", options };
+    } else if (inp.kind === "number") {
+      const num = (v: unknown, fallback: number) => (typeof v === "number" && Number.isFinite(v) ? v : fallback);
+      const min = Math.max(0, num(inp.min, 1));
+      const max = Math.max(min + 1, num(inp.max, 20));
+      const step = Math.max(0.5, num(inp.step, 1));
+      const preset = Math.min(max, Math.max(min, num(inp.preset, min)));
+      turn.input = {
+        kind: "number",
+        label: typeof inp.label === "string" ? inp.label.slice(0, 40) : "Anzahl",
+        unit: typeof inp.unit === "string" ? inp.unit.slice(0, 30) : "",
+        min,
+        max,
+        step,
+        preset,
+      };
+    }
+  }
 
   if (phase === "result" && obj.result && typeof obj.result === "object") {
     const r = obj.result as Record<string, unknown>;

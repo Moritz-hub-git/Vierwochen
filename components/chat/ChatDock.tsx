@@ -2,15 +2,20 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Booking from "./Booking";
+import { Chips, Stepper } from "./Controls";
 import EmailGate from "./EmailGate";
-import ResultCard from "./ResultCard";
-import SketchView from "./Sketch";
-import type { DialogResult, DialogTurn, Sketch, UiMessage } from "./types";
+import OfferCard from "./OfferCard";
+import SketchCard from "./SketchCard";
+import type { DialogInput, DialogResult, DialogTurn, Sketch, UiMessage } from "./types";
 
 /**
  * Das dauerhafte Dialogfenster in der Fußleiste (PROMPT.md §5.1) mit
- * wechselnden Inspirationstexten. Beim Absenden öffnet sich das Panel:
- * links das Gespräch, rechts die sichtbar wachsende Lösungsskizze.
+ * wechselnden Inspirationstexten. Beim Absenden öffnet sich das Panel.
+ *
+ * Einspaltig und nicht zweispaltig: Die Lösungsskizze wächst als Karte MITTEN
+ * im Gespräch. In der früheren Seitenspalte lag sie auf dem Telefon unter dem
+ * Fold — der Wow-Moment war also genau dort unsichtbar, wo die meisten
+ * Besucher sind.
  */
 
 const INSPIRATIONS = [
@@ -22,10 +27,26 @@ const INSPIRATIONS = [
   "Was würde so etwas bei uns kosten?",
 ];
 
+/** Einstiegsbeispiele: Wer nicht selbst formulieren muss, fängt eher an. */
+const STARTERS = [
+  "Wir pflegen Artikel in mehreren Excel-Listen und tippen alles doppelt ein.",
+  "Bestellungen kommen ins Sammelpostfach und gehen dort unter.",
+  "Unser Monatsreporting entsteht per Copy-Paste aus mehreren Systemen.",
+];
+
 const GREETING =
-  "Guten Tag. Beschreiben Sie in ein, zwei Sätzen, was Sie loswerden wollen — ich stelle höchstens drei Rückfragen und Sie bekommen eine Preisspanne mit Vier-Wochen-Plan.";
+  "Guten Tag, ich bin Moritz. Beschreiben Sie in ein, zwei Sätzen, was Sie loswerden wollen — ich stelle höchstens drei Rückfragen. Danach haben Sie eine Lösungsskizze, eine Preisspanne und einen Vier-Wochen-Plan.";
 
 const MAX_CHARS = 1500;
+const MAX_QUESTIONS = 3;
+
+function Avatar() {
+  return (
+    <span className="avatar" aria-hidden>
+      MS
+    </span>
+  );
+}
 
 export default function ChatDock() {
   const [open, setOpen] = useState(false);
@@ -33,6 +54,7 @@ export default function ChatDock() {
   const [sketch, setSketch] = useState<Sketch | null>(null);
   const [result, setResult] = useState<DialogResult | null>(null);
   const [phase, setPhase] = useState<"question" | "result" | "reject">("question");
+  const [input, setInput] = useState<DialogInput | null>(null);
   const [busy, setBusy] = useState(false);
   const [booked, setBooked] = useState(false);
   const [draft, setDraft] = useState("");
@@ -41,10 +63,12 @@ export default function ChatDock() {
   const [placeholderFading, setPlaceholderFading] = useState(false);
 
   const dialogIdRef = useRef<string>("");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const endRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesRef = useRef<UiMessage[]>([]);
+  const sketchRef = useRef<Sketch | null>(null);
   messagesRef.current = messages;
+  sketchRef.current = sketch;
 
   if (!dialogIdRef.current && typeof window !== "undefined") {
     dialogIdRef.current =
@@ -53,7 +77,6 @@ export default function ChatDock() {
         : `d-${Date.now()}-${Math.floor(Math.random() * 1e9)}`;
   }
 
-  // Wechselnde Inspirationstexte in der Fußleiste.
   useEffect(() => {
     if (open) return;
     const timer = setInterval(() => {
@@ -66,16 +89,18 @@ export default function ChatDock() {
     return () => clearInterval(timer);
   }, [open]);
 
-  // Nachrichtenliste ans Ende scrollen.
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages, busy]);
+    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages, busy, result]);
+
+  const askedCount = messages.filter((m) => m.role === "assistant" && !m.error).length;
 
   const send = useCallback(
     async (text: string) => {
       const trimmed = text.trim().slice(0, MAX_CHARS);
       if (!trimmed || busy) return;
 
+      setInput(null);
       const history = messagesRef.current.filter((m) => !m.error);
       const nextMessages: UiMessage[] = [...history, { role: "user", display: trimmed }];
       setMessages(nextMessages);
@@ -96,12 +121,21 @@ export default function ChatDock() {
         const data = (await res.json()) as { ok: boolean; turn?: DialogTurn; error?: string };
         if (data.ok && data.turn) {
           const turn = data.turn;
+          const grew = turn.sketch && turn.sketch.steps.length > 0;
           setMessages((prev) => [
             ...prev,
-            { role: "assistant", display: turn.reply, raw: JSON.stringify(turn) },
+            {
+              role: "assistant",
+              display: turn.reply,
+              raw: JSON.stringify(turn),
+              sketch: grew ? turn.sketch : undefined,
+              prevSketch: sketchRef.current,
+              result: turn.phase === "result" ? turn.result : undefined,
+            },
           ]);
-          if (turn.sketch && turn.sketch.steps.length > 0) setSketch(turn.sketch);
+          if (grew) setSketch(turn.sketch);
           setPhase(turn.phase);
+          setInput(turn.input ?? null);
           if (turn.phase === "result" && turn.result) setResult(turn.result);
         } else {
           setMessages((prev) => [
@@ -134,15 +168,12 @@ export default function ChatDock() {
     (initialText?: string) => {
       setOpen(true);
       const text = (initialText ?? "").trim();
-      if (text) {
-        void send(text);
-      }
+      if (text) void send(text);
       setTimeout(() => textareaRef.current?.focus(), 350);
     },
     [send]
   );
 
-  // Einstiege von Hero, Kopfzeile und Abschluss-Abschnitt.
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent<{ text?: string }>).detail;
@@ -152,7 +183,6 @@ export default function ChatDock() {
     return () => window.removeEventListener("vw:dialog", handler);
   }, [openPanel]);
 
-  // Escape schließt das Panel (Gesprächsstand bleibt erhalten).
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -177,20 +207,17 @@ export default function ChatDock() {
     void send(text);
   };
 
-  const caseSummary = [
-    sketch?.title,
-    messagesRef.current.find((m) => m.role === "user")?.display,
-  ]
+  const caseSummary = [sketch?.title, messages.find((m) => m.role === "user")?.display]
     .filter(Boolean)
     .join(" — ");
 
-  // Ergebnis, dann direkt die Terminwahl. Die E-Mail wird im Bestätigungs-
-  // schritt der Buchung erhoben, nicht als Mauer davor (siehe Booking.tsx).
-  const showBooking = phase === "result" && result !== null && !booked;
+  // Fortschritt erzeugt Spannung: Ein sichtbar unfertiger Balken will fertig
+  // werden (Zeigarnik). Beim Ergebnis ist er voll.
+  const progress =
+    phase === "result" ? 1 : Math.min(0.9, askedCount / (MAX_QUESTIONS + 1));
 
   return (
     <>
-      {/* Dauerhafte Fußleiste */}
       {!open && (
         <div className="dock">
           <form className="dock-bar" onSubmit={submitDock}>
@@ -217,19 +244,17 @@ export default function ChatDock() {
         </div>
       )}
 
-      {/* Dialog-Panel */}
       {open && (
         <>
           <div className="panel-backdrop" onClick={() => setOpen(false)} aria-hidden />
           <section className="panel" role="dialog" aria-modal="true" aria-label="Projekt-Dialog">
             <div className="panel-head">
-              <div className="title">
-                <span className="spark" style={{ color: "var(--accent)" }} aria-hidden>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2c.4 3.9 1.6 6.5 3.5 8.4C17.4 12.3 20 13.5 24 14c-4 .4-6.6 1.6-8.5 3.5-1.9 1.9-3.1 4.5-3.5 8.5-.4-4-1.6-6.6-3.5-8.5C6.6 15.6 4 14.4 0 14c4-.5 6.6-1.7 8.5-3.6C10.4 8.5 11.6 5.9 12 2Z" />
-                  </svg>
+              <div className="panel-person">
+                <Avatar />
+                <span className="panel-person-text">
+                  <strong>Moritz Schumacher</strong>
+                  <span>Baut Ihre Software — antwortet gerade</span>
                 </span>
-                <span>{sketch?.title ?? "Ihre unverbindliche Ersteinschätzung"}</span>
               </div>
               <button type="button" className="icon-btn" onClick={() => setOpen(false)} aria-label="Dialog minimieren">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
@@ -238,62 +263,105 @@ export default function ChatDock() {
               </button>
             </div>
 
-            <div className="panel-body">
-              <div className="panel-chat">
-                <div className="messages">
-                  <div className="msg assistant">{GREETING}</div>
-                  {messages.map((m, i) => (
-                    <div key={i} className={`msg ${m.role}${m.error ? " error" : ""}`}>
-                      {m.display}
-                    </div>
-                  ))}
-                  {busy && (
-                    <div className="typing" aria-label="Antwort wird erstellt">
-                      <i /><i /><i />
-                    </div>
-                  )}
-                  <div ref={messagesEndRef} />
-                </div>
-                <form className="composer" onSubmit={submitComposer}>
-                  <textarea
-                    ref={textareaRef}
-                    rows={1}
-                    value={draft}
-                    maxLength={MAX_CHARS}
-                    disabled={busy}
-                    onChange={(e) => setDraft(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        submitComposer();
-                      }
-                    }}
-                    placeholder={messages.length === 0 ? "Ihr Fall in ein, zwei Sätzen …" : "Ihre Antwort …"}
-                    aria-label="Ihre Nachricht"
-                  />
-                  <button type="submit" className="dock-send" disabled={busy || !draft.trim()} aria-label="Senden">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                      <path d="m5 12 14 0M13 6l6 6-6 6" />
-                    </svg>
-                  </button>
-                </form>
+            <div className="panel-progress" aria-hidden>
+              <span style={{ transform: `scaleX(${progress})` }} />
+            </div>
+
+            <div className="stream">
+              <div className="msg-row">
+                <Avatar />
+                <div className="msg assistant">{GREETING}</div>
               </div>
 
-              <aside className="panel-sketch" aria-label="Lösungsskizze und Ergebnis">
-                {result && <ResultCard result={result} />}
-                {showBooking && (
-                  <>
-                    <Booking
-                      dialogId={dialogIdRef.current}
-                      caseSummary={caseSummary}
-                      onBooked={() => setBooked(true)}
-                    />
-                    <EmailGate dialogId={dialogIdRef.current} sketchTitle={sketch?.title ?? ""} />
-                  </>
-                )}
-                <SketchView sketch={sketch} />
-              </aside>
+              {messages.length === 0 && !busy && (
+                <div className="starters">
+                  <span className="starters-label">Oder wählen Sie einen typischen Fall:</span>
+                  {STARTERS.map((s, i) => (
+                    <button
+                      key={s}
+                      type="button"
+                      className="chip-btn"
+                      style={{ animationDelay: `${i * 0.07}s` }}
+                      onClick={() => void send(s)}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {messages.map((m, i) => (
+                <div key={i}>
+                  {m.role === "user" ? (
+                    <div className="msg user">{m.display}</div>
+                  ) : (
+                    <div className="msg-row">
+                      <Avatar />
+                      <div className={`msg assistant${m.error ? " error" : ""}`}>{m.display}</div>
+                    </div>
+                  )}
+                  {m.sketch && (
+                    <SketchCard sketch={m.sketch} previous={m.prevSketch ?? null} turnIndex={i} />
+                  )}
+                  {m.result && <OfferCard result={m.result} />}
+                </div>
+              ))}
+
+              {busy && (
+                <div className="msg-row">
+                  <Avatar />
+                  <div className="typing" aria-label="Antwort wird erstellt">
+                    <i /><i /><i />
+                  </div>
+                </div>
+              )}
+
+              {/* Bedienelemente des letzten Zuges */}
+              {!busy && input?.kind === "chips" && input.options && (
+                <Chips options={input.options} onPick={(v) => void send(v)} />
+              )}
+              {!busy && input?.kind === "number" && (
+                <Stepper input={input} onSubmit={(v) => void send(v)} />
+              )}
+
+              {/* Abschluss: Termin direkt im Gesprächsverlauf */}
+              {phase === "result" && result && !booked && (
+                <>
+                  <Booking
+                    dialogId={dialogIdRef.current}
+                    caseSummary={caseSummary}
+                    onBooked={() => setBooked(true)}
+                  />
+                  <EmailGate dialogId={dialogIdRef.current} sketchTitle={sketch?.title ?? ""} />
+                </>
+              )}
+
+              <div ref={endRef} />
             </div>
+
+            <form className="composer" onSubmit={submitComposer}>
+              <textarea
+                ref={textareaRef}
+                rows={1}
+                value={draft}
+                maxLength={MAX_CHARS}
+                disabled={busy}
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    submitComposer();
+                  }
+                }}
+                placeholder={messages.length === 0 ? "Ihr Fall in ein, zwei Sätzen …" : "Ihre Antwort …"}
+                aria-label="Ihre Nachricht"
+              />
+              <button type="submit" className="dock-send" disabled={busy || !draft.trim()} aria-label="Senden">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="m5 12 14 0M13 6l6 6-6 6" />
+                </svg>
+              </button>
+            </form>
           </section>
         </>
       )}

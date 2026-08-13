@@ -22,11 +22,23 @@ export interface DialogResult {
   savings?: { personDaysPerWeek: number; quote: string; annualEuro: number; basis: string };
 }
 
+export interface DialogInput {
+  kind: "chips" | "number";
+  options?: string[];
+  label?: string;
+  unit?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  preset?: number;
+}
+
 export interface DialogTurn {
   reply: string;
   phase: "question" | "result" | "reject";
   sketch: Sketch;
   result?: DialogResult;
+  input?: DialogInput;
 }
 
 export interface UiMessage {
@@ -36,6 +48,12 @@ export interface UiMessage {
   /** Nur Assistent: Roh-JSON des Modell-Zugs für die Historie. */
   raw?: string;
   error?: boolean;
+  /** Skizzenstand nach diesem Zug — wird als Karte unter der Nachricht gezeigt. */
+  sketch?: Sketch;
+  /** Skizzenstand davor, um Neues zu markieren. */
+  prevSketch?: Sketch | null;
+  /** Angebot, sofern dieser Zug das Ergebnis geliefert hat. */
+  result?: DialogResult;
 }
 
 export function formatEuro(n: number): string {
