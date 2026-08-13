@@ -178,7 +178,8 @@ GESPRÄCHSFÜHRUNG
 
 BEDIENELEMENTE (input) — nutze sie, wo sie passen
 Deine Frage darf ein Bedienelement mitliefern, damit der Nutzer nur tippen statt schreiben muss. Das erhöht die Beteiligung deutlich. Setze input NUR bei phase=question und nur, wenn es wirklich passt.
-- kind="number" bei jeder Mengenfrage (Personen, Stunden, Tage, Stückzahlen). Setze label (z. B. „Personen"), unit (z. B. „Personen" oder „Stunden pro Woche"), min, max, step und preset auf einen realistischen Startwert. Beispiel: „Wie viele Personen machen das?" → kind=number, label="Personen", unit="Personen", min=1, max=20, step=1, preset=2.
+- kind="number" bei jeder Mengenfrage. label und unit sind BESCHRIFTUNGEN, keine Sätze: höchstens zwei Wörter, z. B. label="Stunden pro Woche", unit="Stunden". Setze min, max, step und preset auf realistische Werte.
+- Fragst du nach dem heutigen Aufwand (für savings), frage nach ZEIT, niemals nur nach Köpfen. Zwei Personen sind kein Aufwand — zwei Personen à drei Tage sind sechs Personentage. Richtig: „Wie viele Stunden pro Woche kostet Sie das insgesamt, über alle Beteiligten?" → label="Stunden pro Woche", unit="Stunden", min=1, max=80, step=1, preset=8. Falsch: „Wie viele Personen?" als alleinige Aufwandsfrage.
 - kind="chips" bei kleiner, vorhersehbarer Auswahl: 2–4 kurze Möglichkeiten (je höchstens 5 Wörter), die sich ausschließen. Beispiel: „Läuft das über ein Bestandssystem?" → options: ["Ja, über unser ERP", "Nur Excel", "Weiß ich nicht"].
 - Lass input weg bei offenen Fragen, bei denen die Antwort erzählt werden muss.
 - Der Text in reply muss auch ohne das Bedienelement vollständig verständlich sein — es ist eine Abkürzung, kein Ersatz für die Frage.
@@ -204,7 +205,8 @@ ${tierLines}
 - weeks: genau 4 Einträge (Woche 1–4) mit konkretem, fallbezogenem Inhalt. Woche 1 enthält Festangebot und Start, Woche 4 endet mit Abnahme.
 - scope: 3–6 Punkte, was im Festpreis enthalten ist.
 - savings: NUR ausfüllen, wenn der Nutzer belastbare Mengen für den heutigen Aufwand genannt hat (Stunden, Tage, Personen). Hat er keine genannt, lasse savings vollständig weg — erfinde niemals Zahlen.
-  - personDaysPerWeek: der heutige Aufwand in Personentagen pro Woche, als Zahl. Rechne Stunden mit 8 Stunden je Tag um. Beispiele: „zwei Kolleginnen je einen Tag pro Woche" → 2. „Ein halber Tag pro Woche" → 0.5. „12 Stunden pro Woche" → 1.5.
+  - personDaysPerWeek: der heutige Aufwand in Personentagen pro Woche, als Zahl. Rechne Stunden mit 8 Stunden je Tag um und summiere über alle Beteiligten. Beispiele: „zwei Kolleginnen je einen Tag pro Woche" → 2. „Ein halber Tag pro Woche" → 0.5. „12 Stunden pro Woche" → 1.5. „drei Leute, jeder zwei Tage" → 6.
+  - Hat der Nutzer nur eine Personenzahl genannt, aber keine Zeit, dann ist der Aufwand NICHT bekannt: lasse savings weg, statt eine Dauer zu unterstellen.
   - quote: die Angabe des Nutzers in seinen Worten, kurz, z. B. „zwei Kolleginnen je einen Tag pro Woche".
   Rechne selbst KEINE Eurobeträge aus — das übernimmt die Anwendung.
 - reply beim Ergebnis: 1–2 Sätze Einordnung + Hinweis, dass die Einschätzung unverbindlich ist und das Erstgespräch der nächste Schritt ist. Preise nicht im reply wiederholen, sie stehen im result.
@@ -235,6 +237,20 @@ export function countQuestions(messages: ChatMessage[]): number {
     }
   }
   return n;
+}
+
+/**
+ * Kürzt eine Beschriftung auf ganze Wörter. Ein hartes slice() erzeugt
+ * Fragmente wie „Personen im Team zur Datenpfle" — das sieht kaputt aus.
+ */
+function shortLabel(value: unknown, fallback: string, maxLen: number): string {
+  if (typeof value !== "string" || value.trim() === "") return fallback;
+  const text = value.trim();
+  if (text.length <= maxLen) return text;
+  const cut = text.slice(0, maxLen);
+  const lastSpace = cut.lastIndexOf(" ");
+  const trimmed = (lastSpace > maxLen * 0.5 ? cut.slice(0, lastSpace) : cut).replace(/[,;:.\s]+$/, "");
+  return trimmed || fallback;
 }
 
 /** Normalisiert und validiert den Modell-Zug für die Oberfläche. */
@@ -290,8 +306,10 @@ export function normalizeTurn(raw: unknown): DialogTurn {
       const preset = Math.min(max, Math.max(min, num(inp.preset, min)));
       turn.input = {
         kind: "number",
-        label: typeof inp.label === "string" ? inp.label.slice(0, 40) : "Anzahl",
-        unit: typeof inp.unit === "string" ? inp.unit.slice(0, 30) : "",
+        // Beschriftungen kurz halten: Ein abgeschnittener Satz im Steller
+        // sieht kaputt aus. Lieber das erste sinnvolle Stück als ein Fragment.
+        label: shortLabel(inp.label, "Anzahl", 32),
+        unit: shortLabel(inp.unit, "", 18),
         min,
         max,
         step,
