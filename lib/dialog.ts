@@ -222,17 +222,10 @@ ERGEBNIS (phase=result)
 ${tierLines}
 - weeks: genau 4 Einträge (Woche 1–4) mit konkretem, fallbezogenem Inhalt. Woche 1 enthält Festangebot und Start, Woche 4 endet mit Abnahme.
 - scope: 3–6 Punkte, was im Festpreis enthalten ist.
-- savings: NUR ausfüllen, wenn der Nutzer belastbare Mengen für den heutigen Aufwand genannt hat (Stunden, Tage, Personen). Hat er keine genannt, lasse savings vollständig weg — erfinde niemals Zahlen.
-  RECHNE NICHT SELBST. Gib nur die Bausteine an, die im Text stehen — multipliziert wird von der Anwendung.
-  - mode="total", wenn der Nutzer einen Gesamtaufwand pro Woche nennt: setze hoursPerWeek. Beispiele: „16 Stunden pro Woche" → hoursPerWeek 16. „zwei Kolleginnen je einen Tag pro Woche" → hoursPerWeek 16 (2 × 8). „ein halber Tag pro Woche" → hoursPerWeek 4.
-  - mode="peritem", wenn er eine Stückzahl und einen Aufwand je Stück nennt: setze itemsPerWeek und hoursPerItem, sonst nichts. Beispiel: „15–20 Angebote die Woche, dauert je 2 Stunden" → itemsPerWeek 15 (unterer Wert!), hoursPerItem 2. Die Zahl der beteiligten Personen wird dabei NICHT einmultipliziert — die steckt bereits im Aufwand je Stück.
-  - Hat der Nutzer nur eine Personenzahl genannt, aber keine Zeit, dann ist der Aufwand NICHT bekannt: lasse savings weg, statt eine Dauer zu unterstellen.
-  - Der Vorgabewert eines Stellers, den DU vorgeschlagen hast, ist keine Aussage des Nutzers. Nur was der Nutzer selbst geschrieben hat, zählt. Im Zweifel savings weglassen.
-  - IMMER KONSERVATIV rechnen. Nennt der Nutzer eine Spanne („15 bis 20 Angebote"), rechne mit dem UNTEREN Wert. Ist eine Angabe mehrdeutig, nimm die sparsamste Lesart. Rechne nichts hoch, was der Nutzer nicht gesagt hat, und multipliziere Angaben nicht doppelt (15 Angebote à 2 Stunden sind 30 Stunden — nicht 30 Stunden je Person).
-  - Der Nutzer rechnet diese Zahl im Kopf nach. Eine zu hohe Zahl zerstört sofort das Vertrauen in alles andere, auch in den Preis. Lieber zu niedrig als zu hoch.
-  - quote: die Angabe des Nutzers, aus der du gerechnet hast — kurz und wörtlich genug, dass er die Rechnung prüfen kann.
-  - quote: die Angabe des Nutzers in seinen Worten, kurz, z. B. „zwei Kolleginnen je einen Tag pro Woche".
-  Rechne selbst KEINE Eurobeträge aus — das übernimmt die Anwendung.
+- savings: Übertrage die Zeitangabe des Nutzers in Bausteine. Du rechnest nichts aus — die Anwendung multipliziert und rechnet in Euro um. Fülle savings immer aus, sobald der Nutzer eine Zeit genannt hat; nur wenn gar keine Zeitangabe fiel, lässt du es weg.
+  - Nennt er einen Gesamtaufwand: mode="total", hoursPerWeek. „16 Stunden pro Woche" → 16. „zwei Kolleginnen je einen Tag" → 16 (2 × 8 Stunden). „ein halber Tag pro Woche" → 4.
+  - Nennt er Stückzahl und Aufwand je Stück: mode="peritem", itemsPerWeek und hoursPerItem, sonst nichts. „15–20 Angebote pro Woche, je 2 Stunden" → itemsPerWeek 15, hoursPerItem 2. Bei Spannen immer den unteren Wert.
+  - quote: die Angabe des Nutzers in seinen Worten, kurz.
 - reply beim Ergebnis: 1–2 Sätze, die den KONKRETEN Fall benennen — mit den Worten des Nutzers, nicht mit Allgemeinplätzen. Falsch: „Bei diesem Volumen entstehen erhebliche Aufwände, die durch standardisierte Bausteine verkürzt werden." Richtig: „Angebote in Word zu bauen, ist der Punkt, an dem die Zeit verschwindet — mit Bausteinen aus einer zentralen Preisliste ist das in Minuten erledigt." Preise nicht im reply wiederholen, sie stehen im result. Kein Beraterdeutsch, keine Floskeln.
 
 FORMAT
@@ -386,7 +379,12 @@ export function normalizeTurn(raw: unknown, userText = ""): DialogTurn {
     } else if (inp.kind === "number") {
       const num = (v: unknown, fallback: number) => (typeof v === "number" && Number.isFinite(v) ? v : fallback);
       const min = Math.max(0, num(inp.min, 1));
-      const max = Math.max(min + 1, num(inp.max, 20));
+      let max = Math.max(min + 1, num(inp.max, 20));
+      // Bei Wochenstunden über mehrere Beteiligte setzt das Modell die
+      // Obergrenze regelmäßig auf 20 — ein Vertrieb mit drei Leuten liegt aber
+      // schnell bei 30 bis 40. Eine zu enge Skala verhindert die Wahrheit.
+      const asksWeeklyHours = /stunde/i.test(`${inp.label ?? ""} ${inp.unit ?? ""}`);
+      if (asksWeeklyHours && max < 60) max = 60;
       const step = Math.max(0.5, num(inp.step, 1));
       const preset = Math.min(max, Math.max(min, num(inp.preset, min)));
       turn.input = {
