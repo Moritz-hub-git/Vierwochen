@@ -46,6 +46,20 @@ export interface DialogResult {
 }
 
 /**
+ * Rohbestandteile des Aufwands, wie das Modell sie aus dem Gesagten liest.
+ * Bewusst nur Bausteine, keine Ergebnisse: Jede Multiplikation, die das Modell
+ * selbst ausführt, ist bisher schiefgegangen — erst um Faktor 2, dann um
+ * Faktor 1,5, weil es die Kopfzahl mit hineinrechnete. Multipliziert wird hier.
+ */
+export interface SavingsParts {
+  mode: "total" | "peritem";
+  hoursPerWeek?: number;
+  itemsPerWeek?: number;
+  hoursPerItem?: number;
+  quote: string;
+}
+
+/**
  * Bedienelement, das der Zug im Chat anbietet.
  *
  * Zweck ist nicht Bequemlichkeit, sondern Beteiligung: Wer seine Zahl selbst
@@ -130,10 +144,13 @@ export const RESPONSE_SCHEMA = {
         savings: {
           type: "OBJECT",
           properties: {
-            personDaysPerWeek: { type: "NUMBER" },
+            mode: { type: "STRING", enum: ["total", "peritem"] },
+            hoursPerWeek: { type: "NUMBER" },
+            itemsPerWeek: { type: "NUMBER" },
+            hoursPerItem: { type: "NUMBER" },
             quote: { type: "STRING" },
           },
-          required: ["personDaysPerWeek", "quote"],
+          required: ["mode", "quote"],
         },
       },
       required: ["tier", "priceMin", "priceMax", "scope", "weeks"],
@@ -206,7 +223,9 @@ ${tierLines}
 - weeks: genau 4 Einträge (Woche 1–4) mit konkretem, fallbezogenem Inhalt. Woche 1 enthält Festangebot und Start, Woche 4 endet mit Abnahme.
 - scope: 3–6 Punkte, was im Festpreis enthalten ist.
 - savings: NUR ausfüllen, wenn der Nutzer belastbare Mengen für den heutigen Aufwand genannt hat (Stunden, Tage, Personen). Hat er keine genannt, lasse savings vollständig weg — erfinde niemals Zahlen.
-  - personDaysPerWeek: der heutige Aufwand in Personentagen pro Woche, als Zahl. Rechne Stunden mit 8 Stunden je Tag um und summiere über alle Beteiligten. Beispiele: „zwei Kolleginnen je einen Tag pro Woche" → 2. „Ein halber Tag pro Woche" → 0.5. „12 Stunden pro Woche" → 1.5. „drei Leute, jeder zwei Tage" → 6.
+  RECHNE NICHT SELBST. Gib nur die Bausteine an, die im Text stehen — multipliziert wird von der Anwendung.
+  - mode="total", wenn der Nutzer einen Gesamtaufwand pro Woche nennt: setze hoursPerWeek. Beispiele: „16 Stunden pro Woche" → hoursPerWeek 16. „zwei Kolleginnen je einen Tag pro Woche" → hoursPerWeek 16 (2 × 8). „ein halber Tag pro Woche" → hoursPerWeek 4.
+  - mode="peritem", wenn er eine Stückzahl und einen Aufwand je Stück nennt: setze itemsPerWeek und hoursPerItem, sonst nichts. Beispiel: „15–20 Angebote die Woche, dauert je 2 Stunden" → itemsPerWeek 15 (unterer Wert!), hoursPerItem 2. Die Zahl der beteiligten Personen wird dabei NICHT einmultipliziert — die steckt bereits im Aufwand je Stück.
   - Hat der Nutzer nur eine Personenzahl genannt, aber keine Zeit, dann ist der Aufwand NICHT bekannt: lasse savings weg, statt eine Dauer zu unterstellen.
   - Der Vorgabewert eines Stellers, den DU vorgeschlagen hast, ist keine Aussage des Nutzers. Nur was der Nutzer selbst geschrieben hat, zählt. Im Zweifel savings weglassen.
   - IMMER KONSERVATIV rechnen. Nennt der Nutzer eine Spanne („15 bis 20 Angebote"), rechne mit dem UNTEREN Wert. Ist eine Angabe mehrdeutig, nimm die sparsamste Lesart. Rechne nichts hoch, was der Nutzer nicht gesagt hat, und multipliziere Angaben nicht doppelt (15 Angebote à 2 Stunden sind 30 Stunden — nicht 30 Stunden je Person).
@@ -281,6 +300,38 @@ const QUANTITY_PHRASE = new RegExp(`\\b${NUM_WORD}\\b(\\s+\\S+){0,2}\\s+${UNIT_W
 
 export function userStatedQuantity(userText: string): boolean {
   return /\d/.test(userText) || QUANTITY_PHRASE.test(userText);
+}
+
+/** Stunden je Arbeitstag für die Umrechnung in Personentage. */
+const HOURS_PER_DAY = 8;
+
+/**
+ * Rechnet die Bausteine des Modells in Personentage pro Woche um.
+ * Hier und nur hier wird multipliziert — das Modell liefert ausschließlich
+ * die Zahlen, die im Nutzertext stehen.
+ */
+export function savingsToPersonDays(sv: Record<string, unknown> | undefined): number | null {
+  if (!sv) return null;
+  const num = (v: unknown): number | null =>
+    typeof v === "number" && Number.isFinite(v) && v > 0 ? v : null;
+
+  let hours: number | null = null;
+  if (sv.mode === "peritem") {
+    const items = num(sv.itemsPerWeek);
+    const perItem = num(sv.hoursPerItem);
+    if (items !== null && perItem !== null) hours = items * perItem;
+  } else {
+    hours = num(sv.hoursPerWeek);
+  }
+  if (hours === null) return null;
+
+  // Obergrenze: mehr als 160 Stunden pro Woche wäre das Vierfache einer
+  // Vollzeitstelle — dann hat das Modell etwas doppelt gerechnet.
+  if (hours > 160) {
+    console.warn(`[dialog] savings verworfen: ${hours} Stunden/Woche sind unplausibel.`);
+    return null;
+  }
+  return Math.round((hours / HOURS_PER_DAY) * 4) / 4;
 }
 
 /**
@@ -369,7 +420,7 @@ export function normalizeTurn(raw: unknown, userText = ""): DialogTurn {
     // Eurobetrag hier rechnen, nicht im Modell. Nur plausible Mengen übernehmen:
     // unter 0,1 Personentagen je Woche ist es kein Argument, über 20 unrealistisch.
     const sv = r.savings as Record<string, unknown> | undefined;
-    const days = typeof sv?.personDaysPerWeek === "number" ? sv.personDaysPerWeek : null;
+    const days = savingsToPersonDays(sv);
     if (days !== null && !userStatedQuantity(userText)) {
       console.warn(
         "[dialog] savings verworfen: Der Nutzer hat nie eine Menge genannt, " +
