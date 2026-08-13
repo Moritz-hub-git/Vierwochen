@@ -52,10 +52,10 @@ export interface DialogResult {
  * Faktor 1,5, weil es die Kopfzahl mit hineinrechnete. Multipliziert wird hier.
  */
 export interface SavingsParts {
-  mode: "total" | "peritem";
-  hoursPerWeek?: number;
-  itemsPerWeek?: number;
-  hoursPerItem?: number;
+  /** Wie oft pro Woche. Bei einer reinen Gesamtangabe schlicht 1. */
+  timesPerWeek: number;
+  /** Stunden je Vorgang — bei einer Gesamtangabe die Wochenstunden. */
+  hoursEach: number;
   quote: string;
 }
 
@@ -144,13 +144,13 @@ export const RESPONSE_SCHEMA = {
         savings: {
           type: "OBJECT",
           properties: {
-            mode: { type: "STRING", enum: ["total", "peritem"] },
-            hoursPerWeek: { type: "NUMBER" },
-            itemsPerWeek: { type: "NUMBER" },
-            hoursPerItem: { type: "NUMBER" },
+            timesPerWeek: { type: "NUMBER" },
+            hoursEach: { type: "NUMBER" },
             quote: { type: "STRING" },
           },
-          required: ["mode", "quote"],
+          // Beide Zahlen sind Pflicht: Als optionale Felder ließ das Modell sie
+          // regelmäßig weg, und der Kostenanker fiel stillschweigend aus.
+          required: ["timesPerWeek", "hoursEach", "quote"],
         },
       },
       required: ["tier", "priceMin", "priceMax", "scope", "weeks"],
@@ -222,9 +222,10 @@ ERGEBNIS (phase=result)
 ${tierLines}
 - weeks: genau 4 Einträge (Woche 1–4) mit konkretem, fallbezogenem Inhalt. Woche 1 enthält Festangebot und Start, Woche 4 endet mit Abnahme.
 - scope: 3–6 Punkte, was im Festpreis enthalten ist.
-- savings: Übertrage die Zeitangabe des Nutzers in Bausteine. Du rechnest nichts aus — die Anwendung multipliziert und rechnet in Euro um. Fülle savings immer aus, sobald der Nutzer eine Zeit genannt hat; nur wenn gar keine Zeitangabe fiel, lässt du es weg.
-  - Nennt er einen Gesamtaufwand: mode="total", hoursPerWeek. „16 Stunden pro Woche" → 16. „zwei Kolleginnen je einen Tag" → 16 (2 × 8 Stunden). „ein halber Tag pro Woche" → 4.
-  - Nennt er Stückzahl und Aufwand je Stück: mode="peritem", itemsPerWeek und hoursPerItem, sonst nichts. „15–20 Angebote pro Woche, je 2 Stunden" → itemsPerWeek 15, hoursPerItem 2. Bei Spannen immer den unteren Wert.
+- savings: Übertrage die Zeitangabe des Nutzers in zwei Zahlen — timesPerWeek (wie oft pro Woche) und hoursEach (Stunden je Mal). Du rechnest nichts aus; die Anwendung multipliziert und rechnet in Euro um. Fülle savings aus, sobald der Nutzer irgendeine Zeitangabe gemacht hat; nur ohne jede Zeitangabe lässt du es weg.
+  - Stückzahl mal Aufwand: „15–20 Angebote pro Woche, je 2 Stunden" → timesPerWeek 15, hoursEach 2. Bei Spannen immer den unteren Wert.
+  - Reine Gesamtangabe: timesPerWeek 1 und die Wochenstunden in hoursEach. „16 Stunden pro Woche" → 1 und 16. „zwei Kolleginnen je einen Tag" → 1 und 16. „ein halber Tag pro Woche" → 1 und 4.
+  - Die Zahl der beteiligten Personen wird NICHT zusätzlich einmultipliziert; sie steckt schon im genannten Aufwand.
   - quote: die Angabe des Nutzers in seinen Worten, kurz.
 - reply beim Ergebnis: 1–2 Sätze, die den KONKRETEN Fall benennen — mit den Worten des Nutzers, nicht mit Allgemeinplätzen. Falsch: „Bei diesem Volumen entstehen erhebliche Aufwände, die durch standardisierte Bausteine verkürzt werden." Richtig: „Angebote in Word zu bauen, ist der Punkt, an dem die Zeit verschwindet — mit Bausteinen aus einer zentralen Preisliste ist das in Minuten erledigt." Preise nicht im reply wiederholen, sie stehen im result. Kein Beraterdeutsch, keine Floskeln.
 
@@ -308,15 +309,10 @@ export function savingsToPersonDays(sv: Record<string, unknown> | undefined): nu
   const num = (v: unknown): number | null =>
     typeof v === "number" && Number.isFinite(v) && v > 0 ? v : null;
 
-  let hours: number | null = null;
-  if (sv.mode === "peritem") {
-    const items = num(sv.itemsPerWeek);
-    const perItem = num(sv.hoursPerItem);
-    if (items !== null && perItem !== null) hours = items * perItem;
-  } else {
-    hours = num(sv.hoursPerWeek);
-  }
-  if (hours === null) return null;
+  const times = num(sv.timesPerWeek);
+  const each = num(sv.hoursEach);
+  if (times === null || each === null) return null;
+  const hours = times * each;
 
   // Obergrenze: mehr als 160 Stunden pro Woche wäre das Vierfache einer
   // Vollzeitstelle — dann hat das Modell etwas doppelt gerechnet.
