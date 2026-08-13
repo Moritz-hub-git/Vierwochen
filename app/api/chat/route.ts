@@ -90,7 +90,13 @@ export async function POST(req: Request) {
       systemInstruction: systemPrompt(userTurns, questionsAsked),
       responseSchema: RESPONSE_SCHEMA as unknown as Record<string, unknown>,
     });
-    const turn = normalizeTurn(json);
+    // Nutzertext mitgeben: Mengenangaben im Ergebnis müssen durch das belegt
+    // sein, was der Nutzer tatsächlich geschrieben hat (siehe normalizeTurn).
+    const userText = messages
+      .filter((m) => m.role === "user")
+      .map((m) => m.content)
+      .join(" ");
+    const turn = normalizeTurn(json, userText);
 
     // Dialog persistieren (nachgelagert; Ausfall bricht den Funnel nicht).
     if (dialogId) {

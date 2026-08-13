@@ -207,6 +207,7 @@ ${tierLines}
 - savings: NUR ausfüllen, wenn der Nutzer belastbare Mengen für den heutigen Aufwand genannt hat (Stunden, Tage, Personen). Hat er keine genannt, lasse savings vollständig weg — erfinde niemals Zahlen.
   - personDaysPerWeek: der heutige Aufwand in Personentagen pro Woche, als Zahl. Rechne Stunden mit 8 Stunden je Tag um und summiere über alle Beteiligten. Beispiele: „zwei Kolleginnen je einen Tag pro Woche" → 2. „Ein halber Tag pro Woche" → 0.5. „12 Stunden pro Woche" → 1.5. „drei Leute, jeder zwei Tage" → 6.
   - Hat der Nutzer nur eine Personenzahl genannt, aber keine Zeit, dann ist der Aufwand NICHT bekannt: lasse savings weg, statt eine Dauer zu unterstellen.
+  - Der Vorgabewert eines Stellers, den DU vorgeschlagen hast, ist keine Aussage des Nutzers. Nur was der Nutzer selbst geschrieben hat, zählt. Im Zweifel savings weglassen.
   - quote: die Angabe des Nutzers in seinen Worten, kurz, z. B. „zwei Kolleginnen je einen Tag pro Woche".
   Rechne selbst KEINE Eurobeträge aus — das übernimmt die Anwendung.
 - reply beim Ergebnis: 1–2 Sätze Einordnung + Hinweis, dass die Einschätzung unverbindlich ist und das Erstgespräch der nächste Schritt ist. Preise nicht im reply wiederholen, sie stehen im result.
@@ -253,8 +254,37 @@ function shortLabel(value: unknown, fallback: string, maxLen: number): string {
   return trimmed || fallback;
 }
 
-/** Normalisiert und validiert den Modell-Zug für die Oberfläche. */
-export function normalizeTurn(raw: unknown): DialogTurn {
+/**
+ * Prüft, ob der Nutzer überhaupt jemals eine Menge genannt hat.
+ *
+ * Hintergrund: Im Live-Test hat das Modell den Vorgabewert seines eigenen
+ * Stellers (preset=10) als Kundenaussage verbucht und daraus einen
+ * Jahresbetrag errechnet, obwohl der Nutzer nie eine Stundenzahl nannte.
+ * Ohne Zahl im Nutzertext kann es keinen belegten Aufwand geben — dann fällt
+ * der Kostenanker ersatzlos weg (PROMPT.md §2.6: keine erfundenen Zahlen).
+ */
+/**
+ * Ausgeschriebene Zahlwörter zählen nur, wenn eine Mengeneinheit folgt.
+ * „ein" ist im Deutschen meist ein Artikel („ein Chaos") — ohne diese
+ * Einschränkung würde die Sperre bei fast jedem Satz anschlagen und damit
+ * nichts mehr verhindern.
+ */
+const NUM_WORD =
+  "(ein|eine|einen|einem|anderthalb|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|elf|zwölf|zwanzig|dreißig|halbe[rn]?|halb|dutzend)";
+const UNIT_WORD =
+  "(stunden?|std|tage?n?|personentage?n?|wochen?|minuten?|leute|personen|mitarbeiter\\w*|kolleg\\w+|mann|vollzeit\\w*)";
+const QUANTITY_PHRASE = new RegExp(`\\b${NUM_WORD}\\b(\\s+\\S+){0,2}\\s+${UNIT_WORD}\\b`, "i");
+
+export function userStatedQuantity(userText: string): boolean {
+  return /\d/.test(userText) || QUANTITY_PHRASE.test(userText);
+}
+
+/**
+ * Normalisiert und validiert den Modell-Zug für die Oberfläche.
+ * `userText` ist der zusammengefasste Klartext aller Nutzernachrichten und
+ * dient als Beleg dafür, dass Mengenangaben tatsächlich vom Nutzer stammen.
+ */
+export function normalizeTurn(raw: unknown, userText = ""): DialogTurn {
   const obj = (raw ?? {}) as Record<string, unknown>;
   const sketchRaw = (obj.sketch ?? {}) as Record<string, unknown>;
   const strings = (v: unknown): string[] =>
@@ -336,7 +366,12 @@ export function normalizeTurn(raw: unknown): DialogTurn {
     // unter 0,1 Personentagen je Woche ist es kein Argument, über 20 unrealistisch.
     const sv = r.savings as Record<string, unknown> | undefined;
     const days = typeof sv?.personDaysPerWeek === "number" ? sv.personDaysPerWeek : null;
-    if (days !== null && days >= 0.1 && days <= 20) {
+    if (days !== null && !userStatedQuantity(userText)) {
+      console.warn(
+        "[dialog] savings verworfen: Der Nutzer hat nie eine Menge genannt, " +
+          `das Modell wollte ${days} Personentage/Woche ansetzen.`
+      );
+    } else if (days !== null && days >= 0.1 && days <= 20) {
       const annualEuro = Math.round(
         days * COST_ANCHOR.workWeeksPerYear * COST_ANCHOR.euroPerPersonDay
       );
