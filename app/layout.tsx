@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import Header from "@/components/Header";
 import RevealObserver from "@/components/RevealObserver";
-import ChatDock from "@/components/chat/ChatDock";
 
 // Schriften liegen im Repository — der Build lädt nichts aus dem Netz.
 const manrope = localFont({
@@ -22,6 +20,32 @@ const sora = localFont({
   ],
   variable: "--font-display",
   display: "swap",
+});
+
+// Zusatzschriften für die Design-Varianten unter /v — ohne Preload, damit die
+// Hauptseite sie nicht mitlädt; sie werden erst gezogen, wenn CSS sie nutzt.
+const grotesk = localFont({
+  src: [{ path: "./fonts/space-grotesk-latin.woff2", weight: "300 700", style: "normal" }],
+  variable: "--font-grotesk",
+  display: "swap",
+  preload: false,
+});
+
+const fraunces = localFont({
+  src: [{ path: "./fonts/fraunces-latin.woff2", weight: "100 900", style: "normal" }],
+  variable: "--font-serif",
+  display: "swap",
+  preload: false,
+});
+
+const mono = localFont({
+  src: [
+    { path: "./fonts/plex-mono-latin-400.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/plex-mono-latin-600.woff2", weight: "600", style: "normal" },
+  ],
+  variable: "--font-mono",
+  display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -50,11 +74,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
-      <body className={`${manrope.variable} ${sora.variable}`}>
+      <body className={`${manrope.variable} ${sora.variable} ${grotesk.variable} ${fraunces.variable} ${mono.variable}`}>
         <RevealObserver />
-        <Header />
         {children}
-        <ChatDock />
       </body>
     </html>
   );

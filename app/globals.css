@@ -2865,3 +2865,185 @@ button, input, textarea, select {
 
 .access-card h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
 .access-card p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+
+/* ============================================================
+   Design-Varianten (/v): Skins
+   Stehen bewusst am DATEIENDE — gleiche Spezifität wie
+   [data-theme="dark"], spätere Regel gewinnt. Das Dialog-Dock und
+   das Panel übernehmen die Palette automatisch über die Variablen.
+   ============================================================ */
+
+/* ---------- werkbank: Industrie, Schwarz auf Rohpapier, Signalgelb ---------- */
+
+html[data-skin="werkbank"] {
+  --bg: #f4f1ea;
+  --bg-raised: #ece8de;
+  --surface: #ffffff;
+  --surface-2: #f7f4ed;
+  --text: #141414;
+  --text-soft: #3a3a38;
+  --text-muted: #6e6c66;
+  --border: rgba(20, 20, 20, 0.22);
+  --border-strong: #141414;
+  --accent: #141414;
+  --accent-strong: #000000;
+  --accent-soft: #f5c400;
+  --accent-softer: #fbe27a;
+  --on-accent: #f5c400;
+  --danger: #c8321e;
+  --shadow-sm: 3px 3px 0 rgba(20, 20, 20, 0.9);
+  --shadow-md: 5px 5px 0 rgba(20, 20, 20, 0.9);
+  --shadow-lg: 7px 7px 0 rgba(20, 20, 20, 0.9);
+  --glow: 0 0 0 3px #f5c400;
+  --radius: 0px;
+  --radius-lg: 0px;
+  color-scheme: light;
+}
+
+html[data-skin="werkbank"] body {
+  --font-body: var(--font-grotesk);
+  --font-display: var(--font-grotesk);
+  background: var(--bg);
+}
+
+html[data-skin="werkbank"] .dock-bar,
+html[data-skin="werkbank"] .dock-send,
+html[data-skin="werkbank"] .composer textarea,
+html[data-skin="werkbank"] .msg,
+html[data-skin="werkbank"] .avatar,
+html[data-skin="werkbank"] .chip-btn {
+  border-radius: 0;
+}
+
+html[data-skin="werkbank"] .dock-bar {
+  border: 2px solid #141414;
+  animation: none;
+}
+
+/* ---------- montag: Terminal, dunkel, Monospace, Grün ---------- */
+
+html[data-skin="montag"] {
+  --bg: #0a0e14;
+  --bg-raised: #0d1320;
+  --surface: #101725;
+  --surface-2: #0c1220;
+  --text: #d9e3ee;
+  --text-soft: #9db0c4;
+  --text-muted: #64788e;
+  --border: rgba(150, 180, 210, 0.14);
+  --border-strong: rgba(150, 180, 210, 0.32);
+  --accent: #42e2a0;
+  --accent-strong: #6ff0b8;
+  --accent-soft: rgba(66, 226, 160, 0.15);
+  --accent-softer: rgba(66, 226, 160, 0.07);
+  --on-accent: #04160e;
+  --danger: #ff7a68;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.4), 0 14px 40px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.45), 0 28px 80px rgba(0, 0, 0, 0.6);
+  --glow: 0 0 0 4px rgba(66, 226, 160, 0.2);
+  --radius: 10px;
+  --radius-lg: 14px;
+  color-scheme: dark;
+}
+
+html[data-skin="montag"] body {
+  --font-body: var(--font-mono);
+  --font-display: var(--font-mono);
+  background: var(--bg);
+}
+
+/* ---------- klara: Editorial, Creme und Tinte, Serifen ---------- */
+
+html[data-skin="klara"] {
+  --bg: #faf6ee;
+  --bg-raised: #f3eddf;
+  --surface: #fffdf8;
+  --surface-2: #f4efe3;
+  --text: #211e18;
+  --text-soft: #48443b;
+  --text-muted: #7c7568;
+  --border: rgba(60, 52, 34, 0.15);
+  --border-strong: rgba(60, 52, 34, 0.34);
+  --accent: #8a6437;
+  --accent-strong: #6f4e28;
+  --accent-soft: #efe3cf;
+  --accent-softer: #f5ecdd;
+  --on-accent: #fffdf8;
+  --danger: #a63d2e;
+  --shadow-sm: 0 1px 2px rgba(60, 50, 30, 0.06), 0 2px 8px rgba(60, 50, 30, 0.05);
+  --shadow-md: 0 2px 6px rgba(60, 50, 30, 0.06), 0 14px 36px rgba(60, 50, 30, 0.09);
+  --shadow-lg: 0 4px 12px rgba(60, 50, 30, 0.07), 0 26px 70px rgba(60, 50, 30, 0.12);
+  --glow: 0 0 0 4px rgba(138, 100, 55, 0.16);
+  --radius: 4px;
+  --radius-lg: 6px;
+  color-scheme: light;
+}
+
+html[data-skin="klara"] body {
+  --font-display: var(--font-serif);
+  background: var(--bg);
+}
+
+/* ---------- fixfertig: Bold, Indigo, große Radien, Bento ---------- */
+
+html[data-skin="fixfertig"] {
+  --bg: #edeffb;
+  --bg-raised: #e3e6f8;
+  --surface: #ffffff;
+  --surface-2: #f4f5ff;
+  --text: #181a33;
+  --text-soft: #3c3f5e;
+  --text-muted: #6a6d8c;
+  --border: rgba(24, 26, 51, 0.1);
+  --border-strong: rgba(24, 26, 51, 0.2);
+  --accent: #4f46e5;
+  --accent-strong: #4338ca;
+  --accent-soft: #e4e1fd;
+  --accent-softer: #efedfe;
+  --on-accent: #ffffff;
+  --danger: #e2503f;
+  --shadow-sm: 0 2px 6px rgba(38, 34, 120, 0.08);
+  --shadow-md: 0 10px 30px rgba(38, 34, 120, 0.14);
+  --shadow-lg: 0 18px 55px rgba(38, 34, 120, 0.2);
+  --glow: 0 0 0 4px rgba(79, 70, 229, 0.18);
+  --radius: 20px;
+  --radius-lg: 28px;
+  color-scheme: light;
+}
+
+html[data-skin="fixfertig"] body {
+  --font-display: var(--font-grotesk);
+  background: var(--bg);
+}
+
+/* ---------- kalkuel: Kaufmann, kühles Blau, Mono-Ziffern ---------- */
+
+html[data-skin="kalkuel"] {
+  --bg: #f5f7f9;
+  --bg-raised: #eceff3;
+  --surface: #ffffff;
+  --surface-2: #eef2f5;
+  --text: #0d1b26;
+  --text-soft: #33475a;
+  --text-muted: #5e7284;
+  --border: rgba(13, 27, 38, 0.12);
+  --border-strong: rgba(13, 27, 38, 0.28);
+  --accent: #1552d0;
+  --accent-strong: #0f3fa3;
+  --accent-soft: #dfe8fb;
+  --accent-softer: #edf2fd;
+  --on-accent: #ffffff;
+  --danger: #c03d2e;
+  --shadow-sm: 0 1px 2px rgba(13, 27, 38, 0.05), 0 2px 8px rgba(13, 27, 38, 0.05);
+  --shadow-md: 0 2px 6px rgba(13, 27, 38, 0.06), 0 14px 40px rgba(13, 27, 38, 0.1);
+  --shadow-lg: 0 4px 12px rgba(13, 27, 38, 0.08), 0 28px 80px rgba(13, 27, 38, 0.14);
+  --glow: 0 0 0 4px rgba(21, 82, 208, 0.15);
+  --radius: 10px;
+  --radius-lg: 14px;
+  color-scheme: light;
+}
+
+html[data-skin="kalkuel"] body {
+  background: var(--bg);
+}

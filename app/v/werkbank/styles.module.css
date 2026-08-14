@@ -1,0 +1,276 @@
+/* werkbank — Industrie-Brutalismus: harte Kanten, Schwarz, Signalgelb. */
+
+.page {
+  min-height: 100dvh;
+  background: #f4f1ea;
+  color: #141414;
+  font-family: var(--font-grotesk), system-ui, sans-serif;
+  padding-bottom: 16vh;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem clamp(1rem, 4vw, 3rem);
+  border-bottom: 2px solid #141414;
+}
+
+.mark {
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  color: #141414;
+}
+
+.mark i {
+  font-style: normal;
+  background: #f5c400;
+  padding: 0 0.25em;
+}
+
+.navLinks {
+  display: flex;
+  gap: 1.4rem;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.navLinks a { color: #141414; text-decoration: none; }
+.navLinks a:hover { background: #f5c400; }
+
+.hero {
+  padding: clamp(3rem, 8vw, 6rem) clamp(1rem, 4vw, 3rem) clamp(2rem, 5vw, 4rem);
+  border-bottom: 2px solid #141414;
+}
+
+.kicker {
+  display: inline-block;
+  background: #141414;
+  color: #f5c400;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.7rem;
+  margin-bottom: 1.6rem;
+}
+
+.h1 {
+  font-size: clamp(2.6rem, 8vw, 5.5rem);
+  line-height: 0.98;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  margin: 0 0 1.6rem;
+  max-width: 20ch;
+}
+
+.h1 mark {
+  background: #f5c400;
+  padding: 0 0.12em;
+}
+
+.sub {
+  font-size: clamp(1.05rem, 2vw, 1.3rem);
+  max-width: 46ch;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Typenschild: Das Angebot wie auf einer Maschinenplakette. */
+.plate {
+  margin: clamp(2rem, 5vw, 3.5rem) clamp(1rem, 4vw, 3rem) 0;
+  max-width: 900px;
+  border: 2px solid #141414;
+  background: #fff;
+  box-shadow: 8px 8px 0 #141414;
+}
+
+.plateHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 1.1rem;
+  border-bottom: 2px solid #141414;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.plateGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (min-width: 760px) {
+  .plateGrid { grid-template-columns: repeat(4, 1fr); }
+}
+
+.plateCell {
+  padding: 1.1rem;
+  border-top: 1px solid rgba(20, 20, 20, 0.25);
+}
+
+.plateGrid .plateCell:nth-child(odd) { border-right: 1px solid rgba(20, 20, 20, 0.25); }
+
+@media (min-width: 760px) {
+  .plateGrid .plateCell { border-right: 1px solid rgba(20, 20, 20, 0.25); border-top: 0; }
+  .plateGrid .plateCell:last-child { border-right: 0; }
+}
+
+.plateLabel {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6e6c66;
+  margin-bottom: 0.3rem;
+}
+
+.plateValue {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.section {
+  padding: clamp(2.5rem, 6vw, 4.5rem) clamp(1rem, 4vw, 3rem);
+  border-bottom: 2px solid #141414;
+}
+
+.secTitle {
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  margin: 0 0 1.8rem;
+}
+
+.tickets {
+  display: grid;
+  gap: 1.2rem;
+  grid-template-columns: 1fr;
+  max-width: 1100px;
+}
+
+@media (min-width: 860px) {
+  .tickets { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Werkstattzettel */
+.ticket {
+  background: #fff;
+  border: 2px solid #141414;
+  padding: 1.2rem;
+  box-shadow: 5px 5px 0 #141414;
+}
+
+.ticketNo {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #6e6c66;
+}
+
+.ticketQuote {
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.4;
+  margin: 0.5rem 0 0.8rem;
+}
+
+.ticketFix {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: #3a3a38;
+  margin: 0;
+  border-top: 1px dashed rgba(20, 20, 20, 0.4);
+  padding-top: 0.8rem;
+}
+
+.ticketFix b { background: #f5c400; }
+
+.steps {
+  max-width: 900px;
+  counter-reset: s;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.steps li {
+  display: flex;
+  gap: 1.2rem;
+  align-items: baseline;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(20, 20, 20, 0.3);
+  font-size: clamp(1rem, 2vw, 1.2rem);
+}
+
+.steps li::before {
+  counter-increment: s;
+  content: counter(s, decimal-leading-zero);
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: #141414;
+  background: #f5c400;
+  padding: 0 0.3rem;
+}
+
+.steps b { font-weight: 700; }
+
+.cta {
+  padding: clamp(3rem, 7vw, 5rem) clamp(1rem, 4vw, 3rem);
+  text-align: left;
+}
+
+.ctaTitle {
+  font-size: clamp(2rem, 6vw, 4rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  margin: 0 0 1.4rem;
+}
+
+.ctaBtn {
+  display: inline-block;
+  background: #141414;
+  color: #f5c400;
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 2px solid #141414;
+  padding: 1rem 1.8rem;
+  cursor: pointer;
+  box-shadow: 6px 6px 0 rgba(20, 20, 20, 0.35);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.ctaBtn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 rgba(20, 20, 20, 0.35);
+}
+
+.ctaHint {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #6e6c66;
+}
+
+.foot {
+  padding: 1.4rem clamp(1rem, 4vw, 3rem) 0;
+  font-size: 0.85rem;
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.foot a { color: #141414; }
