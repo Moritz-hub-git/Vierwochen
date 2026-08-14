@@ -653,6 +653,34 @@ button, input, textarea, select {
   line-height: 1.45;
 }
 
+/* Rollen-Chips am Moritz-Knoten: die linke Kette, in eine Person gefaltet. */
+.role-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.55rem;
+}
+
+.roles-caption {
+  width: 100%;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.role-chip {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  color: var(--text-soft);
+}
+
 .ki-pill {
   display: inline-flex;
   gap: 0.5rem;

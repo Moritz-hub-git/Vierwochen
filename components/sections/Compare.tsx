@@ -69,13 +69,23 @@ function Chain({ nodes, direct }: { nodes: (ChainNode | "direct-label")[]; direc
               <strong>{n.role}</strong>
               <span>{n.text}</span>
               {direct && n.role === "Moritz" && (
-                <span className="ki-pill">
-                  <SparkIcon />
-                  <span>
-                    <strong>KI als Werkzeug:</strong> übernimmt Tippen, Tests und
-                    Routinearbeit — unter Aufsicht, nie allein.
+                <>
+                  {/* Die Rollen der linken Kette, gebündelt in einer Person —
+                      das macht die Absorption sichtbar statt behauptet. */}
+                  <span className="role-chips" aria-label="Gebündelte Rollen">
+                    <span className="roles-caption">Bündelt die Rollen von links:</span>
+                    {["Anforderungen", "Architektur", "UX", "Umsetzung", "Qualität"].map((r) => (
+                      <span className="role-chip" key={r}>{r}</span>
+                    ))}
                   </span>
-                </span>
+                  <span className="ki-pill">
+                    <SparkIcon />
+                    <span>
+                      <strong>KI als Werkzeug:</strong> übernimmt Tippen, Tests und
+                      Routinearbeit — unter Aufsicht, nie allein.
+                    </span>
+                  </span>
+                </>
               )}
             </span>
           </li>
