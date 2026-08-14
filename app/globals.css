@@ -621,8 +621,25 @@ button, input, textarea, select {
 }
 
 .price-card.featured {
+  position: relative;
   border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
   background: linear-gradient(180deg, var(--accent-softer), var(--surface) 55%);
+}
+
+/* Einstiegsmarke am Pilot: Der Preisanker (teuerste Stufe zuerst) bleibt,
+   aber Kleinbetriebe sehen sofort, wo IHR Einstieg liegt. */
+.price-badge {
+  position: absolute;
+  top: -0.7rem;
+  right: 1rem;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.28rem 0.75rem;
+  border-radius: 999px;
+  box-shadow: var(--shadow-sm);
 }
 
 .price-card p { color: var(--text-muted); font-size: 0.95rem; }
@@ -826,6 +843,34 @@ button, input, textarea, select {
   margin-top: 1.6rem;
   font-size: 0.9rem;
   color: var(--text-muted);
+}
+
+/* Leiser Zweitweg unter der Haupt-CTA: sichtbar für Suchende,
+   unsichtbar für alle anderen. */
+.alt-path {
+  margin-top: 1.1rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.alt-path a {
+  color: var(--text-soft);
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 3px;
+}
+
+.alt-path a:hover { color: var(--accent); }
+
+/* ---------- Direktbuchung /termin ---------- */
+
+.direct-booking .booking { margin-top: 2rem; }
+
+.direct-booking-hint {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.85rem 1.05rem;
+  font-size: 0.92rem;
 }
 
 /* ---------- Fußzeile ---------- */

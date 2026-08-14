@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import Booking from "./Booking";
 import { Chips, MultiChips, Stepper } from "./Controls";
 import EmailGate from "./EmailGate";
@@ -154,7 +155,13 @@ export default function ChatDock() {
   messagesRef.current = messages;
   sketchRef.current = sketch;
 
-  const { text: typed } = useTypewriter(!open);
+  // Auf der Direktbuchung und der IT-Faktenseite schwebt keine Dialogleiste:
+  // Dort soll nichts vom eigentlichen Zweck der Seite ablenken oder das
+  // Formular überlappen. Der Dialog bleibt über den Kopfzeilen-Knopf erreichbar.
+  const pathname = usePathname();
+  const dockSuppressed = pathname === "/termin" || pathname === "/it";
+
+  const { text: typed } = useTypewriter(!open && !dockSuppressed);
 
   if (!dialogIdRef.current && typeof window !== "undefined") {
     dialogIdRef.current =
@@ -342,6 +349,7 @@ export default function ChatDock() {
     <>
       {/* Das Dock bleibt eingehängt und blendet weich aus, während das Panel
           darüber aufblendet — ein Kreuzblenden statt eines harten Sprungs. */}
+      {!dockSuppressed && (
       <div className={`dock${open ? " is-hidden" : ""}`} aria-hidden={open}>
         <form className="dock-bar" onSubmit={submitDock}>
           <span className="spark" aria-hidden>
@@ -373,6 +381,7 @@ export default function ChatDock() {
           </button>
         </form>
       </div>
+      )}
 
       {open && (
         <section className="panel" role="dialog" aria-modal="true" aria-label="Projekt-Dialog">

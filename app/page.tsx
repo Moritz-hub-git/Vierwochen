@@ -152,10 +152,14 @@ function Pricing() {
           <span className="eyebrow">Preise</span>
           <h2 className="section-title">Drei Stufen, ein Festpreis</h2>
           <p className="section-lead">
-            Welche Stufe Ihr Fall ist, sagt Ihnen die Einschätzung unten in wenigen Minuten.
+            Welche Stufe Ihr Fall ist, sagt Ihnen die Einschätzung unten in wenigen
+            Minuten. Und keine Sorge vor den großen Zahlen: Die meisten
+            Erstprojekte starten als Pilot.
           </p>
         </div>
-        {/* Preisanker: die teuerste Stufe steht bewusst zuerst (PROMPT.md §2.4). */}
+        {/* Preisanker: die teuerste Stufe steht bewusst zuerst (PROMPT.md §2.4).
+            Damit der Anker Kleinbetriebe nicht verscheucht, trägt der Pilot
+            eine sichtbare Einstiegsmarke. */}
         <div className="price-cards">
           {PRICING_TIERS.map((tier, i) => (
             <article
@@ -164,6 +168,9 @@ function Pricing() {
               data-reveal
               style={delay(i * 0.08)}
             >
+              {tier.id === "pilot" && (
+                <span className="price-badge">Der häufigste Einstieg</span>
+              )}
               <span className="tier">{tier.name}</span>
               <span className="amount">{tier.range}</span>
               <p>{tier.description}</p>
@@ -235,7 +242,7 @@ function Proof() {
 }
 
 function Objections() {
-  const objections = [
+  const objections: { q: string; risk: string; a: React.ReactNode }[] = [
     {
       q: "„Vier Wochen? Das glaube ich erst, wenn ich es sehe.“",
       risk: "Berechtigt — die meisten IT-Projekte reißen Termine, und niemand haftet dafür.",
@@ -247,14 +254,40 @@ function Objections() {
       a: "Darum gehören Code, Daten und Zugänge vom ersten Tag an Ihnen, dokumentiert und übergabefähig. Der Beleg, dass das funktioniert: Ein von mir gebautes Werkzeug läuft nach dem Wechsel des Erbauers unverändert weiter.",
     },
     {
+      q: "„Und wer kümmert sich nach den vier Wochen darum?“",
+      risk: "Die richtige Frage — der wahre Preis von Software zeigt sich oft erst im Betrieb.",
+      a: "Drei Wege, Sie wählen: Fehler im vereinbarten Umfang behebe ich 12 Monate lang kostenfrei. Auf Wunsch betreibe und pflege ich die Anwendung weiter — monatlich kündbar. Oder Ihre IT übernimmt: Code, Daten, Zugänge und Dokumentation gehören ohnehin Ihnen.",
+    },
+    {
       q: "„Unsere IT wird das blockieren.“",
       risk: "Verständlich — sie soll etwas betreiben, das sie nicht gebaut hat.",
-      a: "Ich baue in Ihre bestehende Umgebung, mit Standardtechnik statt Exoten. Ihre IT bekommt Adminrechte, vollständige Dokumentation und ein Übergabegespräch — nicht ich behalte die Schlüssel, sondern sie.",
+      a: (
+        <>
+          Ich baue in Ihre bestehende Umgebung, mit Standardtechnik statt Exoten.
+          Ihre IT bekommt Adminrechte, vollständige Dokumentation und ein
+          Übergabegespräch — nicht ich behalte die Schlüssel, sondern sie. Die
+          Eckdaten zum Weiterreichen: <Link href="/it">Fakten für Ihre IT</Link>.
+        </>
+      ),
     },
     {
       q: "„Und der Datenschutz, wenn KI im Spiel ist?“",
       risk: "Die Sorge ist begründet — viele KI-Werkzeuge senden Daten in die USA.",
-      a: "Verarbeitung und Speicherung laufen in EU-Rechenzentren (Region Frankfurt), Ihre Daten werden nicht für das Training von Modellen verwendet, und wir schließen einen Auftragsverarbeitungsvertrag. KI kommt nur dorthin, wo sie nachweislich hilft.",
+      a: (
+        <>
+          Für Ihr Projekt gilt: Verarbeitung und Speicherung in EU-Rechenzentren
+          (Region Frankfurt), Ihre Daten werden nicht für das Training von
+          Modellen verwendet, und wir schließen einen Auftragsverarbeitungsvertrag.
+          KI kommt nur dorthin, wo sie nachweislich hilft. Und wie diese Website
+          selbst mit Daten umgeht — auch im KI-Dialog —, steht ungeschönt in der{" "}
+          <Link href="/datenschutz">Datenschutzerklärung</Link>.
+        </>
+      ),
+    },
+    {
+      q: "„Lohnt sich das für einen kleinen Betrieb überhaupt?“",
+      risk: "Fair gefragt — 9.500 € sind für einen Zehn-Personen-Betrieb echtes Geld.",
+      a: "Deshalb rechnen wir vorher, mit Ihren Zahlen statt Prospektzahlen. Zur Größenordnung: Ein Ablauf, der Sie einen halben Tag pro Woche kostet, bindet im Jahr rund 7.000 € an Arbeitszeit — ein Pilot trägt sich dann nach gut einem Jahr, alles danach arbeitet für Sie. Trägt Ihr Fall das nicht, sage ich es Ihnen im Gespräch, bevor Sie Geld ausgeben.",
     },
     {
       q: "„Was, wenn das Ergebnis nicht das ist, was wir brauchen?“",
@@ -398,6 +431,14 @@ function FinalCta() {
           Preisschätzung — auf Wunsch direkt mit Termin.
         </p>
         <CtaButton label="Unverbindliche Einschätzung starten" />
+        {/* Leiser Zweitweg für alle, die keinen Chat mögen: Ein Klick zum
+            Kalender, ohne Dialog. Bewusst unauffällig — die Dialogleiste
+            bleibt der Hauptweg. */}
+        <p className="alt-path">
+          Sie mögen keine Chat-Dialoge? <Link href="/termin">Termin direkt wählen</Link>{" "}
+          oder schreiben Sie an{" "}
+          <a href="mailto:kontakt@vierwochen.de">kontakt@vierwochen.de</a>.
+        </p>
         <div className="scarcity">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
             <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
@@ -419,7 +460,9 @@ function Footer() {
           </span>{" "}
           — In vier Wochen zum Ziel.
         </div>
-        <nav aria-label="Rechtliches">
+        <nav aria-label="Weitere Seiten">
+          <Link href="/termin">Termin buchen</Link>
+          <Link href="/it">Fakten für Ihre IT</Link>
           <Link href="/impressum">Impressum</Link>
           <Link href="/datenschutz">Datenschutz</Link>
           <Link href="/agb">AGB</Link>

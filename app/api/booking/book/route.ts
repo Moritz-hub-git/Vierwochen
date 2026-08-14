@@ -46,7 +46,12 @@ export async function POST(req: Request) {
   // --- Validierung ---
   const emailCheck = checkBusinessEmail(body.email ?? "");
   if (!emailCheck.ok) {
-    return bad(422, "Bitte geben Sie Ihre geschäftliche E-Mail-Adresse an.");
+    // Ausweichweg statt Sackgasse: Wer keine Firmenadresse hat, soll den
+    // Termin trotzdem bekommen können — nur eben per Mail statt Formular.
+    return bad(
+      422,
+      "Bitte geben Sie Ihre geschäftliche E-Mail-Adresse an. Sie haben keine? Schreiben Sie an kontakt@vierwochen.de — der Termin lässt sich auch so vereinbaren."
+    );
   }
   const name = (body.name ?? "").trim();
   if (name.length < 2 || name.length > 200) {

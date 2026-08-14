@@ -77,6 +77,12 @@ export const LIMITS = {
 /**
  * Freemail-Domains: Das Ergebnis gibt es gegen eine geschäftliche Adresse (§5.5).
  * Liste bewusst auf verbreitete Privat-Anbieter im DACH-Raum begrenzt.
+ *
+ * Bewusst NICHT gesperrt sind Adressen klassischer Zugangsprovider
+ * (t-online.de, freenet.de, arcor.de, vodafone.de, o2online.de, magenta.de):
+ * Viele Handwerks- und Kleinbetriebe führen seit Jahrzehnten eine solche
+ * Adresse als einzige Firmenadresse. Der Zweck des Gates ist Lead-Qualität —
+ * keine anonymen Wegwerf-Adressen —, nicht das Aussperren echter Betriebe.
  */
 export const FREEMAIL_DOMAINS = new Set([
   "gmail.com",
@@ -86,8 +92,6 @@ export const FREEMAIL_DOMAINS = new Set([
   "gmx.net",
   "gmx.at",
   "gmx.ch",
-  "t-online.de",
-  "freenet.de",
   "yahoo.com",
   "yahoo.de",
   "hotmail.com",
@@ -106,10 +110,6 @@ export const FREEMAIL_DOMAINS = new Set([
   "posteo.de",
   "mail.de",
   "email.de",
-  "arcor.de",
-  "vodafone.de",
-  "o2online.de",
-  "magenta.de",
 ]);
 
 /** Terminbuchung (PROMPT.md §7). */
