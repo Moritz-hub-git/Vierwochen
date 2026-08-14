@@ -742,6 +742,173 @@ button, input, textarea, select {
 
 .compare-new .compare-stats dd { color: var(--accent); }
 
+/* ---------- Mechanismus-Punkte unter dem Vergleich ---------- */
+
+.mech-row {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: 1fr;
+  margin-top: 1.25rem;
+}
+
+@media (min-width: 860px) {
+  .mech-row { grid-template-columns: repeat(3, 1fr); }
+}
+
+.mech-title {
+  font-size: 1.02rem;
+  margin-bottom: 0.45rem;
+}
+
+.mech-text {
+  font-size: 0.92rem;
+  color: var(--text-soft);
+  line-height: 1.55;
+}
+
+.section-after {
+  margin-top: 1.75rem;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+/* ---------- Zweifel + Vertragskarte ---------- */
+
+.risk-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+  align-items: start;
+}
+
+@media (min-width: 980px) {
+  .risk-grid { grid-template-columns: 1.6fr 1fr; }
+  /* Die Vertragskarte bleibt beim Scrollen durch die Zweifel im Blick:
+     Jeder aufgeklappte Einwand hat seine Zusage direkt daneben. */
+  .contract-card { position: sticky; top: calc(var(--header-h) + 20px); }
+}
+
+.contract-card {
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--border));
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.contract-eyebrow {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.contract-card h3 {
+  font-size: 1.2rem;
+  margin: 0.3rem 0 0.9rem;
+}
+
+.contract-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.contract-list li {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  padding-block: 0.55rem;
+  font-size: 0.93rem;
+  line-height: 1.5;
+  color: var(--text-soft);
+  border-bottom: 1px dashed var(--border);
+}
+
+.contract-list li:last-child { border-bottom: 0; }
+
+.contract-list svg {
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 0.2em;
+}
+
+.contract-sig {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.9rem;
+  margin-top: 1.1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-soft);
+}
+
+.contract-sig svg { color: var(--text-soft); opacity: 0.8; }
+
+.contract-sig span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.contract-note {
+  margin-top: 0.9rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ---------- Einstieg: vier Schritte ---------- */
+
+.start-steps {
+  display: grid;
+  gap: 1.1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .start-steps { grid-template-columns: 1fr 1fr; }
+}
+
+@media (min-width: 1020px) {
+  .start-steps { grid-template-columns: repeat(4, 1fr); }
+}
+
+.start-step { position: relative; }
+
+.start-num {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.2rem;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--accent) 28%, transparent);
+  line-height: 1;
+}
+
+.start-when {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.start-step h3 {
+  font-size: 1.05rem;
+  margin-bottom: 0.4rem;
+}
+
+.start-step p {
+  font-size: 0.9rem;
+  color: var(--text-soft);
+  line-height: 1.55;
+}
+
 /* ---------- Kundenaussagen ---------- */
 
 .usecase-quote {

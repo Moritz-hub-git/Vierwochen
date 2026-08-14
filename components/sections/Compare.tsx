@@ -113,25 +113,14 @@ const DIRECT: (ChainNode | "direct-label")[] = [
   { role: "Ihre Software", text: "abgenommen in Woche vier, gegen vorab vereinbarte Kriterien.", final: "check" },
 ];
 
-export default function Compare() {
+/**
+ * Nur die Grafik — Sektion, Überschrift und Einbettung liefert die Seite.
+ * So kann der Vergleich innerhalb der „Wie können Sie das versprechen?"-
+ * Erzählung stehen, statt eine eigene Insel zu sein.
+ */
+export default function CompareGrid() {
   return (
-    <section className="section" id="unterschied">
-      <div className="container">
-        <div className="section-head" data-reveal>
-          <span className="eyebrow">Der Unterschied</span>
-          <h2 className="section-title">
-            Das klassische Projekt ist eine Telefonkette.
-            <br />
-            Hier reden Sie mit dem, der baut.
-          </h2>
-          <p className="section-lead">
-            Software wird nicht langsam, weil jemand langsam tippt — sondern weil
-            zwischen Problem und Code viele Übergaben liegen. Agentisches Coding
-            streicht genau diese Kette.
-          </p>
-        </div>
-
-        <div className="compare-grid">
+    <div className="compare-grid">
           <article className="compare-card compare-classic" data-reveal>
             <header className="compare-head">
               <h3>Das klassische Projekt</h3>
@@ -165,8 +154,6 @@ export default function Compare() {
               <div><dt>Abrechnung</dt><dd>Festpreis</dd></div>
             </dl>
           </article>
-        </div>
-      </div>
-    </section>
+    </div>
   );
 }

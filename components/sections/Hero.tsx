@@ -1,12 +1,15 @@
 "use client";
 
 /**
- * Hero (PROMPT.md §4.1): das Vier-Wochen-Versprechen groß.
+ * Hero (Neukonzeption 2026-08-14): Das stärkste Verkaufsargument zuerst —
+ * nicht die Geschwindigkeit, sondern die Risiko-Umkehr. „Läuft es nicht,
+ * zahlen Sie nichts" ist der Satz, den kein Wettbewerber schreibt; er
+ * beantwortet die größte B2B-Angst (Fehlkauf) im ersten Blick und wirft
+ * genau die Frage auf, die der Rest der Seite beantwortet: Wie kann er das
+ * versprechen?
  *
  * Bewusst OHNE eigenes Eingabefeld und ohne Primärknopf: Die schwebende
- * Dialogleiste unten ist die einzige herausgehobene CTA der ganzen Seite —
- * ein zweites Eingabefeld hier würde den Blick nur teilen. Der Hinweistext
- * zeigt dorthin.
+ * Dialogleiste unten ist die einzige herausgehobene CTA der ganzen Seite.
  */
 export default function Hero() {
   return (
@@ -18,20 +21,21 @@ export default function Hero() {
           Individualsoftware für den Mittelstand
         </div>
         <h1 data-reveal style={{ "--reveal-delay": "0.05s" } as React.CSSProperties}>
-          In <span className="accent">vier Wochen</span> zur Software, die Ihr Betrieb wirklich braucht.
+          Vier Wochen. Festpreis.
+          <br />
+          <span className="accent">Läuft es nicht, zahlen Sie nichts.</span>
         </h1>
         <p className="hero-sub" data-reveal style={{ "--reveal-delay": "0.1s" } as React.CSSProperties}>
-          Zum Festpreis, integriert in Ihre bestehende IT. Läuft es nach vier Wochen
-          nicht, kostet es nichts.
+          Entworfen und gebaut von einem, der Ihr Geschäft versteht — mit KI als
+          Werkzeug. Das ist der ganze Deal. Diese Seite erklärt, warum ich ihn
+          anbieten kann.
         </p>
-        {/* Kein Hinweis-Absatz mehr: Das getippte Banner in der Dialogleiste
-            erklärt den Einstieg selbst — Text hinter der schwebenden Leiste
-            sah zerschnitten aus. Das Kostenlos-Versprechen wird ein Chip. */}
+
         <div className="hero-chips" data-reveal style={{ "--reveal-delay": "0.2s" } as React.CSSProperties}>
           {[
-            "Festpreis, vorab vereinbart",
+            "Voller Quellcode gehört Ihnen",
             "12 Monate Gewährleistung",
-            "Code und Daten gehören Ihnen",
+            "Kein Lock-in, kein Abo",
           ].map((chip) => (
             <span className="chip" key={chip}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>

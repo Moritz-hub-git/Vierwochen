@@ -1,38 +1,66 @@
 import Link from "next/link";
-import Compare from "@/components/sections/Compare";
+import CompareGrid from "@/components/sections/Compare";
 import CtaButton from "@/components/sections/CtaButton";
 import Hero from "@/components/sections/Hero";
 import { PRICE_DISCLAIMER, PRICING_TIERS } from "@/lib/config";
 
 /**
- * Seitenaufbau nach PROMPT.md §4. Ein einziger nächster Schritt pro Bildschirm:
- * der Projekt-Dialog (Fußleiste bzw. die „Einschätzung starten"-Einstiege).
+ * Neukonzeption 2026-08-14: Die Seite ist als Dramaturgie entlang der inneren
+ * Fragen eines B2B-Käufers gebaut, nicht als Feature-Liste.
+ *
+ *   Hero      — das Angebot, mit der Risiko-Umkehr als Kopfzeile. Sie wirft
+ *               die Frage auf, die alles Weitere antreibt: Wie geht das?
+ *   §1        — „Wie können Sie das versprechen?"  → Mechanismus + Vergleich
+ *   §2        — „Ist das etwas für uns?"           → Einsatzfälle
+ *   §3        — „Rechnet sich das?"                → Preise + Kostenanker
+ *   §4        — „Und was, wenn es schiefgeht?"     → Zweifel + Vertragskarte
+ *   §5        — „Wer garantiert mir das?"          → Belege + Person
+ *   §6        — „Wie fange ich an?"                → Weg + Abschluss-CTA
+ *
+ * Jede Überschrift ist die Frage, die der Leser sich an dieser Stelle ohnehin
+ * stellt — die Seite führt das Verkaufsgespräch, das er sonst allein führt
+ * (Gartner: Käufer verbringen ~5 % der Kaufzeit mit einem Anbieter).
  */
 
 const delay = (s: number) => ({ "--reveal-delay": `${s}s` } as React.CSSProperties);
 
-function Method() {
+/* ---------- §1 Mechanismus ---------- */
+
+function Mechanism() {
+  const points = [
+    {
+      title: "Die KI tippt — entschieden wird hier",
+      text: "Architektur, Standards und jede Prüfung kommen von einem Menschen, der Ihr Geschäft verstanden hat. Die KI übernimmt das, was Projekte sonst teuer macht: die Fleißarbeit.",
+    },
+    {
+      title: "Der Umfang steht vorher schriftlich",
+      text: "Vier Wochen sind kein Sprint ins Ungewisse, sondern ein Plan mit Abnahmekriterien. Was gebaut wird, ist vereinbart, bevor die erste Zeile entsteht.",
+    },
+    {
+      title: "Schlechter Code wäre mein Problem",
+      text: "Automatisierte Tests, Dokumentation und Code, den jede Entwicklerin weiterpflegen kann, sind Vertragsbestandteil — dazu 12 Monate Gewährleistung. Pfusch würde mich treffen, nicht Sie.",
+    },
+  ];
   return (
-    <section className="method section" id="methode">
-      <div className="container method-grid">
-        <div data-reveal>
-          <span className="eyebrow">Warum vier Wochen reichen</span>
-          <h2 className="section-title">
-            Agentisches Coding ist keine Zauberei. Es ist eine Arbeitsweise.
-          </h2>
+    <section className="section" id="unterschied">
+      <div className="container">
+        <div className="section-head" data-reveal>
+          <span className="eyebrow">§1 · Der Mechanismus</span>
+          <h2 className="section-title">„Wie können Sie das versprechen?"</h2>
           <p className="section-lead">
-            Deshalb kann ich mich vertraglich auf vier Wochen festlegen — und tue es.
+            Weil hier niemand mehr zwischen Ihnen und dem Code steht. Das
+            klassische Projekt ist eine Telefonkette — agentisches Coding
+            streicht sie.
           </p>
         </div>
-        <div className="method-points">
-          {[
-            "Ich entwickle mit agentischen KI-Werkzeugen: Sie übernehmen das Tippen, ich übernehme Verstehen, Architektur und Qualität.",
-            "Was früher ein Projektteam über Monate beschäftigt hat, schafft ein erfahrener Entwickler damit in Wochen — ohne Abstriche an Sorgfalt.",
-            "Der Umfang wird vorher schriftlich festgelegt. Vier Wochen sind kein Sprint ins Ungewisse, sondern ein Plan mit Abnahme am Ende.",
-          ].map((text, i) => (
-            <div className="method-point" key={i} data-reveal style={delay(i * 0.08)}>
-              <span className="num">{`0${i + 1}`}</span>
-              <p>{text}</p>
+
+        <CompareGrid />
+
+        <div className="mech-row">
+          {points.map((p, i) => (
+            <div className="card" key={p.title} data-reveal style={delay(i * 0.07)}>
+              <h3 className="mech-title">{p.title}</h3>
+              <p className="mech-text">{p.text}</p>
             </div>
           ))}
         </div>
@@ -40,6 +68,8 @@ function Method() {
     </section>
   );
 }
+
+/* ---------- §2 Einsatzfälle ---------- */
 
 function UseCases() {
   const cases = [
@@ -63,10 +93,11 @@ function UseCases() {
     <section className="section" id="einsatz">
       <div className="container">
         <div className="section-head" data-reveal>
-          <span className="eyebrow">Wofür Sie mich holen</span>
-          <h2 className="section-title">Drei Sätze, die ich ständig höre</h2>
+          <span className="eyebrow">§2 · Einsatzfälle</span>
+          <h2 className="section-title">„Ist das etwas für uns?"</h2>
           <p className="section-lead">
-            Wenn einer davon auch bei Ihnen fällt, lohnt sich die Einschätzung unten.
+            Drei Sätze, die ich ständig höre. Wenn einer davon auch bei Ihnen
+            fällt: ja.
           </p>
         </div>
         <div className="grid-3">
@@ -80,82 +111,29 @@ function UseCases() {
             </article>
           ))}
         </div>
+        <p className="section-after" data-reveal>
+          Ihr Fall klingt anders? Beschreiben Sie ihn unten im Dialog — die
+          Einschätzung sagt Ihnen in drei Minuten, ob er trägt.
+        </p>
       </div>
     </section>
   );
 }
 
-function Path() {
-  const steps = [
-    {
-      when: "Heute, 3 Minuten",
-      title: "Einschätzung",
-      text: "Sie beschreiben Ihren Fall im Dialog unten. Sie bekommen sofort eine Lösungsskizze, einen Zeitplan und eine unverbindliche Preisschätzung.",
-    },
-    {
-      when: "Diese Woche, 30 Minuten",
-      title: "Erstgespräch",
-      text: "Video oder Telefon. Wir klären die offenen Punkte aus der Skizze. Kein Verkaufsgespräch — eine fachliche Prüfung, ob der Fall trägt.",
-    },
-    {
-      when: "Danach, schriftlich",
-      title: "Festangebot",
-      text: "Umfang, Preis und Abnahmekriterien stehen schwarz auf weiß, bevor es losgeht. Kein Tagessatz, kein Nachtrag.",
-    },
-    {
-      when: "Woche 1–4",
-      title: "Bau",
-      text: "Jede Woche sehen Sie den Stand am lebenden System, nicht in Folien. Kurswechsel sind in dieser Phase normal und eingepreist.",
-    },
-    {
-      when: "Ende Woche 4",
-      title: "Abnahme",
-      text: "Gemessen an den vereinbarten Kriterien. Läuft es nicht, zahlen Sie nichts — das ist der Vertrag, nicht ein Versprechen.",
-    },
-    {
-      when: "Ab Woche 5, optional",
-      title: "Betrieb",
-      text: "Auf Wunsch betreibe ich die Anwendung weiter — monatlich kündbar. Oder Ihre IT übernimmt: Code, Daten und Zugänge gehören ohnehin Ihnen.",
-    },
-  ];
-  return (
-    <section className="section" id="weg">
-      <div className="container">
-        <div className="section-head" data-reveal>
-          <span className="eyebrow">Der Weg</span>
-          <h2 className="section-title">Von der Idee zur Abnahme — in vier Wochen</h2>
-        </div>
-        <div className="path-steps">
-          {steps.map((s, i) => (
-            <div className="path-step" key={i} data-reveal style={delay(i * 0.06)}>
-              <div className="path-marker">
-                <span className="path-dot">{i + 1}</span>
-                {i < steps.length - 1 && <span className="path-line" aria-hidden />}
-              </div>
-              <div className="path-body">
-                <span className="when">{s.when}</span>
-                <h3>{s.title}</h3>
-                <p>{s.text}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
+/* ---------- §3 Wirtschaftlichkeit ---------- */
 
 function Pricing() {
   return (
     <section className="section" id="preise" style={{ paddingTop: 0 }}>
       <div className="container">
         <div className="section-head" data-reveal>
-          <span className="eyebrow">Preise</span>
-          <h2 className="section-title">Drei Stufen, ein Festpreis</h2>
+          <span className="eyebrow">§3 · Wirtschaftlichkeit</span>
+          <h2 className="section-title">„Rechnet sich das?"</h2>
           <p className="section-lead">
-            Welche Stufe Ihr Fall ist, sagt Ihnen die Einschätzung unten in wenigen
-            Minuten. Und keine Sorge vor den großen Zahlen: Die meisten
-            Erstprojekte starten als Pilot.
+            Zur Einordnung: Eine einzige Sachbearbeitungsstelle kostet
+            45.000–60.000&nbsp;€ — pro Jahr, jedes Jahr. Software, die diese
+            Arbeit übernimmt, kostet einmal. Und keine Sorge vor den großen
+            Zahlen: Die meisten Erstprojekte starten als Pilot.
           </p>
         </div>
         {/* Preisanker: die teuerste Stufe steht bewusst zuerst (PROMPT.md §2.4).
@@ -179,8 +157,8 @@ function Pricing() {
           ))}
         </div>
         <p className="anchor-line" data-reveal>
-          Zur Einordnung: Eine einzige Sachbearbeitungsstelle kostet 45.000–60.000 € —
-          pro Jahr, jedes Jahr. Software, die diese Arbeit übernimmt, kostet einmal.
+          Welche Stufe Ihr Fall ist — und ein konkreter Schätzpreis — kommt aus
+          der Einschätzung unten, in wenigen Minuten.
         </p>
         <div className="price-note" data-reveal>
           <span>{PRICE_DISCLAIMER}</span>
@@ -191,63 +169,19 @@ function Pricing() {
   );
 }
 
-function Proof() {
-  const facts = [
-    {
-      figure: "32 h → 6 h",
-      label:
-        "Reporting-Aufwand pro Zyklus in einem SDAX-Industrieunternehmen — von über 32 auf rund 6 Stunden gesenkt.",
-    },
-    {
-      figure: "≈ 30 Fälle",
-      label:
-        "KI-Anwendungsfälle mit Fachbereichen identifiziert, zwei im Produktivbetrieb, weitere in Umsetzung.",
-    },
-    {
-      figure: "3 Apps",
-      label:
-        "Eigene iOS-Apps im App Store veröffentlicht — inklusive Backend, Datenbank, KI-Anbindung und Betrieb.",
-    },
-    {
-      figure: "0 Ausfälle",
-      label:
-        "Ein gebautes Werkzeug läuft nach dem Wechsel des Erbauers unverändert weiter — ohne dessen Zutun.",
-    },
-  ];
-  return (
-    <section className="section method" id="belege">
-      <div className="container">
-        <div className="section-head" data-reveal>
-          <span className="eyebrow">Belege</span>
-          <h2 className="section-title">Keine Logos, keine Zitate — Zahlen</h2>
-          <p className="section-lead">
-            Alles anonymisiert, denn Interna meiner Kunden bekommen Sie bei mir nie zu
-            sehen. Ihre sieht später auch niemand.
-          </p>
-        </div>
-        <div className="grid-2">
-          {facts.map((f, i) => (
-            <div className="card" key={i} data-reveal style={delay(i * 0.07)}>
-              <div className="proof-figure">{f.figure}</div>
-              <p className="proof-label">{f.label}</p>
-            </div>
-          ))}
-        </div>
-        <p className="confidential" data-reveal>
-          Statt echter Kundenprojekte zeige ich Ihnen im Gespräch klickbare Nachbauten
-          mit Beispieldaten — dieselbe Vertraulichkeit gilt danach für Ihr Projekt.
-        </p>
-      </div>
-    </section>
-  );
-}
+/* ---------- §4 Zweifel + Vertrag ---------- */
 
-function Objections() {
+function Doubts() {
   const objections: { q: string; risk: string; a: React.ReactNode }[] = [
     {
       q: "„Vier Wochen? Das glaube ich erst, wenn ich es sehe.“",
       risk: "Berechtigt — die meisten IT-Projekte reißen Termine, und niemand haftet dafür.",
       a: "Deshalb liegt das Risiko bei mir: Der Umfang wird vorher schriftlich fixiert, abgenommen wird gegen diese Kriterien, und läuft es nach vier Wochen nicht, zahlen Sie nichts. Das steht im Vertrag, nicht in der Werbung.",
+    },
+    {
+      q: "„Von KI geschriebener Code — kann das gut sein?“",
+      risk: "Berechtigt — blind übernommener KI-Code ist der neue technische Schuldenberg.",
+      a: "Die KI tippt, aber sie entscheidet nicht: Architektur, Standards und jede Prüfung kommen von mir. Automatisierte Tests, Dokumentation und Code, den jeder Entwickler weiterpflegen kann, sind Vertragsbestandteil. Und weil ich 12 Monate Gewährleistung gebe, wäre schlechter Code zuerst mein Problem — nicht Ihres.",
     },
     {
       q: "„Dann hängen wir an einer einzigen Person.“",
@@ -290,99 +224,128 @@ function Objections() {
       risk: "Fair gefragt — 9.500 € sind für einen Zehn-Personen-Betrieb echtes Geld.",
       a: "Deshalb rechnen wir vorher, mit Ihren Zahlen statt Prospektzahlen. Zur Größenordnung: Ein Ablauf, der Sie einen halben Tag pro Woche kostet, bindet im Jahr rund 7.000 € an Arbeitszeit — ein Pilot trägt sich dann nach gut einem Jahr, alles danach arbeitet für Sie. Trägt Ihr Fall das nicht, sage ich es Ihnen im Gespräch, bevor Sie Geld ausgeben.",
     },
-    {
-      q: "„Was, wenn das Ergebnis nicht das ist, was wir brauchen?“",
-      risk: "Das klassische Projektrisiko: Am Ende steht Software, die keiner benutzt.",
-      a: "Drei Sicherungen: Sie sehen jede Woche den echten Stand und können umsteuern. Die zweite Zahlungshälfte wird erst nach Abnahme fällig. Und auf das Ergebnis gebe ich 12 Monate Gewährleistung.",
-    },
   ];
+
+  const contract = [
+    "Abnahmetermin nach vier Wochen — er steht im Angebot",
+    "Festpreis: 50 % bei Auftrag, 50 % nach Abnahme",
+    "Besteht die Abnahme nicht, entfällt die zweite Rate",
+    "12 Monate Gewährleistung auf den vereinbarten Umfang",
+    "Code, Daten und Zugänge gehören Ihnen — vom ersten Tag",
+  ];
+
   return (
     <section className="section" id="einwaende">
       <div className="container">
         <div className="section-head" data-reveal>
-          <span className="eyebrow">Die berechtigten Zweifel</span>
-          <h2 className="section-title">Was Sie jetzt vermutlich denken</h2>
+          <span className="eyebrow">§4 · Die Zweifel</span>
+          <h2 className="section-title">„Und was, wenn es schiefgeht?"</h2>
           <p className="section-lead">
-            Jede dieser Sorgen ist begründet. Deshalb bekommt jede eine überprüfbare
-            Zusage statt einer Beruhigung.
+            Jede dieser Sorgen ist begründet. Deshalb bekommt jede eine
+            überprüfbare Zusage statt einer Beruhigung — und die wichtigsten
+            stehen rechts schwarz auf weiß.
           </p>
         </div>
-        <div data-reveal>
-          {objections.map((o, i) => (
-            <details className="objection" key={i}>
-              <summary>
-                {o.q}
-                <svg className="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-              </summary>
-              <div className="objection-body">
-                <span className="risk">{o.risk}</span>
-                {o.a}
-              </div>
-            </details>
-          ))}
+
+        <div className="risk-grid">
+          <div data-reveal>
+            {objections.map((o, i) => (
+              <details className="objection" key={i}>
+                <summary>
+                  {o.q}
+                  <svg className="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </summary>
+                <div className="objection-body">
+                  <span className="risk">{o.risk}</span>
+                  {o.a}
+                </div>
+              </details>
+            ))}
+          </div>
+
+          <aside className="contract-card" data-reveal style={delay(0.1)}>
+            <span className="contract-eyebrow">Schwarz auf weiß</span>
+            <h3>Das steht im Vertrag</h3>
+            <ul className="contract-list">
+              {contract.map((c) => (
+                <li key={c}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                  <span>{c}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="contract-sig" aria-hidden>
+              <svg width="120" height="34" viewBox="0 0 120 34" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <path d="M6 26c8-16 14-20 16-14s-4 16 2 14 10-18 16-16-2 18 4 16 12-16 18-14-2 16 4 14c8-3 16-10 28-11" />
+              </svg>
+              <span>gez. M. Schumacher</span>
+            </div>
+            <p className="contract-note">
+              Kein Kleingedrucktes: Den Mustervertrag sehen Sie im Erstgespräch —
+              vor dem Angebot.
+            </p>
+          </aside>
         </div>
       </div>
     </section>
   );
 }
 
-function Manifest() {
-  const promises = [
+/* ---------- §5 Belege + Person ---------- */
+
+function WhoAndProof() {
+  const facts = [
     {
-      title: "Vier Wochen bis zur Abnahme",
-      text: "Vom Auftrag bis zur abgenommenen Software. Der Termin steht im Angebot.",
+      figure: "32 h → 6 h",
+      label:
+        "Reporting-Aufwand pro Zyklus in einem SDAX-Industrieunternehmen — von über 32 auf rund 6 Stunden gesenkt.",
     },
     {
-      title: "Festpreis, vorab vereinbart",
-      text: "Kein Tagessatz, keine Nachträge. Was es kostet, wissen Sie vor dem Start.",
+      figure: "≈ 30 Fälle",
+      label:
+        "KI-Anwendungsfälle mit Fachbereichen identifiziert, zwei im Produktivbetrieb, weitere in Umsetzung.",
     },
     {
-      title: "Läuft es nicht, kostet es nichts",
-      text: "Besteht die Software die vereinbarte Abnahme nicht, zahlen Sie nichts.",
+      figure: "3 Apps",
+      label:
+        "Eigene iOS-Apps im App Store veröffentlicht — inklusive Backend, Datenbank, KI-Anbindung und Betrieb.",
     },
     {
-      title: "12 Monate Gewährleistung",
-      text: "Fehler im vereinbarten Umfang behebe ich ein Jahr lang kostenfrei.",
-    },
-    {
-      title: "Kein Lock-in",
-      text: "Code, Daten und Zugänge gehören Ihnen. Der Betrieb ist optional und monatlich kündbar.",
+      figure: "0 Ausfälle",
+      label:
+        "Ein gebautes Werkzeug läuft nach dem Wechsel des Erbauers unverändert weiter — ohne dessen Zutun.",
     },
   ];
   return (
-    <section className="manifest section" id="arbeitsweise">
+    <section className="section method" id="belege">
       <div className="container">
         <div className="section-head" data-reveal>
-          <span className="eyebrow">Wie ich arbeite</span>
-          <h2 className="section-title">Fünf Zusagen. Alle stehen im Vertrag.</h2>
+          <span className="eyebrow">§5 · Belege &amp; Person</span>
+          <h2 className="section-title">„Wer garantiert mir das?"</h2>
+          <p className="section-lead">
+            Zahlen statt Logos — alles anonymisiert, denn Interna meiner Kunden
+            bekommen Sie bei mir nie zu sehen. Ihre sieht später auch niemand.
+            Und eine Person mit Namen statt einer Agenturfassade.
+          </p>
         </div>
-        <div className="manifest-list">
-          {promises.map((p, i) => (
-            <div className="manifest-item" key={i} data-reveal style={delay(i * 0.05)}>
-              <span className="idx">{`0${i + 1}`}</span>
-              <div>
-                <h3>{p.title}</h3>
-                <p>{p.text}</p>
-              </div>
+        <div className="grid-2">
+          {facts.map((f, i) => (
+            <div className="card" key={i} data-reveal style={delay(i * 0.07)}>
+              <div className="proof-figure">{f.figure}</div>
+              <p className="proof-label">{f.label}</p>
             </div>
           ))}
         </div>
-      </div>
-    </section>
-  );
-}
+        <p className="confidential" data-reveal>
+          Statt echter Kundenprojekte zeige ich Ihnen im Gespräch klickbare Nachbauten
+          mit Beispieldaten — dieselbe Vertraulichkeit gilt danach für Ihr Projekt.
+        </p>
 
-function About() {
-  return (
-    <section className="section" id="wer">
-      <div className="container">
-        <div className="section-head" data-reveal>
-          <span className="eyebrow">Wer baut</span>
-          <h2 className="section-title">Aus dem Betrieb, nicht aus der Agenturwelt</h2>
-        </div>
-        <div className="about-grid">
+        <div className="about-grid" style={{ marginTop: "3rem" }}>
           <div data-reveal>
             <h3 className="about-name">Moritz Schumacher</h3>
             <p className="about-role">Individualsoftware mit agentischem Coding</p>
@@ -417,6 +380,56 @@ function About() {
   );
 }
 
+/* ---------- §6 Einstieg + Abschluss ---------- */
+
+function Start() {
+  const steps = [
+    {
+      when: "Heute · 3 Minuten",
+      title: "Einschätzung",
+      text: "Im Dialog unten: Lösungsskizze, Zeitplan mit echtem Datum, unverbindliche Preisschätzung.",
+    },
+    {
+      when: "Diese Woche · 30 Minuten",
+      title: "Beratungsgespräch",
+      text: "Kostenlos, per Video oder Telefon. Wir schärfen die Skizze — kein Verkaufsgespräch.",
+    },
+    {
+      when: "Danach · schriftlich",
+      title: "Festangebot",
+      text: "Umfang, Preis, Abnahmekriterien und Abnahmetermin — schwarz auf weiß, vor dem Start.",
+    },
+    {
+      when: "4 Wochen",
+      title: "Bau & Abnahme",
+      text: "Jede Woche sehen Sie den Stand am lebenden System. Am Ende: Abnahme gegen die Kriterien.",
+    },
+  ];
+  return (
+    <section className="section" id="weg">
+      <div className="container">
+        <div className="section-head" data-reveal>
+          <span className="eyebrow">§6 · Der Einstieg</span>
+          <h2 className="section-title">„Wie fange ich an?"</h2>
+          <p className="section-lead">
+            Mit einem Satz. Alles Weitere hat einen festen Platz und ein Datum.
+          </p>
+        </div>
+        <div className="start-steps">
+          {steps.map((s, i) => (
+            <div className="card start-step" key={s.title} data-reveal style={delay(i * 0.07)}>
+              <span className="start-num" aria-hidden>{i + 1}</span>
+              <span className="start-when">{s.when}</span>
+              <h3>{s.title}</h3>
+              <p>{s.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function FinalCta() {
   return (
     <section className="final" id="start">
@@ -432,9 +445,7 @@ function FinalCta() {
           Preisschätzung — auf Wunsch direkt mit Termin.
         </p>
         <CtaButton label="Unverbindliche Einschätzung starten" />
-        {/* Leiser Zweitweg für alle, die keinen Chat mögen: Ein Klick zum
-            Kalender, ohne Dialog. Bewusst unauffällig — die Dialogleiste
-            bleibt der Hauptweg. */}
+        {/* Leiser Zweitweg für alle, die keinen Chat mögen. */}
         <p className="alt-path">
           Sie mögen keine Chat-Dialoge? <Link href="/termin">Termin direkt wählen</Link>{" "}
           oder schreiben Sie an{" "}
@@ -477,15 +488,12 @@ export default function Home() {
   return (
     <main>
       <Hero />
-      <Method />
-      <Compare />
+      <Mechanism />
       <UseCases />
-      <Path />
       <Pricing />
-      <Proof />
-      <Objections />
-      <Manifest />
-      <About />
+      <Doubts />
+      <WhoAndProof />
+      <Start />
       <FinalCta />
       <Footer />
     </main>
