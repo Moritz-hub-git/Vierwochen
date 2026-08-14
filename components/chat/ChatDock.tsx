@@ -40,9 +40,6 @@ const STARTERS = [
   "Unser Monatsreporting entsteht per Copy-Paste aus mehreren Systemen.",
 ];
 
-const GREETING =
-  "Schön, dass Sie da sind! Beschreiben Sie kurz Ihr Ziel oder das Problem, das Sie loswerden wollen — ich stelle ein paar kurze Rückfragen, danach sehen Sie Ihre Lösungsskizze mit Zeitplan und unverbindlicher Preisschätzung. Ich bin eine KI auf Basis echter Projekt- und Preisdaten; Ihre Skizze liest Moritz persönlich.";
-
 const MAX_CHARS = 1500;
 const MAX_QUESTIONS = 3;
 
@@ -419,14 +416,12 @@ export default function ChatDock() {
           </div>
 
           <div className="stream">
-            <div className="msg-row">
-              <Avatar />
-              <div className="msg assistant">{GREETING}</div>
-            </div>
-
+            {/* Keine Begrüßungsnachricht (Rücksprache 2026-08-14): Das Gespräch
+                beginnt mit dem, was der Nutzer selbst geschrieben hat. Die
+                KI-Offenlegung (EU-KI-VO Art. 50) trägt der Panel-Kopf. */}
             {messages.length === 0 && !busy && (
               <div className="starters">
-                <span className="starters-label">Oder wählen Sie einen typischen Fall:</span>
+                <span className="starters-label">Zum Start: ein typischer Fall — oder schreiben Sie unten einfach los.</span>
                 {STARTERS.map((s, i) => (
                   <button
                     key={s}
