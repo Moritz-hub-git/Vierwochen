@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Compare from "@/components/sections/Compare";
 import CtaButton from "@/components/sections/CtaButton";
 import Hero from "@/components/sections/Hero";
 import { PRICE_DISCLAIMER, PRICING_TIERS } from "@/lib/config";
@@ -477,6 +478,7 @@ export default function Home() {
     <main>
       <Hero />
       <Method />
+      <Compare />
       <UseCases />
       <Path />
       <Pricing />
