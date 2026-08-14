@@ -15,15 +15,15 @@ export interface Sketch {
 
 export interface DialogResult {
   tier: string;
-  priceMin: number;
-  priceMax: number;
+  /** Ein gerundeter Betrag („unverbindliche Preisschätzung"), keine Spanne. */
+  price: number;
   scope: string[];
   weeks: { week: number; label: string }[];
   savings?: { personDaysPerWeek: number; quote: string; annualEuro: number; basis: string };
 }
 
 export interface DialogInput {
-  kind: "chips" | "number";
+  kind: "chips" | "number" | "multichips";
   options?: string[];
   label?: string;
   unit?: string;

@@ -59,9 +59,11 @@ export interface EventInput {
   endUtc: string;
   name: string;
   email: string;
+  company?: string;
   channel: "video" | "telefon";
   phone?: string;
   summaryOfCase?: string;
+  agenda?: string;
 }
 
 export interface CreatedEvent {
@@ -78,10 +80,12 @@ export async function createEvent(input: EventInput): Promise<CreatedEvent> {
 
   const contactBlock = [
     `Name: ${input.name}`,
+    input.company ? `Firma: ${input.company}` : null,
     `E-Mail: ${input.email}`,
     `Kanal: ${input.channel === "video" ? "Videocall" : "Telefon"}`,
     input.phone ? `Rufnummer: ${input.phone}` : null,
     input.summaryOfCase ? `\nFall:\n${input.summaryOfCase}` : null,
+    input.agenda ? `\nAgenda (vom Nutzer): ${input.agenda}` : null,
   ]
     .filter(Boolean)
     .join("\n");

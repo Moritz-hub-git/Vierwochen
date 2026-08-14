@@ -1,19 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Terminbuchung direkt unter dem Ergebnis (PROMPT.md §2.2, §5.6, §7).
  *
  * Reihenfolge bewusst: erst Termin wählen, dann Kontaktdaten.
- * Die Slotwahl kostet den Besucher nichts und ist ein Mikro-Commitment —
- * wer „Donnerstag 10:00" angeklickt hat, vervollständigt eher, als dass er
- * neu anfängt. Umgekehrt (Formular vor Terminliste) verlangt die Seite eine
- * Vorleistung, bevor sie zeigt, was es dafür gibt.
+ * Die Slotwahl kostet den Besucher nichts und ist ein Mikro-Commitment.
  *
- * Das E-Mail-Gate (§5.5) sitzt damit im Bestätigungsschritt: Ohne
- * geschäftliche Adresse gibt es keinen Termin. Der Wert (Skizze, Preisspanne)
- * lag ohnehin schon vorher offen — Reziprozität bleibt gewahrt.
+ * Im Kontaktschritt kommt die E-MAIL ZUERST: Aus ihr leiten wir Name und
+ * Firma ab und befüllen die Felder animiert vor („die KI liest mit") —
+ * ein kleiner Produktbeweis an genau der Stelle, an der sonst Formularmüdigkeit
+ * einsetzt. Beide Felder bleiben editierbar; erkannt heißt nicht behauptet.
  *
  * Zeiten kommen als UTC vom Server und werden hier nach Europe/Berlin formatiert.
  */
@@ -46,13 +44,61 @@ function berlinDay(utcIso: string): string {
   }).format(new Date(utcIso));
 }
 
+/** Häufige Privat-Domains: daraus lässt sich keine Firma ableiten. */
+const FREEMAIL_HINTS = new Set([
+  "gmail.com", "googlemail.com", "web.de", "gmx.de", "gmx.net", "gmx.at", "gmx.ch",
+  "t-online.de", "freenet.de", "yahoo.com", "yahoo.de", "hotmail.com", "hotmail.de",
+  "outlook.com", "outlook.de", "live.com", "live.de", "icloud.com", "me.com",
+  "proton.me", "protonmail.com", "posteo.de", "mail.de", "magenta.de",
+]);
+
+const cap = (w: string) => (w ? w[0].toUpperCase() + w.slice(1) : w);
+
+/**
+ * Leitet Name und Firma aus einer geschäftlichen Adresse ab.
+ * max.mustermann@musterbau-gmbh.de → „Max Mustermann", „Musterbau Gmbh".
+ * Deterministisch und sofort — die kurze Animation macht die Arbeit sichtbar.
+ */
+function deriveFromEmail(email: string): { name: string; company: string } | null {
+  const at = email.indexOf("@");
+  if (at < 1 || at === email.length - 1) return null;
+  const local = email.slice(0, at).toLowerCase();
+  const domain = email.slice(at + 1).toLowerCase();
+  if (!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(domain)) return null;
+
+  const nameParts = local
+    .split(/[._+-]+/)
+    .map((p) => p.replace(/\d+$/, ""))
+    .filter((p) => p.length > 1)
+    .slice(0, 3);
+  const name = nameParts.map(cap).join(" ");
+
+  let company = "";
+  if (!FREEMAIL_HINTS.has(domain)) {
+    const labels = domain.split(".");
+    labels.pop(); // TLD
+    if (labels.length > 1 && ["co", "com"].includes(labels[labels.length - 1])) labels.pop();
+    const core = labels[labels.length - 1] ?? "";
+    const LEGAL: Record<string, string> = { gmbh: "GmbH", ag: "AG", kg: "KG", ug: "UG", ohg: "OHG", se: "SE" };
+    company = core
+      .split("-")
+      .filter(Boolean)
+      .map((w) => LEGAL[w] ?? cap(w))
+      .join(" ");
+  }
+  if (!name && !company) return null;
+  return { name, company };
+}
+
 export default function Booking({
   dialogId,
   caseSummary,
+  suggestedAgenda,
   onBooked,
 }: {
   dialogId: string;
   caseSummary: string;
+  suggestedAgenda?: string;
   onBooked?: () => void;
 }) {
   const [days, setDays] = useState<SlotDay[] | null>(null);
@@ -60,12 +106,19 @@ export default function Booking({
   const [activeDay, setActiveDay] = useState(0);
   const [slot, setSlot] = useState<string | null>(null);
   const [channel, setChannel] = useState<"video" | "telefon">("video");
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [company, setCompany] = useState("");
   const [phone, setPhone] = useState("");
+  const [agenda, setAgenda] = useState(suggestedAgenda ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{ message: string; mode: string } | null>(null);
+
+  // Autofill-Zustand: idle → scanning (Animation) → done (Hinweis).
+  const [scan, setScan] = useState<"idle" | "scanning" | "done">("idle");
+  const touchedRef = useRef({ name: false, company: false });
+  const scanTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadSlots = () => {
     setLoadError(null);
@@ -85,6 +138,24 @@ export default function Booking({
   };
 
   useEffect(loadSlots, []);
+  useEffect(() => () => {
+    if (scanTimerRef.current) clearTimeout(scanTimerRef.current);
+  }, []);
+
+  /** Nach gültiger E-Mail: kurz „lesen", dann Name und Firma einsetzen. */
+  const autofillFrom = (value: string) => {
+    if (touchedRef.current.name && touchedRef.current.company) return;
+    if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(value)) return;
+    const derived = deriveFromEmail(value);
+    if (!derived) return;
+    if (scanTimerRef.current) clearTimeout(scanTimerRef.current);
+    setScan("scanning");
+    scanTimerRef.current = setTimeout(() => {
+      if (!touchedRef.current.name && derived.name) setName(derived.name);
+      if (!touchedRef.current.company && derived.company) setCompany(derived.company);
+      setScan("done");
+    }, 900);
+  };
 
   const book = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,9 +174,11 @@ export default function Booking({
           channel,
           name,
           email,
+          company: company.trim() || undefined,
           phone: channel === "telefon" ? phone : undefined,
           dialogId,
           caseSummary,
+          agenda: agenda.trim() || undefined,
         }),
       });
       const data = (await res.json()) as { ok: boolean; mode?: string; message?: string; error?: string };
@@ -137,6 +210,18 @@ export default function Booking({
           </div>
           <h3>{success.mode === "angefragt" ? "Anfrage eingegangen" : "Termin gebucht"}</h3>
           <p style={{ marginBottom: 0 }}>{success.message}</p>
+          {success.mode === "angefragt" ? (
+            <ul className="booking-next">
+              <li>Sie erhalten in Kürze eine persönliche Bestätigung mit Termin und Zugangslink.</li>
+              <li>Moritz liest Ihre Skizze vorher durch — das Gespräch startet direkt bei Ihren offenen Punkten.</li>
+            </ul>
+          ) : (
+            <ul className="booking-next">
+              <li>Die Kalendereinladung mit Zugangslink ist unterwegs.</li>
+              <li>Moritz liest Ihre Skizze vorher persönlich durch.</li>
+              <li>Ihr Kalender erinnert Sie automatisch kurz vor dem Termin.</li>
+            </ul>
+          )}
         </div>
       </div>
     );
@@ -144,11 +229,11 @@ export default function Booking({
 
   return (
     <form className="booking" onSubmit={book}>
-      <h3>Die offenen Punkte klären wir im Gespräch</h3>
+      <h3>Kostenloses Beratungsgespräch — 30 Minuten, unverbindlich</h3>
       <p>
-        30 Minuten, kostenlos. <strong>Kein Verkaufsgespräch und keine Präsentation</strong> —
-        wir gehen die offenen Punkte aus Ihrer Skizze durch. Passt Ihr Fall nicht,
-        sage ich Ihnen das im Termin.
+        <strong>Kein Verkaufsgespräch, keine Präsentation.</strong> Wir schärfen
+        Ihre Skizze, klären die offenen Punkte — danach erhalten Sie das
+        verbindliche Festangebot. Passt Ihr Fall nicht, sage ich Ihnen das im Termin.
       </p>
 
       {loadError && (
@@ -213,6 +298,70 @@ export default function Booking({
                 </span>
               </div>
 
+              <div className="field">
+                <label htmlFor="booking-email">Geschäftliche E-Mail</label>
+                <input
+                  id="booking-email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  maxLength={254}
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    autofillFrom(e.target.value);
+                  }}
+                  onBlur={() => autofillFrom(email)}
+                  placeholder="name@ihre-firma.de"
+                />
+              </div>
+
+              {scan === "scanning" && (
+                <div className="scan-note" role="status">
+                  <span className="scan-spark" aria-hidden>✦</span> KI liest Name und Firma aus der Adresse …
+                </div>
+              )}
+              {scan === "done" && (
+                <div className="scan-note scan-note-done" role="status">
+                  <span className="scan-spark" aria-hidden>✦</span> Automatisch erkannt — bitte kurz prüfen.
+                </div>
+              )}
+
+              <div className="field">
+                <label htmlFor="booking-name">Ihr Name</label>
+                <input
+                  id="booking-name"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  maxLength={200}
+                  className={scan === "scanning" ? "is-scanning" : scan === "done" ? "is-filled" : ""}
+                  value={name}
+                  onChange={(e) => {
+                    touchedRef.current.name = true;
+                    setName(e.target.value);
+                  }}
+                  placeholder="Vor- und Nachname"
+                />
+              </div>
+
+              <div className="field">
+                <label htmlFor="booking-company">Unternehmen</label>
+                <input
+                  id="booking-company"
+                  type="text"
+                  autoComplete="organization"
+                  maxLength={200}
+                  className={scan === "scanning" ? "is-scanning" : scan === "done" ? "is-filled" : ""}
+                  value={company}
+                  onChange={(e) => {
+                    touchedRef.current.company = true;
+                    setCompany(e.target.value);
+                  }}
+                  placeholder="Firma (optional)"
+                />
+              </div>
+
               <div className="channel-row" role="radiogroup" aria-label="Gesprächskanal">
                 <button
                   type="button"
@@ -224,7 +373,7 @@ export default function Booking({
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                     <path d="m22 8-6 4 6 4V8Z" /><rect x="2" y="6" width="14" height="12" rx="2" />
                   </svg>
-                  Videocall
+                  Online-Call
                 </button>
                 <button
                   type="button"
@@ -238,34 +387,6 @@ export default function Booking({
                   </svg>
                   Telefon
                 </button>
-              </div>
-
-              <div className="field">
-                <label htmlFor="booking-name">Ihr Name</label>
-                <input
-                  id="booking-name"
-                  type="text"
-                  autoComplete="name"
-                  required
-                  maxLength={200}
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Vor- und Nachname"
-                />
-              </div>
-
-              <div className="field">
-                <label htmlFor="booking-email">Geschäftliche E-Mail</label>
-                <input
-                  id="booking-email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  maxLength={254}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@ihre-firma.de"
-                />
               </div>
 
               {channel === "telefon" && (
@@ -284,15 +405,27 @@ export default function Booking({
                 </div>
               )}
 
+              <div className="field">
+                <label htmlFor="booking-agenda">Was soll im Gespräch geklärt werden? (optional)</label>
+                <textarea
+                  id="booking-agenda"
+                  rows={2}
+                  maxLength={500}
+                  value={agenda}
+                  onChange={(e) => setAgenda(e.target.value)}
+                  placeholder="z. B. wie die Artikelnummern abgeglichen werden"
+                />
+              </div>
+
               {error && <div className="form-error" role="alert">{error}</div>}
 
               <button type="submit" className="btn btn-primary" disabled={busy} style={{ width: "100%" }}>
-                {busy ? "Wird gebucht …" : "Termin bestätigen"}
+                {busy ? "Wird gebucht …" : "Termin verbindlich reservieren"}
               </button>
 
               {/* Ehrliche Knappheit an der Entscheidung, nicht nur auf der Startseite (§2.5). */}
               <p className="booking-scarcity">
-                Ich baue jedes Projekt selbst — deshalb starten pro Monat höchstens zwei.
+                Moritz baut jedes Projekt selbst — deshalb starten pro Monat höchstens zwei.
               </p>
             </div>
           )}

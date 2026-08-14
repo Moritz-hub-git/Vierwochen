@@ -89,7 +89,7 @@ function Path() {
     {
       when: "Heute, 3 Minuten",
       title: "Einschätzung",
-      text: "Sie beschreiben Ihren Fall im Dialog unten. Sie bekommen sofort eine Preisspanne, eine Lösungsskizze und einen Terminvorschlag.",
+      text: "Sie beschreiben Ihren Fall im Dialog unten. Sie bekommen sofort eine Lösungsskizze, einen Zeitplan und eine unverbindliche Preisschätzung.",
     },
     {
       when: "Diese Woche, 30 Minuten",
@@ -394,7 +394,8 @@ function FinalCta() {
         </h2>
         <p>
           Beschreiben Sie unten kurz, was Sie loswerden wollen. Sie bekommen eine
-          Preisspanne, eine Lösungsskizze und auf Wunsch direkt einen Termin.
+          Lösungsskizze, einen Zeitplan mit echtem Datum und eine unverbindliche
+          Preisschätzung — auf Wunsch direkt mit Termin.
         </p>
         <CtaButton label="Unverbindliche Einschätzung starten" />
         <div className="scarcity">

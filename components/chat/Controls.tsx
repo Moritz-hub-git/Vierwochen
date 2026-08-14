@@ -30,6 +30,58 @@ export function Chips({ options, onPick }: { options: string[]; onPick: (value: 
   );
 }
 
+/** Mehrfachauswahl: Optionen an- und abwählen, dann gesammelt absenden. */
+export function MultiChips({
+  options,
+  onSubmit,
+}: {
+  options: string[];
+  onSubmit: (value: string) => void;
+}) {
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+
+  const toggle = (o: string) =>
+    setPicked((prev) => {
+      const next = new Set(prev);
+      if (next.has(o)) next.delete(o);
+      else next.add(o);
+      return next;
+    });
+
+  return (
+    <div className="chips chips-multi" role="group" aria-label="Mehrfachauswahl">
+      {options.map((o, i) => {
+        const active = picked.has(o);
+        return (
+          <button
+            key={o}
+            type="button"
+            className={`chip-btn${active ? " is-picked" : ""}`}
+            style={{ animationDelay: `${i * 0.06}s` }}
+            aria-pressed={active}
+            onClick={() => toggle(o)}
+          >
+            {active && (
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            )}
+            {o}
+          </button>
+        );
+      })}
+      <button
+        type="button"
+        className="btn btn-primary chips-submit"
+        disabled={picked.size === 0}
+        onClick={() => onSubmit([...picked].join(", "))}
+      >
+        {picked.size > 1 ? `${picked.size} Auswahlen übernehmen` : "Übernehmen"}
+      </button>
+    </div>
+  );
+}
+
 export function Stepper({
   input,
   onSubmit,

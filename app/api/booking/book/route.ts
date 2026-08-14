@@ -12,6 +12,7 @@ import { bookingCalendarId, busyIntervals, createEvent, overlapsBusy } from "@/l
 import { BOOKING } from "@/lib/config";
 import { checkBusinessEmail } from "@/lib/email";
 import { firestore, safe } from "@/lib/firestore";
+import { bookingConfirmationHtml, sendMail } from "@/lib/mail";
 import { clientIp } from "@/lib/ratelimit";
 import { formatBerlinDateTime, isValidSlotStart } from "@/lib/slots";
 
@@ -23,9 +24,11 @@ interface BookRequest {
   channel?: "video" | "telefon";
   name?: string;
   email?: string;
+  company?: string;
   phone?: string;
   dialogId?: string;
   caseSummary?: string;
+  agenda?: string;
 }
 
 function bad(status: number, error: string) {
@@ -64,6 +67,34 @@ export async function POST(req: Request) {
   const startMs = Date.parse(slotStart);
   const slotEnd = new Date(startMs + BOOKING.durationMinutes * 60_000).toISOString();
   const slotStartIso = new Date(startMs).toISOString();
+  // Agenda-Frage (optional): erhöht Vorbereitung und Erscheinen, weil der
+  // Nutzer sich vor dem Termin schon auf ein Thema festgelegt hat.
+  const agenda = typeof body.agenda === "string" ? body.agenda.trim().slice(0, 500) : "";
+  const company = typeof body.company === "string" ? body.company.trim().slice(0, 200) : "";
+  const caseSummary = typeof body.caseSummary === "string" ? body.caseSummary.slice(0, 2000) : "";
+
+  // Bestätigungsmail nach erfolgreicher Buchung — nachgelagert und ohne die
+  // Antwort zu verzögern; ein Fehlschlag bricht den Funnel nie.
+  const queueConfirmationMail = (mode: "bestätigt" | "angefragt", meetLink?: string) => {
+    void sendMail({
+      to: emailCheck.email,
+      subject:
+        mode === "bestätigt"
+          ? `Ihr Beratungsgespräch am ${formatBerlinDateTime(slotStartIso)} Uhr — vierwochen.de`
+          : `Ihre Terminanfrage für ${formatBerlinDateTime(slotStartIso)} Uhr — vierwochen.de`,
+      html: bookingConfirmationHtml({
+        to: emailCheck.email,
+        name,
+        company: company || undefined,
+        slotStartIso,
+        channel,
+        agenda: agenda || undefined,
+        caseTitle: caseSummary ? caseSummary.split(" — ")[0] : undefined,
+        mode,
+        meetLink,
+      }),
+    }).catch((err) => console.warn("[booking] Bestätigungsmail fehlgeschlagen:", err));
+  };
 
   const requestMode = !bookingCalendarId();
   const db = firestore();
@@ -82,10 +113,12 @@ export async function POST(req: Request) {
           slotEnd,
           name,
           email: emailCheck.email,
+          company: company || null,
           channel,
           phone: channel === "telefon" ? phone : null,
           dialogId: typeof body.dialogId === "string" ? body.dialogId.slice(0, 64) : null,
-          caseSummary: typeof body.caseSummary === "string" ? body.caseSummary.slice(0, 2000) : null,
+          caseSummary: caseSummary || null,
+          agenda: agenda || null,
           status: requestMode ? "angefragt" : "reserviert",
           ip: clientIp(req),
           createdAt: FieldValue.serverTimestamp(),
@@ -108,6 +141,7 @@ export async function POST(req: Request) {
 
   // --- Anfrage-Modus: kein Kalender konfiguriert, manuelle Bestätigung ---
   if (requestMode) {
+    queueConfirmationMail("angefragt");
     return NextResponse.json({
       ok: true,
       mode: "angefragt",
@@ -135,9 +169,11 @@ export async function POST(req: Request) {
       endUtc: slotEnd,
       name,
       email: emailCheck.email,
+      company: company || undefined,
       channel,
       phone: channel === "telefon" ? phone : undefined,
-      summaryOfCase: typeof body.caseSummary === "string" ? body.caseSummary.slice(0, 2000) : undefined,
+      summaryOfCase: caseSummary || undefined,
+      agenda: agenda || undefined,
     });
     if (bookingRef) {
       await safe(
@@ -151,6 +187,7 @@ export async function POST(req: Request) {
         "Buchung bestätigen"
       );
     }
+    queueConfirmationMail("bestätigt", event.meetLink);
     return NextResponse.json({
       ok: true,
       mode: "bestätigt",
@@ -166,6 +203,7 @@ export async function POST(req: Request) {
       await safe(async () => bookingRef.update({ status: "angefragt", reason: "Kalenderfehler" }), "Buchung als Anfrage markieren");
     }
     // Funnel nicht brechen: Anfrage ist gespeichert, Bestätigung folgt manuell.
+    queueConfirmationMail("angefragt");
     return NextResponse.json({
       ok: true,
       mode: "angefragt",

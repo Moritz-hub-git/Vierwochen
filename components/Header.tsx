@@ -70,7 +70,9 @@ export default function Header() {
           <a className="nav-link" href="/#preise">Preise</a>
           <a className="nav-link" href="/#einwaende">Einwände</a>
           <ThemeToggle />
-          <button type="button" className="btn btn-primary" onClick={() => openDialog()}>
+          {/* Bewusst zurückhaltend: Die Dialogleiste unten ist die einzige
+              herausgehobene CTA der Seite — hier nur der leise Zweitweg. */}
+          <button type="button" className="btn btn-ghost" onClick={() => openDialog()}>
             Einschätzung starten
           </button>
         </nav>

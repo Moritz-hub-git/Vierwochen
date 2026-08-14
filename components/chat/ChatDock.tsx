@@ -2,32 +2,38 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Booking from "./Booking";
-import { Chips, Stepper } from "./Controls";
+import { Chips, MultiChips, Stepper } from "./Controls";
 import EmailGate from "./EmailGate";
-import OfferCard from "./OfferCard";
 import SketchCard from "./SketchCard";
+import SolutionCard from "./SolutionCard";
 import type { DialogInput, DialogResult, DialogTurn, Sketch, UiMessage } from "./types";
 
 /**
- * Das dauerhafte Dialogfenster in der Fußleiste (PROMPT.md §5.1) mit
- * wechselnden Inspirationstexten. Beim Absenden öffnet sich das Panel.
+ * Die Dialogleiste ist die EINZIGE herausgehobene Call-to-Action der Seite
+ * (Rücksprache 2026-08-14, Vorbild: brunellocucinelli.ai): groß, frei über dem
+ * Inhalt schwebend, mit getipptem Ziel-Banner. Beim Absenden übernimmt der
+ * Dialog den ganzen Bildschirm.
  *
- * Einspaltig und nicht zweispaltig: Die Lösungsskizze wächst als Karte MITTEN
- * im Gespräch. In der früheren Seitenspalte lag sie auf dem Telefon unter dem
- * Fold — der Wow-Moment war also genau dort unsichtbar, wo die meisten
- * Besucher sind.
+ * Offenlegung (EU-KI-VO Art. 50): Es antwortet erkennbar eine KI — als
+ * Produktbeweis gerahmt, denn dieser Dialog ist selbst Individualsoftware.
  */
 
-const INSPIRATIONS = [
+/** Ziel-Banner: läuft zweimal durch, bevor die Beispiel-Fälle rotieren. */
+const BANNER = [
+  "Welches Ziel wollen Sie erreichen?",
+  "In 60 Sekunden: Lösungsskizze, Zeitplan & Preisschätzung.",
+];
+
+/** Beispiel-Fälle: werden getippt, gehalten, gelöscht — Inspiration im Takt. */
+const EXAMPLES = [
   "Unser Angebotsprozess lebt in drei Excel-Listen …",
   "Bestellungen kommen als PDF ins Sammelpostfach …",
   "Der Monatsbericht entsteht per Copy-Paste aus fünf Systemen …",
   "Wir tippen jeden Lieferschein zweimal ab …",
   "Die Urlaubsplanung läuft über eine Wandtafel …",
-  "Was würde so etwas bei uns kosten?",
 ];
 
-/** Einstiegsbeispiele: Wer nicht selbst formulieren muss, fängt eher an. */
+/** Einstiegsbeispiele im geöffneten Dialog: Wer nicht formulieren muss, fängt eher an. */
 const STARTERS = [
   "Wir pflegen Artikel in mehreren Excel-Listen und tippen alles doppelt ein.",
   "Bestellungen kommen ins Sammelpostfach und gehen dort unter.",
@@ -35,17 +41,95 @@ const STARTERS = [
 ];
 
 const GREETING =
-  "Guten Tag, ich bin Moritz. Beschreiben Sie in ein, zwei Sätzen, was Sie loswerden wollen — ich stelle höchstens drei Rückfragen. Danach haben Sie eine Lösungsskizze, eine Preisspanne und einen Vier-Wochen-Plan.";
+  "Schön, dass Sie da sind! Beschreiben Sie kurz Ihr Ziel oder das Problem, das Sie loswerden wollen — ich stelle ein paar kurze Rückfragen, danach sehen Sie Ihre Lösungsskizze mit Zeitplan und unverbindlicher Preisschätzung. Ich bin eine KI auf Basis echter Projekt- und Preisdaten; Ihre Skizze liest Moritz persönlich.";
 
 const MAX_CHARS = 1500;
 const MAX_QUESTIONS = 3;
 
+// Fortschritt startet mit Guthaben (Endowed Progress) und ist dynamisch:
+// Er nähert sich mit jeder beantworteten Frage, voll erst beim Ergebnis.
+const PROGRESS_BASELINE = 0.15;
+const PROGRESS_CAP = 0.9;
+
+// Laborillusion: benannte Arbeitsschritte statt stummer Punkte.
+const BUSY_LABELS = [
+  "Liest Ihre Angabe …",
+  "Gleicht mit typischen Fällen ab …",
+  "Skizze wird ergänzt …",
+];
+
+function SparkIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M12 2c.4 3.9 1.6 6.5 3.5 8.4C17.4 12.3 20 13.5 24 14c-4 .4-6.6 1.6-8.5 3.5-1.9 1.9-3.1 4.5-3.5 8.5-.4-4-1.6-6.6-3.5-8.5C6.6 15.6 4 14.4 0 14c4-.5 6.6-1.7 8.5-3.6C10.4 8.5 11.6 5.9 12 2Z" />
+    </svg>
+  );
+}
+
 function Avatar() {
   return (
     <span className="avatar" aria-hidden>
-      MS
+      <SparkIcon size={15} />
     </span>
   );
+}
+
+/** Getipptes Placeholder: Banner zweimal, danach Beispiele im Loop. */
+function useTypewriter(active: boolean) {
+  const [text, setText] = useState("");
+  const [reduced, setReduced] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mq.matches);
+    const onChange = () => setReduced(mq.matches);
+    mq.addEventListener?.("change", onChange);
+    return () => mq.removeEventListener?.("change", onChange);
+  }, []);
+
+  useEffect(() => {
+    if (!active || reduced) return;
+    const sequence = [...BANNER, ...BANNER];
+    let seqIdx = 0;
+    let charIdx = 0;
+    let deleting = false;
+    let timer: ReturnType<typeof setTimeout>;
+
+    const current = () =>
+      seqIdx < sequence.length
+        ? sequence[seqIdx]
+        : EXAMPLES[(seqIdx - sequence.length) % EXAMPLES.length];
+
+    const tick = () => {
+      const full = current();
+      if (!deleting) {
+        charIdx += 1;
+        setText(full.slice(0, charIdx));
+        if (charIdx >= full.length) {
+          deleting = true;
+          timer = setTimeout(tick, seqIdx < sequence.length ? 2100 : 2400);
+        } else {
+          timer = setTimeout(tick, 32);
+        }
+      } else {
+        charIdx -= 2;
+        setText(full.slice(0, Math.max(0, charIdx)));
+        if (charIdx <= 0) {
+          deleting = false;
+          charIdx = 0;
+          seqIdx += 1;
+          timer = setTimeout(tick, 350);
+        } else {
+          timer = setTimeout(tick, 14);
+        }
+      }
+    };
+
+    timer = setTimeout(tick, 500);
+    return () => clearTimeout(timer);
+  }, [active, reduced]);
+
+  return { text: reduced ? BANNER[0] : text, reduced };
 }
 
 export default function ChatDock() {
@@ -56,11 +140,12 @@ export default function ChatDock() {
   const [phase, setPhase] = useState<"question" | "result" | "reject">("question");
   const [input, setInput] = useState<DialogInput | null>(null);
   const [busy, setBusy] = useState(false);
+  const [revealing, setRevealing] = useState(false);
   const [booked, setBooked] = useState(false);
   const [draft, setDraft] = useState("");
   const [dockDraft, setDockDraft] = useState("");
-  const [placeholderIdx, setPlaceholderIdx] = useState(0);
-  const [placeholderFading, setPlaceholderFading] = useState(false);
+  const [dockFocused, setDockFocused] = useState(false);
+  const [busyLabelIdx, setBusyLabelIdx] = useState(0);
 
   const dialogIdRef = useRef<string>("");
   const endRef = useRef<HTMLDivElement>(null);
@@ -70,6 +155,8 @@ export default function ChatDock() {
   messagesRef.current = messages;
   sketchRef.current = sketch;
 
+  const { text: typed } = useTypewriter(!open);
+
   if (!dialogIdRef.current && typeof window !== "undefined") {
     dialogIdRef.current =
       typeof crypto.randomUUID === "function"
@@ -78,20 +165,20 @@ export default function ChatDock() {
   }
 
   useEffect(() => {
-    if (open) return;
-    const timer = setInterval(() => {
-      setPlaceholderFading(true);
-      setTimeout(() => {
-        setPlaceholderIdx((i) => (i + 1) % INSPIRATIONS.length);
-        setPlaceholderFading(false);
-      }, 400);
-    }, 4200);
-    return () => clearInterval(timer);
-  }, [open]);
+    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages, busy, revealing, result]);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages, busy, result]);
+    if (!busy) {
+      setBusyLabelIdx(0);
+      return;
+    }
+    const timer = setInterval(
+      () => setBusyLabelIdx((i) => Math.min(i + 1, BUSY_LABELS.length - 1)),
+      900
+    );
+    return () => clearInterval(timer);
+  }, [busy]);
 
   const askedCount = messages.filter((m) => m.role === "assistant" && !m.error).length;
 
@@ -122,21 +209,38 @@ export default function ChatDock() {
         if (data.ok && data.turn) {
           const turn = data.turn;
           const grew = turn.sketch && turn.sketch.steps.length > 0;
-          setMessages((prev) => [
-            ...prev,
-            {
-              role: "assistant",
-              display: turn.reply,
-              raw: JSON.stringify(turn),
-              sketch: grew ? turn.sketch : undefined,
-              prevSketch: sketchRef.current,
-              result: turn.phase === "result" ? turn.result : undefined,
-            },
-          ]);
-          if (grew) setSketch(turn.sketch);
-          setPhase(turn.phase);
-          setInput(turn.input ?? null);
-          if (turn.phase === "result" && turn.result) setResult(turn.result);
+          const isResult = turn.phase === "result" && Boolean(turn.result);
+          const pushTurn = () => {
+            setMessages((prev) => [
+              ...prev,
+              {
+                role: "assistant",
+                display: turn.reply,
+                raw: JSON.stringify(turn),
+                sketch: grew ? turn.sketch : undefined,
+                prevSketch: sketchRef.current,
+                result: isResult ? turn.result : undefined,
+              },
+            ]);
+            if (grew) setSketch(turn.sketch);
+            setPhase(turn.phase);
+            setInput(turn.input ?? null);
+            if (isResult && turn.result) setResult(turn.result);
+            setRevealing(false);
+          };
+          if (isResult) {
+            // Kurzer Moment der Entstehung vor dem großen Ergebnis.
+            const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            setBusy(false);
+            if (reduced) {
+              pushTurn();
+            } else {
+              setRevealing(true);
+              setTimeout(pushTurn, 1600);
+            }
+            return;
+          }
+          pushTurn();
         } else {
           setMessages((prev) => [
             ...prev,
@@ -211,10 +315,22 @@ export default function ChatDock() {
     .filter(Boolean)
     .join(" — ");
 
-  // Fortschritt erzeugt Spannung: Ein sichtbar unfertiger Balken will fertig
-  // werden (Zeigarnik). Beim Ergebnis ist er voll.
+  // Fortschritt: startet mit Guthaben, wächst je Frage, voll beim Ergebnis.
   const progress =
-    phase === "result" ? 1 : Math.min(0.9, askedCount / (MAX_QUESTIONS + 1));
+    phase === "result"
+      ? 1
+      : PROGRESS_BASELINE +
+        Math.min(PROGRESS_CAP - PROGRESS_BASELINE, (askedCount / MAX_QUESTIONS) * (PROGRESS_CAP - PROGRESS_BASELINE));
+
+  const remaining = Math.max(1, MAX_QUESTIONS - askedCount);
+  const goalStatus =
+    phase === "result"
+      ? "Geschafft — Ihre Skizze ist da"
+      : messages.length === 0
+        ? "Startklar"
+        : `Noch ~${remaining} kurze ${remaining === 1 ? "Frage" : "Fragen"}`;
+
+  const suggestedAgenda = sketch?.open?.[0] ?? "";
 
   return (
     <>
@@ -222,21 +338,28 @@ export default function ChatDock() {
         <div className="dock">
           <form className="dock-bar" onSubmit={submitDock}>
             <span className="spark" aria-hidden>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2c.4 3.9 1.6 6.5 3.5 8.4C17.4 12.3 20 13.5 24 14c-4 .4-6.6 1.6-8.5 3.5-1.9 1.9-3.1 4.5-3.5 8.5-.4-4-1.6-6.6-3.5-8.5C6.6 15.6 4 14.4 0 14c4-.5 6.6-1.7 8.5-3.6C10.4 8.5 11.6 5.9 12 2Z" />
-              </svg>
+              <SparkIcon size={20} />
             </span>
-            <input
-              type="text"
-              value={dockDraft}
-              maxLength={MAX_CHARS}
-              onChange={(e) => setDockDraft(e.target.value)}
-              placeholder={INSPIRATIONS[placeholderIdx]}
-              className={placeholderFading ? "placeholder-fading" : ""}
-              aria-label="Beschreiben Sie Ihren Fall"
-            />
+            <span className="dock-inputwrap">
+              <input
+                type="text"
+                value={dockDraft}
+                maxLength={MAX_CHARS}
+                onChange={(e) => setDockDraft(e.target.value)}
+                onFocus={() => setDockFocused(true)}
+                onBlur={() => setDockFocused(false)}
+                placeholder=""
+                aria-label="Beschreiben Sie Ihr Ziel oder Ihr Problem"
+              />
+              {!dockDraft && !dockFocused && (
+                <span className="dock-type" aria-hidden>
+                  {typed}
+                  <i className="dock-caret" />
+                </span>
+              )}
+            </span>
             <button type="submit" className="dock-send" aria-label="Einschätzung starten">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <path d="m5 12 14 0M13 6l6 6-6 6" />
               </svg>
             </button>
@@ -245,125 +368,149 @@ export default function ChatDock() {
       )}
 
       {open && (
-        <>
-          <div className="panel-backdrop" onClick={() => setOpen(false)} aria-hidden />
-          <section className="panel" role="dialog" aria-modal="true" aria-label="Projekt-Dialog">
-            <div className="panel-head">
-              <div className="panel-person">
-                <Avatar />
-                <span className="panel-person-text">
-                  <strong>Moritz Schumacher</strong>
-                  <span>Baut Ihre Software — antwortet gerade</span>
-                </span>
+        <section className="panel" role="dialog" aria-modal="true" aria-label="Projekt-Dialog">
+          <div className="panel-head">
+            <div className="panel-person">
+              <Avatar />
+              <span className="panel-person-text">
+                <strong>KI-Projektberater</strong>
+                <span>vierwochen.de · KI auf Basis echter Projektdaten — Moritz liest jede Skizze</span>
+              </span>
+            </div>
+            <button type="button" className="icon-btn" onClick={() => setOpen(false)} aria-label="Dialog minimieren">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="panel-goal">
+            <span className="panel-goal-label">
+              Ziel: Lösungsskizze&nbsp;+ Zeitplan&nbsp;+ Preisschätzung
+            </span>
+            <span className={`panel-goal-status${phase === "result" ? " done" : ""}`}>{goalStatus}</span>
+          </div>
+          <div className="panel-progress" aria-hidden>
+            <span style={{ transform: `scaleX(${progress})` }} />
+          </div>
+
+          <div className="stream">
+            <div className="msg-row">
+              <Avatar />
+              <div className="msg assistant">{GREETING}</div>
+            </div>
+
+            {messages.length === 0 && !busy && (
+              <div className="starters">
+                <span className="starters-label">Oder wählen Sie einen typischen Fall:</span>
+                {STARTERS.map((s, i) => (
+                  <button
+                    key={s}
+                    type="button"
+                    className="chip-btn"
+                    style={{ animationDelay: `${i * 0.07}s` }}
+                    onClick={() => void send(s)}
+                  >
+                    {s}
+                  </button>
+                ))}
               </div>
-              <button type="button" className="icon-btn" onClick={() => setOpen(false)} aria-label="Dialog minimieren">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-              </button>
-            </div>
+            )}
 
-            <div className="panel-progress" aria-hidden>
-              <span style={{ transform: `scaleX(${progress})` }} />
-            </div>
+            {messages.map((m, i) => (
+              <div key={i}>
+                {m.role === "user" ? (
+                  <div className="msg user">{m.display}</div>
+                ) : (
+                  <div className="msg-row">
+                    <Avatar />
+                    <div className={`msg assistant${m.error ? " error" : ""}`}>{m.display}</div>
+                  </div>
+                )}
+                {/* Beim Ergebnis übernimmt die SolutionCard die ganze Skizze —
+                    eine zusätzliche SketchCard wäre doppelt. */}
+                {m.sketch && !m.result && (
+                  <SketchCard sketch={m.sketch} previous={m.prevSketch ?? null} turnIndex={i} />
+                )}
+                {m.result && (m.sketch ?? sketch) && (
+                  <SolutionCard sketch={(m.sketch ?? sketch)!} result={m.result} />
+                )}
+              </div>
+            ))}
 
-            <div className="stream">
+            {busy && (
               <div className="msg-row">
                 <Avatar />
-                <div className="msg assistant">{GREETING}</div>
+                <div className="typing" aria-label="Antwort wird erstellt">
+                  <span className="typing-dots"><i /><i /><i /></span>
+                  <span className="typing-label">{BUSY_LABELS[busyLabelIdx]}</span>
+                </div>
               </div>
+            )}
 
-              {messages.length === 0 && !busy && (
-                <div className="starters">
-                  <span className="starters-label">Oder wählen Sie einen typischen Fall:</span>
-                  {STARTERS.map((s, i) => (
-                    <button
-                      key={s}
-                      type="button"
-                      className="chip-btn"
-                      style={{ animationDelay: `${i * 0.07}s` }}
-                      onClick={() => void send(s)}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              )}
+            {revealing && (
+              <div className="reveal" role="status">
+                <span className="reveal-spark"><SparkIcon size={22} /></span>
+                <span className="reveal-text">Ihre Lösungsskizze wird gezeichnet …</span>
+                <span className="reveal-bar"><i /></span>
+              </div>
+            )}
 
-              {messages.map((m, i) => (
-                <div key={i}>
-                  {m.role === "user" ? (
-                    <div className="msg user">{m.display}</div>
-                  ) : (
-                    <div className="msg-row">
-                      <Avatar />
-                      <div className={`msg assistant${m.error ? " error" : ""}`}>{m.display}</div>
-                    </div>
-                  )}
-                  {m.sketch && (
-                    <SketchCard sketch={m.sketch} previous={m.prevSketch ?? null} turnIndex={i} />
-                  )}
-                  {m.result && <OfferCard result={m.result} />}
-                </div>
-              ))}
+            {/* Bedienelemente des letzten Zuges */}
+            {!busy && input?.kind === "chips" && input.options && (
+              <Chips options={input.options} onPick={(v) => void send(v)} />
+            )}
+            {!busy && input?.kind === "multichips" && input.options && (
+              <MultiChips options={input.options} onSubmit={(v) => void send(v)} />
+            )}
+            {!busy && input?.kind === "number" && (
+              <Stepper input={input} onSubmit={(v) => void send(v)} />
+            )}
 
-              {busy && (
-                <div className="msg-row">
-                  <Avatar />
-                  <div className="typing" aria-label="Antwort wird erstellt">
-                    <i /><i /><i />
-                  </div>
-                </div>
-              )}
-
-              {/* Bedienelemente des letzten Zuges */}
-              {!busy && input?.kind === "chips" && input.options && (
-                <Chips options={input.options} onPick={(v) => void send(v)} />
-              )}
-              {!busy && input?.kind === "number" && (
-                <Stepper input={input} onSubmit={(v) => void send(v)} />
-              )}
-
-              {/* Abschluss: Termin direkt im Gesprächsverlauf */}
-              {phase === "result" && result && !booked && (
-                <>
-                  <Booking
-                    dialogId={dialogIdRef.current}
-                    caseSummary={caseSummary}
-                    onBooked={() => setBooked(true)}
-                  />
+            {/* Abschluss: Termin direkt im Gesprächsverlauf. Booking bleibt nach
+                der Buchung eingehängt — es zeigt selbst den Erfolgsbildschirm;
+                nur die leise E-Mail-Alternative verschwindet dann. */}
+            {phase === "result" && result && (
+              <>
+                <Booking
+                  dialogId={dialogIdRef.current}
+                  caseSummary={caseSummary}
+                  suggestedAgenda={suggestedAgenda}
+                  onBooked={() => setBooked(true)}
+                />
+                {!booked && (
                   <EmailGate dialogId={dialogIdRef.current} sketchTitle={sketch?.title ?? ""} />
-                </>
-              )}
+                )}
+              </>
+            )}
 
-              <div ref={endRef} />
-            </div>
+            <div ref={endRef} />
+          </div>
 
-            <form className="composer" onSubmit={submitComposer}>
-              <textarea
-                ref={textareaRef}
-                rows={1}
-                value={draft}
-                maxLength={MAX_CHARS}
-                disabled={busy}
-                onChange={(e) => setDraft(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    submitComposer();
-                  }
-                }}
-                placeholder={messages.length === 0 ? "Ihr Fall in ein, zwei Sätzen …" : "Ihre Antwort …"}
-                aria-label="Ihre Nachricht"
-              />
-              <button type="submit" className="dock-send" disabled={busy || !draft.trim()} aria-label="Senden">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="m5 12 14 0M13 6l6 6-6 6" />
-                </svg>
-              </button>
-            </form>
-          </section>
-        </>
+          <form className="composer" onSubmit={submitComposer}>
+            <textarea
+              ref={textareaRef}
+              rows={1}
+              value={draft}
+              maxLength={MAX_CHARS}
+              disabled={busy}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  submitComposer();
+                }
+              }}
+              placeholder={messages.length === 0 ? "Ihr Ziel oder Problem in ein, zwei Sätzen …" : "Ihre Antwort …"}
+              aria-label="Ihre Nachricht"
+            />
+            <button type="submit" className="dock-send" disabled={busy || !draft.trim()} aria-label="Senden">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="m5 12 14 0M13 6l6 6-6 6" />
+              </svg>
+            </button>
+          </form>
+        </section>
       )}
     </>
   );
