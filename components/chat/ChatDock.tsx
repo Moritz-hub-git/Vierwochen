@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import Booking from "./Booking";
 import { Chips, MultiChips, Stepper } from "./Controls";
 import EmailGate from "./EmailGate";
-import SketchCard from "./SketchCard";
 import SolutionCard from "./SolutionCard";
 import type { DialogInput, DialogResult, DialogTurn, Sketch, UiMessage } from "./types";
 
@@ -328,44 +327,52 @@ export default function ChatDock() {
       ? "Geschafft — Ihre Skizze ist da"
       : messages.length === 0
         ? "Startklar"
-        : `Noch ~${remaining} kurze ${remaining === 1 ? "Frage" : "Fragen"}`;
+        : `noch ~${remaining} kurze ${remaining === 1 ? "Frage" : "Fragen"}`;
+
+  // Die Skizze bleibt bis zum Schluss verborgen. Damit der Nutzer trotzdem
+  // sieht, dass seine Antworten etwas bewirken, zählt die Zielzeile die
+  // erfassten Punkte mit — ein Satz Spannung statt einer Karte.
+  const capturedPoints = sketch
+    ? sketch.steps.length + sketch.value.length + sketch.assumptions.length
+    : 0;
 
   const suggestedAgenda = sketch?.open?.[0] ?? "";
 
   return (
     <>
-      {!open && (
-        <div className="dock">
-          <form className="dock-bar" onSubmit={submitDock}>
-            <span className="spark" aria-hidden>
-              <SparkIcon size={20} />
-            </span>
-            <span className="dock-inputwrap">
-              <input
-                type="text"
-                value={dockDraft}
-                maxLength={MAX_CHARS}
-                onChange={(e) => setDockDraft(e.target.value)}
-                onFocus={() => setDockFocused(true)}
-                onBlur={() => setDockFocused(false)}
-                placeholder=""
-                aria-label="Beschreiben Sie Ihr Ziel oder Ihr Problem"
-              />
-              {!dockDraft && !dockFocused && (
-                <span className="dock-type" aria-hidden>
-                  {typed}
-                  <i className="dock-caret" />
-                </span>
-              )}
-            </span>
-            <button type="submit" className="dock-send" aria-label="Einschätzung starten">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <path d="m5 12 14 0M13 6l6 6-6 6" />
-              </svg>
-            </button>
-          </form>
-        </div>
-      )}
+      {/* Das Dock bleibt eingehängt und blendet weich aus, während das Panel
+          darüber aufblendet — ein Kreuzblenden statt eines harten Sprungs. */}
+      <div className={`dock${open ? " is-hidden" : ""}`} aria-hidden={open}>
+        <form className="dock-bar" onSubmit={submitDock}>
+          <span className="spark" aria-hidden>
+            <SparkIcon size={20} />
+          </span>
+          <span className="dock-inputwrap">
+            <input
+              type="text"
+              value={dockDraft}
+              maxLength={MAX_CHARS}
+              tabIndex={open ? -1 : undefined}
+              onChange={(e) => setDockDraft(e.target.value)}
+              onFocus={() => setDockFocused(true)}
+              onBlur={() => setDockFocused(false)}
+              placeholder=""
+              aria-label="Beschreiben Sie Ihr Ziel oder Ihr Problem"
+            />
+            {!dockDraft && !dockFocused && (
+              <span className="dock-type" aria-hidden>
+                {typed}
+                <i className="dock-caret" />
+              </span>
+            )}
+          </span>
+          <button type="submit" className="dock-send" tabIndex={open ? -1 : undefined} aria-label="Einschätzung starten">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="m5 12 14 0M13 6l6 6-6 6" />
+            </svg>
+          </button>
+        </form>
+      </div>
 
       {open && (
         <section className="panel" role="dialog" aria-modal="true" aria-label="Projekt-Dialog">
@@ -386,9 +393,17 @@ export default function ChatDock() {
 
           <div className="panel-goal">
             <span className="panel-goal-label">
-              Ziel: Lösungsskizze&nbsp;+ Zeitplan&nbsp;+ Preisschätzung
+              <span className="goal-full">Ziel: Lösungsskizze&nbsp;+ Zeitplan&nbsp;+ Preisschätzung</span>
+              <span className="goal-short">Lösungsskizze &amp; Preis</span>
             </span>
-            <span className={`panel-goal-status${phase === "result" ? " done" : ""}`}>{goalStatus}</span>
+            <span className="panel-goal-meta">
+              {capturedPoints > 0 && phase !== "result" && (
+                <span className="goal-count" aria-live="polite">
+                  {capturedPoints} Punkte erfasst
+                </span>
+              )}
+              <span className={`panel-goal-status${phase === "result" ? " done" : ""}`}>{goalStatus}</span>
+            </span>
           </div>
           <div className="panel-progress" aria-hidden>
             <span style={{ transform: `scaleX(${progress})` }} />
@@ -417,8 +432,11 @@ export default function ChatDock() {
               </div>
             )}
 
+            {/* Fragment statt Wrapper-div: So ist die Ergebniskarte ein
+                direktes Kind des Stroms und darf breiter werden als die
+                Lesespalte des Gesprächs. */}
             {messages.map((m, i) => (
-              <div key={i}>
+              <Fragment key={i}>
                 {m.role === "user" ? (
                   <div className="msg user">{m.display}</div>
                 ) : (
@@ -427,15 +445,14 @@ export default function ChatDock() {
                     <div className={`msg assistant${m.error ? " error" : ""}`}>{m.display}</div>
                   </div>
                 )}
-                {/* Beim Ergebnis übernimmt die SolutionCard die ganze Skizze —
-                    eine zusätzliche SketchCard wäre doppelt. */}
-                {m.sketch && !m.result && (
-                  <SketchCard sketch={m.sketch} previous={m.prevSketch ?? null} turnIndex={i} />
-                )}
+                {/* Die Skizze erscheint bewusst NUR am Ende (Rücksprache
+                    2026-08-14): Im Verlauf lenkte die mitwachsende Karte vom
+                    Gespräch ab. Der Zähler in der Zielzeile hält die Spannung,
+                    die große Enthüllung bleibt der Lohn. */}
                 {m.result && (m.sketch ?? sketch) && (
                   <SolutionCard sketch={(m.sketch ?? sketch)!} result={m.result} />
                 )}
-              </div>
+              </Fragment>
             ))}
 
             {busy && (

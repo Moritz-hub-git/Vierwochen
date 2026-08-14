@@ -1,0 +1,36 @@
+<!--
+  PLATZHALTER: Porträt für den Beratungstermin.
+
+  Bitte durch ein echtes Foto ersetzen (public/berater.jpg, quadratisch,
+  mindestens 320×320 px, freundlich, Blick in die Kamera) und den Pfad in
+  components/chat/Booking.tsx anpassen. Ein echtes Gesicht wirkt an dieser
+  Stelle deutlich vertrauensbildender als jede Illustration.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160" role="img" aria-label="Porträt-Platzhalter">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e0f0ec"/>
+      <stop offset="100%" stop-color="#c7e3db"/>
+    </linearGradient>
+    <linearGradient id="shirt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d7a68"/>
+      <stop offset="100%" stop-color="#0a5f51"/>
+    </linearGradient>
+    <clipPath id="circle">
+      <circle cx="80" cy="80" r="80"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#circle)">
+    <rect width="160" height="160" fill="url(#bg)"/>
+    <!-- Schultern -->
+    <path d="M12 160c0-30 30-46 68-46s68 16 68 46z" fill="url(#shirt)"/>
+    <!-- Kragen -->
+    <path d="M62 117l18 20 18-20-8-4-10 11-10-11z" fill="#f7faf9" opacity="0.9"/>
+    <!-- Hals -->
+    <path d="M68 96h24v22a12 12 0 0 1-24 0z" fill="#d9b79c"/>
+    <!-- Kopf -->
+    <ellipse cx="80" cy="70" rx="27" ry="31" fill="#e8c6ab"/>
+    <!-- Haare -->
+    <path d="M53 68c-2-22 12-33 27-33s29 11 27 33c-3-12-9-17-14-18-7 3-24 5-33-2-3 4-5 11-7 20z" fill="#3d4f4a"/>
+  </g>
+</svg>

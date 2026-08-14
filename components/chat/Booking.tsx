@@ -229,6 +229,22 @@ export default function Booking({
 
   return (
     <form className="booking" onSubmit={book}>
+      {/* Gesicht zum Termin: Wer sieht, mit wem er spricht, bucht eher.
+          Das Bild ist ein PLATZHALTER — bitte durch ein echtes Foto ersetzen. */}
+      <div className="advisor">
+        <span className="advisor-photo">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/berater-platzhalter.svg" alt="" width={64} height={64} />
+        </span>
+        <span className="advisor-text">
+          <span className="advisor-eyebrow">Ihr Gesprächspartner</span>
+          <strong>Moritz Schumacher</strong>
+          <span className="advisor-role">
+            Gründer — baut Ihre Software selbst. Kein Vertrieb dazwischen.
+          </span>
+        </span>
+      </div>
+
       <h3>Kostenloses Beratungsgespräch — 30 Minuten, unverbindlich</h3>
       <p>
         <strong>Kein Verkaufsgespräch, keine Präsentation.</strong> Wir schärfen
