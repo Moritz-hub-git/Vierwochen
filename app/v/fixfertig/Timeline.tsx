@@ -27,7 +27,7 @@ const STATIONS = [
     offset: 0,
     fallback: "Woche 1",
     title: "Kick-off & Workshop",
-    text: "Ihr Ablauf, Ihre Begriffe, die Abnahmekriterien — festgehalten, bevor gebaut wird.",
+    text: "Ihr Ablauf, Ihre Begriffe, die Abnahmekriterien — und wir trennen, was gebaut werden muss, von dem, was nur Geld kosten würde.",
   },
   {
     offset: 7,

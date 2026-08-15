@@ -173,11 +173,11 @@ export default function Landing({ variant }: { variant: VariantKey }) {
             In vier Wochen <LivePill />
           </h2>
           <p className={s.promiseSub}>
-            AI macht möglich, was es so noch nicht gab: bauen, iterieren und
-            veröffentlichen in Tagen. Und weil hier derselbe Kopf Ihr Geschäft
-            versteht <em>und</em> den Code schreibt, geht zwischen Idee und
-            Umsetzung nichts verloren — das Ergebnis ist nicht ungefähr
-            richtig, sondern passgenau.
+            AI hat das Bauen schnell gemacht. Der Engpass ist heute, zu
+            wissen, <em>was</em> man baut — hier entscheidet das einer, der
+            Ihr Geschäft versteht, aus vielen Produkten weiß, was wirklich
+            benutzt wird, und den Code selbst schreibt. Ohne Verlust,
+            passgenau.
           </p>
 
           <div className={s.methodVisual}>

@@ -68,6 +68,7 @@ export function WegeVisual() {
           <span className={s.builderCard}>
             <b>Einer, der beides kann</b>
             <i>versteht Ihr Geschäft · schreibt den Code</i>
+            <i>kennt aus vielen Produkten, was benutzt wird</i>
             <em className={s.aiBadge}>+ AI</em>
           </span>
           <span className={s.chainArrow} aria-hidden>
@@ -82,6 +83,11 @@ export function WegeVisual() {
         </p>
         <span className={`${s.wayResult} ${s.wayResultNew}`}>Ergebnis: das, was Sie gemeint haben</span>
       </div>
+      <p className={s.waysFoot}>
+        <b>Der neue Engpass:</b> AI hat das Bauen billig gemacht — teuer ist
+        nur noch, das Falsche zu bauen. Deshalb sagen wir auch Nein. Beim
+        Festpreis kostet Unnötiges uns, nicht Sie.
+      </p>
     </div>
   );
 }
@@ -115,8 +121,8 @@ export function FormelVisual() {
           <span className={s.formulaNum}>1</span>
           <b>Der, der baut</b>
           <span>
-            Businessverständnis und Code in einem Kopf — die Anforderung geht
-            vom Gespräch direkt in die Umsetzung.
+            Businessverständnis und Code in einem Kopf — und der Blick aus
+            vielen Produkten dafür, was benutzt wird und was nicht.
           </span>
         </div>
         <span className={s.formulaSign} aria-hidden>
@@ -131,6 +137,11 @@ export function FormelVisual() {
           </span>
         </div>
       </div>
+
+      <p className={s.eqMoral}>
+        Bauen ist gelöst. <b>Was</b> man baut — das entscheidet Erfahrung.
+        Und der Festpreis hält uns ehrlich: Unnötiges kostet uns, nicht Sie.
+      </p>
     </div>
   );
 }
@@ -184,6 +195,13 @@ export function KernVisual() {
           <b>AI ist der Verstärker.</b> Sie gibt dem einen Kopf hundert Hände:
           bauen, testen, wiederholen — er prüft und verantwortet jede Zeile.
         </p>
+        <p className={s.vennWide}>
+          <b>Der neue Engpass.</b> AI hat das Bauen billig gemacht —
+          entscheidend ist, <em>was</em> man baut. Wer viele Produkte im
+          Einsatz gesehen hat, weiß, welche Features benutzt werden und
+          welche nur teuer aussehen. Der Festpreis hält uns dabei ehrlich:
+          Ihnen Unnötiges auszureden lohnt sich für uns.
+        </p>
       </div>
     </div>
   );
@@ -225,6 +243,22 @@ export function BentoVisual() {
         <b>Qualität</b>
         <p>Jede Zeile geprüft von einem erfahrenen Kopf.</p>
       </div>
+      <div className={`${s.mTile} ${s.mTileHalf} ${s.mTileInk}`}>
+        <span className={s.mBig}>Was?</span>
+        <b>ist die neue Frage</b>
+        <p>
+          AI hat das Bauen billig gemacht. Der Engpass ist, zu wissen, was
+          man baut — das beantwortet Erfahrung aus vielen Produkten.
+        </p>
+      </div>
+      <div className={`${s.mTile} ${s.mTileHalf}`}>
+        <span className={s.mBig}>Nein.</span>
+        <b>Auch das ist Beratung</b>
+        <p>
+          Wir raten Features ab, die niemand nutzen wird — beim Festpreis
+          kostet Unnötiges uns, nicht Sie.
+        </p>
+      </div>
     </div>
   );
 }
@@ -261,9 +295,22 @@ export function PlanVisual() {
           </span>
         </div>
       </div>
+      <div className={s.bpRow}>
+        <span className={s.bpLabel}>der neue engpass</span>
+        <div className={s.bpNewPath}>
+          <span className={s.bpNodeOld}><s>Können wir es bauen?</s></span>
+          <span className={s.bpLine} aria-hidden />
+          <span className={`${s.bpNodeNew} ${s.bpNodeCore}`}>
+            Was sollten wir bauen?
+            <i>← hier zählt Erfahrung aus vielen Produkten</i>
+          </span>
+        </div>
+      </div>
       <p className={s.bpNote}>
         Der kurze Weg ist kein Sparprogramm — er ist der Grund für die
         Qualität: keine Übersetzungsverluste zwischen Idee und Umsetzung.
+        Und der Festpreis hält uns ehrlich: Unnötiges zu bauen kostet uns,
+        nicht Sie.
       </p>
     </div>
   );

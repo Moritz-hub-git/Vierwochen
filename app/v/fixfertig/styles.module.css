@@ -1276,3 +1276,42 @@
   line-height: 1.65;
   color: #3c3f5e;
 }
+
+/* ---------- Drittes Argument: Urteilsvermögen / der neue Engpass ---------- */
+
+/* Fußzeile unter dem Wege-Vergleich, über beide Spalten */
+.waysFoot {
+  grid-column: 1 / -1;
+  margin: 0.2rem 0 0;
+  background: #fff;
+  border-radius: 18px;
+  padding: 1.05rem 1.3rem;
+  font-size: 0.94rem;
+  line-height: 1.6;
+  color: #3c3f5e;
+  text-align: center;
+  box-shadow: 0 8px 22px rgba(38, 34, 120, 0.07);
+}
+
+.waysFoot b { color: #181a33; }
+
+/* Merksatz unter der Formel */
+.eqMoral {
+  margin: 1.8rem auto 0;
+  max-width: 56ch;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #3c3f5e;
+}
+
+.eqMoral b { color: #181a33; }
+
+/* Dritte Venn-Karte über beide Spalten */
+.vennWide { grid-column: 1 / -1; }
+
+/* Halbbreite Bento-Kacheln (Engpass + Nein) */
+.mTileHalf { grid-column: span 2; }
+
+@media (max-width: 520px) {
+  .mTileHalf { grid-column: auto; }
+}

@@ -17,6 +17,10 @@ const FAQS = [
     a: "„Besser“ behaupten wir nicht — passgenauer. Zwischen Ihrem Problem und dem Code liegt keine einzige Übersetzung, also kommt das an, was Sie gemeint haben. Und für die Qualität verlassen Sie sich nicht auf unser Wort: Festpreis, Abnahme nach vereinbarten Kriterien, Garantie — wir haften dafür.",
   },
   {
+    q: "Woher wissen Sie, was wir wirklich brauchen?",
+    a: "Sie kennen Ihren Betrieb — wir kennen die Muster aus vielen Produkten: welche Features benutzt werden, welche Darstellungen funktionieren und was nur teuer aussieht. Deshalb raten wir auch ab. Der Festpreis hält uns dabei ehrlich: Unnötiges zu bauen kostet uns, nicht Sie.",
+  },
+  {
     q: "Was, wenn das Ergebnis nicht passt?",
     a: "Dann zahlen Sie die zweite Hälfte nicht. Die Abnahmekriterien legen wir in Woche 1 gemeinsam fest — Sie messen uns an dem, was vereinbart ist, nicht an dem, was wir hineininterpretiert haben.",
   },
