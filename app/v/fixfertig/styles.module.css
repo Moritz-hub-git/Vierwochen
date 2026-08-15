@@ -608,3 +608,540 @@
 
 .foot a { color: #6a6d8c; text-decoration: none; }
 .foot a:hover { color: #4f46e5; }
+
+/* ============================================================
+   Methodik-Baukasten: Timeline, Benefits-Bento, fünf Visuals
+   ============================================================ */
+
+.methodVisual { margin-top: clamp(2rem, 4vw, 3rem); text-align: left; }
+
+.h3 {
+  font-size: clamp(1.35rem, 2.8vw, 1.9rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+/* ---------- Zeitplan mit echten Daten ---------- */
+
+.timelineHead { margin-top: clamp(3rem, 6vw, 4.5rem); text-align: center; }
+.timelineHead .kicker { margin-bottom: 0.5rem; }
+
+.timeline {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.2rem;
+  margin-top: 2rem;
+  text-align: left;
+}
+
+.tlRail {
+  position: absolute;
+  top: 7px;
+  left: 4%;
+  right: 4%;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #4f46e5, #ff6b5e 70%, #22c55e);
+  opacity: 0.3;
+}
+
+.tlStop { position: relative; }
+
+.tlDot {
+  display: block;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #4f46e5;
+  border: 3px solid #f3f4fd;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.35);
+  margin-bottom: 0.7rem;
+  position: relative;
+  z-index: 1;
+}
+
+.tlDotLive {
+  background: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.4);
+}
+
+.tlDate {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #4f46e5;
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.28rem 0.7rem;
+  box-shadow: 0 5px 14px rgba(38, 34, 120, 0.08);
+  margin-bottom: 0.55rem;
+}
+
+.tlTitle { display: block; font-size: 1.04rem; font-weight: 800; letter-spacing: -0.02em; }
+
+.tlLive {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #15803d;
+  background: rgba(34, 197, 94, 0.14);
+  border-radius: 999px;
+  padding: 0.14rem 0.5rem;
+  vertical-align: middle;
+}
+
+.tlLive i { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
+
+.tlText { margin: 0.35rem 0 0; font-size: 0.88rem; line-height: 1.55; color: #3c3f5e; }
+
+@media (max-width: 860px) {
+  .timeline { grid-template-columns: 1fr 1fr; }
+  .tlRail { display: none; }
+}
+
+@media (max-width: 520px) {
+  .timeline { grid-template-columns: 1fr; }
+}
+
+/* ---------- Leistungs-Bento (Apple-Stil) ---------- */
+
+.benefitsSection { padding: clamp(3.5rem, 7vw, 5.5rem) 0 0; }
+
+.benefits {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.benefit {
+  background: #fff;
+  border-radius: 24px;
+  padding: 1.35rem 1.3rem;
+  box-shadow: 0 10px 28px rgba(38, 34, 120, 0.08);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.benefit:hover { transform: translateY(-4px); box-shadow: 0 18px 44px rgba(38, 34, 120, 0.13); }
+
+.benefitBig { grid-column: span 2; }
+
+.benefit b { display: block; font-size: 1.06rem; font-weight: 800; letter-spacing: -0.02em; margin: 0.75rem 0 0.3rem; }
+.benefit p { margin: 0; font-size: 0.9rem; line-height: 1.55; color: #3c3f5e; }
+
+.bIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  box-shadow: inset 0 -6px 12px rgba(0, 0, 0, 0.12), 0 6px 14px rgba(38, 34, 120, 0.14);
+}
+
+.tone_indigo { background: linear-gradient(160deg, #6366f1, #4338ca); }
+.tone_ink { background: linear-gradient(160deg, #2e3150, #14162e); }
+.tone_green { background: linear-gradient(160deg, #34d399, #059669); }
+.tone_sky { background: linear-gradient(160deg, #38bdf8, #0284c7); }
+.tone_violet { background: linear-gradient(160deg, #a78bfa, #7c3aed); }
+.tone_coral { background: linear-gradient(160deg, #fb8b7e, #e2503f); }
+.tone_amber { background: linear-gradient(160deg, #fbbf24, #d97706); }
+.tone_lime { background: linear-gradient(160deg, #a3e635, #65a30d); color: #1e2405; }
+
+@media (max-width: 900px) {
+  .benefits { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 520px) {
+  .benefits { grid-template-columns: 1fr; }
+  .benefitBig { grid-column: auto; }
+}
+
+/* ---------- Gemeinsame Kleinteile der Visuals ---------- */
+
+.miniLive {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72em;
+  font-weight: 800;
+  color: #15803d;
+  background: rgba(34, 197, 94, 0.15);
+  border-radius: 999px;
+  padding: 0.16em 0.6em;
+  vertical-align: middle;
+}
+
+.miniLive i { width: 0.5em; height: 0.5em; min-width: 6px; min-height: 6px; border-radius: 50%; background: #22c55e; }
+
+/* ---------- Visual 1: Die zwei Wege ---------- */
+
+.ways {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+  align-items: stretch;
+}
+
+@media (max-width: 900px) { .ways { grid-template-columns: 1fr; } }
+
+.wayOld,
+.wayNew {
+  border-radius: 26px;
+  padding: 1.5rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.wayOld { background: #fff; box-shadow: 0 10px 28px rgba(38, 34, 120, 0.07); }
+
+.wayNew {
+  background: #181a33;
+  color: #fff;
+  box-shadow: 0 18px 44px rgba(24, 26, 51, 0.35);
+}
+
+.wayHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 1.1rem;
+}
+
+.wayHead span {
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.wayHead b { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; }
+.wayNew .wayHead b { color: #d8f26e; }
+
+.chainOld {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.chainStop {
+  background: #eef0fe;
+  color: #3c3f5e;
+  border-radius: 999px;
+  padding: 0.42rem 0.85rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.chainLoss {
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #e2503f;
+  border-bottom: 2px dashed rgba(226, 80, 63, 0.5);
+  padding-bottom: 0.1rem;
+}
+
+.wayNote { margin: 1.1rem 0 0; font-size: 0.88rem; line-height: 1.6; color: #6a6d8c; }
+.wayNew .wayNote { color: rgba(255, 255, 255, 0.72); margin-top: auto; padding-top: 1.1rem; }
+
+.chainNew { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; }
+
+.chainYou,
+.chainProduct {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  font-size: 0.92rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.chainProduct { background: rgba(34, 197, 94, 0.12); border-color: rgba(34, 197, 94, 0.4); }
+
+.chainArrow { font-size: 1.2rem; font-weight: 800; color: #d8f26e; }
+
+.builderCard {
+  flex: 1 1 200px;
+  min-width: 190px;
+  background: #fff;
+  color: #181a33;
+  border-radius: 18px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  position: relative;
+}
+
+.builderCard b { font-size: 0.98rem; font-weight: 800; letter-spacing: -0.02em; }
+.builderCard i { font-style: normal; font-size: 0.8rem; color: #6a6d8c; }
+
+.aiBadge {
+  position: absolute;
+  top: -0.8rem;
+  right: 0.9rem;
+  font-style: normal;
+  font-size: 0.72rem;
+  font-weight: 800;
+  background: #d8f26e;
+  color: #1e2405;
+  border-radius: 999px;
+  padding: 0.24rem 0.65rem;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+}
+
+/* ---------- Visual 2: Die Gleichung ---------- */
+
+.eq { text-align: center; }
+
+.eqOld {
+  margin: 0 0 0.8rem;
+  font-size: clamp(0.9rem, 1.8vw, 1.15rem);
+  font-weight: 700;
+  color: #a8abcc;
+  text-decoration: line-through;
+  text-decoration-color: #e2503f;
+  text-decoration-thickness: 2px;
+}
+
+.eqNew {
+  margin: 0 0 2rem;
+  font-size: clamp(1.35rem, 3.4vw, 2.3rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.4;
+}
+
+.eqAi {
+  background: #181a33;
+  color: #d8f26e;
+  border-radius: 0.4em;
+  padding: 0.06em 0.34em;
+}
+
+.eqResult {
+  background: linear-gradient(100deg, #4f46e5, #ff6b5e);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.eqResult :global(i) { background: #22c55e; }
+
+/* ---------- Visual 3: Ein Kopf (Venn) ---------- */
+
+.vennWrap { display: grid; gap: 1.4rem; }
+
+.venn {
+  display: block;
+  width: min(640px, 100%);
+  height: auto;
+  margin: 0 auto;
+  font-family: inherit;
+}
+
+.vennPoints {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  text-align: left;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.vennPoints p {
+  margin: 0;
+  background: #fff;
+  border-radius: 20px;
+  padding: 1.1rem 1.2rem;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #3c3f5e;
+  box-shadow: 0 8px 22px rgba(38, 34, 120, 0.07);
+}
+
+.vennPoints b { color: #181a33; }
+
+@media (max-width: 720px) { .vennPoints { grid-template-columns: 1fr; } }
+
+/* ---------- Visual 4: Featureboard (iOS-Bento) ---------- */
+
+.mBento {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  text-align: left;
+}
+
+.mTile {
+  background: #fff;
+  border-radius: 24px;
+  padding: 1.35rem 1.3rem;
+  box-shadow: 0 10px 28px rgba(38, 34, 120, 0.08);
+}
+
+.mTileHero { grid-column: span 2; grid-row: span 2; display: flex; flex-direction: column; justify-content: center; }
+.mTileInk { background: #181a33; color: #fff; }
+.mTileInk p { color: rgba(255, 255, 255, 0.72); }
+.mTileIndigo { background: #4f46e5; color: #fff; }
+.mTileIndigo p { color: rgba(255, 255, 255, 0.78); }
+.mTileLime { background: #d8f26e; color: #1e2405; }
+.mTileLime p { color: rgba(30, 36, 5, 0.75); }
+
+.mTile b { display: block; font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; }
+.mTile p { margin: 0.3rem 0 0; font-size: 0.9rem; line-height: 1.55; color: #3c3f5e; }
+
+.mBig {
+  display: block;
+  font-size: clamp(1.9rem, 4vw, 2.8rem);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(120deg, #4f46e5, #ff6b5e);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.mTileInk .mBig { background: none; -webkit-background-clip: initial; background-clip: initial; color: #d8f26e; }
+.mTileIndigo .mBig { background: none; -webkit-background-clip: initial; background-clip: initial; color: #fff; }
+.mTileLime .mBig { background: none; -webkit-background-clip: initial; background-clip: initial; color: #1e2405; }
+
+.mDuo { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+
+.mAvatar,
+.mAvatarAlt {
+  display: inline-grid;
+  place-items: center;
+  min-width: 62px;
+  height: 62px;
+  padding: 0 0.9rem;
+  border-radius: 50%;
+  font-weight: 800;
+  font-size: 0.9rem;
+  background: #eef0fe;
+  color: #4f46e5;
+}
+
+.mAvatarAlt { background: #ffe4e0; color: #c2402f; }
+
+.mChip {
+  display: inline-grid;
+  place-items: center;
+  height: 62px;
+  padding: 0 1.1rem;
+  border-radius: 18px;
+  font-weight: 800;
+  background: #181a33;
+  color: #d8f26e;
+}
+
+.mPlus { font-size: 1.3rem; font-weight: 800; color: #a8abcc; }
+
+@media (max-width: 900px) {
+  .mBento { grid-template-columns: 1fr 1fr; }
+  .mTileHero { grid-column: span 2; grid-row: auto; }
+}
+
+@media (max-width: 520px) {
+  .mBento { grid-template-columns: 1fr; }
+  .mTileHero { grid-column: auto; }
+}
+
+/* ---------- Visual 5: Der Bauplan (Blueprint) ---------- */
+
+.blueprint {
+  position: relative;
+  overflow: hidden;
+  background: #181a33;
+  color: #fff;
+  border-radius: 28px;
+  padding: clamp(1.6rem, 4vw, 2.6rem);
+  text-align: left;
+  box-shadow: 0 20px 50px rgba(24, 26, 51, 0.35);
+}
+
+.bpGrid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+  background-size: 26px 26px;
+  pointer-events: none;
+}
+
+.bpRow { position: relative; margin-bottom: 1.6rem; }
+.bpRow:last-of-type { margin-bottom: 0; }
+
+.bpLabel {
+  display: inline-block;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 0.7rem;
+}
+
+.bpLabelNew { color: #d8f26e; }
+
+.bpOldPath { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; opacity: 0.6; }
+
+.bpNodeOld {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.78rem;
+  border: 1px dashed rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  padding: 0.35rem 0.6rem;
+  white-space: nowrap;
+}
+
+.bpDash { width: 16px; border-top: 1px dashed rgba(255, 255, 255, 0.4); }
+
+.bpNewPath { display: flex; align-items: center; gap: 0; flex-wrap: wrap; row-gap: 0.8rem; }
+
+.bpNodeNew {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: 0.7rem 1rem;
+  white-space: nowrap;
+}
+
+.bpNodeCore {
+  border-color: #d8f26e;
+  background: rgba(216, 242, 110, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  white-space: normal;
+}
+
+.bpNodeCore i { font-style: normal; font-size: 0.72rem; color: rgba(255, 255, 255, 0.6); }
+
+.bpNodeLive { border-color: rgba(34, 197, 94, 0.6); background: rgba(34, 197, 94, 0.1); }
+
+.bpLine { flex: 1 0 22px; min-width: 22px; height: 2px; background: #d8f26e; }
+
+.bpNote {
+  position: relative;
+  margin: 1.6rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 60ch;
+}
