@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 /**
- * Übersicht der fünf Design-Varianten — intern, zum Vergleichen und
+ * Übersicht der sechs Design-Varianten — intern, zum Vergleichen und
  * Auswählen. Jede Variante transportiert dieselbe Botschaft (4 Wochen,
  * Festpreis, Risiko-Umkehr, KI als Werkzeug) mit einer anderen Psychologie.
  */
@@ -45,15 +45,22 @@ const VARIANTS = [
     idea: "Dashboard: interaktiver Kostenrechner im Hero, Mono-Ziffern, Vergleichstabelle. Der Regler übergibt die eigene Zahl in den Dialog.",
     colors: ["#f5f7f9", "#0d1b26", "#1552d0"],
   },
+  {
+    href: "/v/substanz",
+    name: "substanz.",
+    tone: "Das stille Studio",
+    idea: "Manifest im Stil einer Premium-Markenberatung, nur greifbar: große Typo, Weißraum, Serifen-Akzente, „Aus A wird B“-Transformationen. Warmes Papier, Tinte, Tannengrün.",
+    colors: ["#f6f4ee", "#191712", "#14594a"],
+  },
 ];
 
 export default function VariantsIndex() {
   return (
     <main className="container legal">
-      <h1>Fünf Design-Varianten</h1>
+      <h1>Sechs Design-Varianten</h1>
       <p>
         Gleiche Botschaft — vier Wochen, Festpreis, „läuft es nicht, zahlen Sie
-        nichts", KI als Werkzeug — in fünf grundverschiedenen Welten. Der
+        nichts", KI als Werkzeug — in sechs grundverschiedenen Welten. Der
         Dialog-Funnel läuft auf jeder Variante voll mit und färbt sich
         automatisch in deren Palette. Zum Vergleichen durchklicken; die
         Hauptseite bleibt unter <Link href="/">vierwochen.de</Link> unverändert.
