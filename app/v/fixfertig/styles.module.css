@@ -61,7 +61,7 @@
    Weiterscrollen, kein Pfeil nötig. */
 .hero {
   text-align: center;
-  padding: clamp(2.4rem, 6vw, 4.6rem) 0 clamp(1rem, 2vw, 1.6rem);
+  padding: clamp(2.4rem, 6vw, 4.6rem) 0 clamp(1.7rem, 3.2vw, 2.6rem);
 }
 
 /* Obergrenze bewusst niedrig: Die längste Fassung der Zeile lautet
@@ -106,47 +106,48 @@
   line-height: 1.68;
 }
 
-.heroCtas {
-  display: flex;
-  gap: 0.8rem;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 2rem;
-}
-
-/* Stille Faktenzeile: kein zweiter Knopf, kein zweiter Beweis — nur die
-   drei Kennzahlen, unaufdringlich unter der Handlung. */
-.heroFacts {
-  margin: 0.9rem 0 0;
-  font-size: 0.86rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  color: #6a6d8c;
-}
-
-.heroFacts span { margin: 0 0.55rem; color: #b6b9d8; }
-
-/* Neugier-Haken zur Methode: greift die Skepsis („vier Wochen — wie das?")
-   auf und führt sie zur Antwort, statt sie stehen zu lassen. */
-.heroHook {
+/* Neugier-Haken zur Methode, jetzt unter den Pillars: mit spürbarem
+   Abstand abgesetzt, damit „Wie geht das?" als eigener Gedanke wirkt,
+   nicht als vierter Chip. */
+.methodLink {
   display: inline-block;
-  margin-top: 0.8rem;
+  margin: 1.5rem 0 0;
   font-size: 0.9rem;
   font-weight: 600;
   color: #6a6d8c;
   text-decoration: none;
 }
 
-.heroHook b { color: #4f46e5; font-weight: 800; }
+.methodLink b { color: #4f46e5; font-weight: 800; }
 
-.heroHook span {
+.methodLink span {
   display: inline-block;
   color: #4f46e5;
   transition: transform 0.2s ease;
 }
 
-.heroHook:hover b { text-decoration: underline; text-underline-offset: 3px; }
-.heroHook:hover span { transform: translateY(2px); }
+.methodLink:hover b { text-decoration: underline; text-underline-offset: 3px; }
+.methodLink:hover span { transform: translateY(2px); }
+
+.heroCtas {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
+/* Stille Faktenzeile: kein zweiter Knopf, kein zweiter Beweis — nur die
+   zwei Kennzahlen, unaufdringlich unter der Handlung. */
+.heroFacts {
+  margin: 0.75rem 0 0;
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #6a6d8c;
+}
+
+.heroFacts span { margin: 0 0.4rem; color: #b6b9d8; }
 
 .ctaBtn {
   font-family: inherit;
@@ -358,7 +359,7 @@
 
 /* Knapp oben: Die Sektion folgt jetzt direkt dem Hero, und die erste Karte
    soll im ersten Bildschirm bereits anschneiden. */
-.showcases { padding: clamp(0.6rem, 2vw, 1.2rem) 0 0; }
+.showcases { padding: clamp(1.1rem, 3vw, 2rem) 0 0; }
 
 /* ---------- Karussell ---------- */
 

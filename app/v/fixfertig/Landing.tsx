@@ -171,12 +171,15 @@ export default function Landing({ variant }: { variant: VariantKey }) {
               </a>
             ))}
           </nav>
+          <a href="#methode" className={s.methodLink}>
+            Wie geht das? <b>Die 2+AI-Methode</b> <span aria-hidden>↓</span>
+          </a>
           <div className={s.heroCtas}>
             <DialogCta className={s.ctaBtn}>Preiseinschätzung erhalten</DialogCta>
           </div>
           <p className={s.heroFacts}>
-            In 10 Sekunden <span aria-hidden>·</span> kostenlos &amp;
-            unverbindlich <span aria-hidden>·</span> ohne E-Mail-Adresse
+            In 10 Sekunden <span aria-hidden>·</span> unverbindlich{" "}
+            <span aria-hidden>·</span> ohne E-Mail-Adresse
           </p>
         </header>
 
