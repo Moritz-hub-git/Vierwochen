@@ -41,15 +41,30 @@ const STARTERS = [
   "Unser Monatsreporting entsteht per Copy-Paste aus mehreren Systemen.",
 ];
 
-/** Vorschläge, die beim Anklicken der Dialogleiste aufsteigen. Ein Klick
- *  schreibt den Satz ins Feld — ergänzen und abschicken macht der Nutzer
- *  selbst. Deshalb sind es ganze Sätze, keine Stichworte. */
+/** Vorschläge, die beim Anklicken der Dialogleiste aufsteigen. Auf der
+ *  Bubble steht die Quintessenz; in die Leiste wandert eine ausformulierte
+ *  Problembeschreibung, die man übernehmen oder weiterschreiben kann. */
 const DOCK_HINTS = [
-  "Unsere Daten liegen in mehreren Excel-Listen.",
-  "Bestellungen gehen im Sammelpostfach unter.",
-  "Die Schichtplanung läuft über Zuruf und Zettel.",
-  "Ein Angebot zu kalkulieren dauert bei uns Tage.",
-  "Kunden rufen an, um den Bestellstatus zu erfahren.",
+  {
+    label: "Daten in Excel-Listen",
+    text: "Wir pflegen unsere Artikel- und Kundendaten in mehreren Excel-Listen. Jede Änderung muss an mehreren Stellen nachgetragen werden, und am Ende weiß niemand sicher, welche Liste gerade stimmt.",
+  },
+  {
+    label: "Bestellungen gehen unter",
+    text: "Bestellungen erreichen uns als PDF oder Mail im Sammelpostfach. Jemand muss sie von Hand ins System übertragen, dabei bleibt regelmäßig etwas liegen und Kunden fragen nach.",
+  },
+  {
+    label: "Planung per Zuruf",
+    text: "Unsere Einsatz- und Schichtplanung läuft über Zuruf, Aushang und Telefon. Wer tauschen will, ruft im Büro an, und Änderungen erreichen nicht zuverlässig alle.",
+  },
+  {
+    label: "Angebote dauern zu lang",
+    text: "Ein Angebot zu kalkulieren dauert bei uns ein bis zwei Tage, weil die Preise aus Erfahrungswerten und alten Angeboten zusammengesucht werden. Schnelle Anfragen verlieren wir dadurch.",
+  },
+  {
+    label: "Kunden fragen ständig nach",
+    text: "Kunden rufen an oder schreiben, um den Stand ihrer Bestellung zu erfahren. Die Auskunft kostet uns täglich Zeit, weil sie erst aus mehreren Stellen zusammengesucht werden muss.",
+  },
 ];
 
 const MAX_CHARS = 1500;
@@ -151,7 +166,6 @@ export default function ChatDock() {
   const [busy, setBusy] = useState(false);
   const [revealing, setRevealing] = useState(false);
   const [booked, setBooked] = useState(false);
-  const [draft, setDraft] = useState("");
   const [dockDraft, setDockDraft] = useState("");
   const [dockFocused, setDockFocused] = useState(false);
   const [sending, setSending] = useState(false);
@@ -159,7 +173,6 @@ export default function ChatDock() {
 
   const dialogIdRef = useRef<string>("");
   const endRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dockInputRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<UiMessage[]>([]);
   const sketchRef = useRef<Sketch | null>(null);
@@ -297,7 +310,7 @@ export default function ChatDock() {
         ]);
       } finally {
         setBusy(false);
-        setTimeout(() => textareaRef.current?.focus(), 50);
+        setTimeout(() => dockInputRef.current?.focus(), 50);
       }
     },
     [busy]
@@ -362,7 +375,7 @@ export default function ChatDock() {
         setOpen(true);
         setSending(false);
         if (text) void send(text);
-        window.setTimeout(() => textareaRef.current?.focus(), 300);
+        window.setTimeout(() => dockInputRef.current?.focus(), 300);
       }, 430);
     },
     [send, fadePageOut]
@@ -393,17 +406,16 @@ export default function ChatDock() {
 
   const submitDock = (e: React.FormEvent) => {
     e.preventDefault();
-    const text = dockDraft;
+    const text = dockDraft.trim();
+    if (open) {
+      // Im Gespräch ist dieselbe Leiste die Antwortzeile.
+      if (!text || busy) return;
+      setDockDraft("");
+      void send(text);
+      return;
+    }
     setDockDraft("");
     openPanel(text || undefined);
-  };
-
-  const submitComposer = (e?: React.FormEvent) => {
-    e?.preventDefault();
-    const text = draft;
-    if (!text.trim()) return;
-    setDraft("");
-    void send(text);
   };
 
   const caseSummary = [sketch?.title, messages.find((m) => m.role === "user")?.display]
@@ -436,34 +448,33 @@ export default function ChatDock() {
 
   return (
     <>
-      {/* Das Dock bleibt eingehängt und blendet weich aus, während das Panel
-          darüber aufblendet — ein Kreuzblenden statt eines harten Sprungs. */}
+      {/* Dieselbe Leiste, zwei Rollen: vor dem Gespräch der Einstieg, im
+          Gespräch die Antwortzeile. Sie wird nie ersetzt, nur umgedeutet. */}
       {!dockSuppressed && (
       <div
-        className={`dock${open ? " is-hidden" : ""}${sending ? " is-sending" : ""}${dockFocused && !dockDraft ? " has-hints" : ""}`}
-        aria-hidden={open}
+        className={`dock${open ? " in-chat" : ""}${sending || (open && (busy || revealing)) ? " is-sending" : ""}${!open && dockFocused && !dockDraft ? " has-hints" : ""}`}
       >
         <div className="dock-stack">
           {/* Beim Anklicken der Leiste poppen Beispiele auf. Ein Klick schreibt
               den Satz ins Feld — abgeschickt wird erst mit Enter, damit man
               vorher noch ergänzen kann. onMouseDown/preventDefault hält den
               Fokus im Feld, sonst verschwänden die Vorschläge vor dem Klick. */}
-          {dockFocused && !dockDraft && (
+          {!open && dockFocused && !dockDraft && (
             <div className="dock-hints" role="group" aria-label="Beispiele zum Übernehmen">
               {DOCK_HINTS.map((hint, i) => (
                 <button
-                  key={hint}
+                  key={hint.label}
                   type="button"
                   className="dock-hint"
                   style={{ animationDelay: `${i * 65}ms` }}
                   tabIndex={open ? -1 : undefined}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => {
-                    setDockDraft(hint);
+                    setDockDraft(hint.text);
                     dockInputRef.current?.focus();
                   }}
                 >
-                  {hint}
+                  {hint.label}
                 </button>
               ))}
             </div>
@@ -478,21 +489,26 @@ export default function ChatDock() {
               type="text"
               value={dockDraft}
               maxLength={MAX_CHARS}
-              tabIndex={open ? -1 : undefined}
               onChange={(e) => setDockDraft(e.target.value)}
               onFocus={() => setDockFocused(true)}
               onBlur={() => setDockFocused(false)}
-              placeholder=""
-              aria-label="Beschreiben Sie Ihr Ziel oder Ihr Problem"
+              placeholder={
+                open
+                  ? messages.length === 0
+                    ? "Ihr Ziel oder Problem in ein, zwei Sätzen …"
+                    : "Ihre Antwort …"
+                  : ""
+              }
+              aria-label={open ? "Ihre Antwort" : "Beschreiben Sie Ihr Ziel oder Ihr Problem"}
             />
-            {!dockDraft && !dockFocused && (
+            {!open && !dockDraft && !dockFocused && (
               <span className="dock-type" aria-hidden>
                 {typed}
                 <i className="dock-caret" />
               </span>
             )}
           </span>
-          <button type="submit" className="dock-send" tabIndex={open ? -1 : undefined} aria-label="Einschätzung starten">
+          <button type="submit" className="dock-send" aria-label={open ? "Antwort senden" : "Einschätzung starten"}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <path d="m5 12 14 0M13 6l6 6-6 6" />
             </svg>
@@ -503,38 +519,29 @@ export default function ChatDock() {
       )}
 
       {open && (
-        <section className="panel" role="dialog" aria-modal="true" aria-label="Projekt-Dialog">
-          <div className="panel-head">
-            <div className="panel-person">
-              <Avatar />
-              <span className="panel-person-text">
-                <strong>KI-Projektberater</strong>
-                <span>KI auf Basis echter Projektdaten — Moritz liest jede Skizze</span>
-              </span>
-            </div>
-            <button type="button" className="icon-btn" onClick={() => setOpen(false)} aria-label="Dialog minimieren">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            </button>
-          </div>
-
-          <div className="panel-goal">
-            <span className="panel-goal-label">
-              <span className="goal-full">Ziel: Lösungsskizze&nbsp;+ Zeitplan&nbsp;+ Preisschätzung</span>
-              <span className="goal-short">Lösungsskizze &amp; Preis</span>
-            </span>
-            <span className="panel-goal-meta">
-              {capturedPoints > 0 && phase !== "result" && (
-                <span className="goal-count" aria-live="polite">
-                  {capturedPoints} Punkte erfasst
-                </span>
-              )}
-              <span className={`panel-goal-status${phase === "result" ? " done" : ""}`}>{goalStatus}</span>
-            </span>
-          </div>
-          <div className="panel-progress" aria-hidden>
+        <section className="panel" aria-label="Projekt-Dialog">
+          {/* Statt einer Kopfleiste nur ein Haarstrich unter der Navigation:
+              Er wächst mit dem Gespräch und trägt den Fortschritt, ohne dass
+              ein zweiter Rahmen entsteht. Die Meta-Zeile darunter bleibt so
+              zurückhaltend, dass sie als Fußnote der Seite liest. */}
+          <div className="chat-progress" aria-hidden>
             <span style={{ transform: `scaleX(${progress})` }} />
+          </div>
+          <div className="chat-meta">
+            <span className={`chat-status${phase === "result" ? " done" : ""}`}>
+              {goalStatus}
+              {capturedPoints > 0 && phase !== "result" && (
+                <i aria-live="polite"> · {capturedPoints} Punkte erfasst</i>
+              )}
+            </span>
+            <button
+              type="button"
+              className="chat-close"
+              onClick={() => setOpen(false)}
+              aria-label="Gespräch schließen und zur Seite zurück"
+            >
+              Zurück zur Seite
+            </button>
           </div>
 
           <div className="stream">
@@ -566,10 +573,9 @@ export default function ChatDock() {
                 {m.role === "user" ? (
                   <div className="msg user">{m.display}</div>
                 ) : (
-                  <div className="msg-row">
-                    <Avatar />
-                    <div className={`msg assistant${m.error ? " error" : ""}`}>{m.display}</div>
-                  </div>
+                  /* Die Antwort ist Text auf der Seite, keine Sprechblase —
+                     das hält den Dialog als Teil der Seite statt als Fenster. */
+                  <div className={`msg assistant${m.error ? " error" : ""}`}>{m.display}</div>
                 )}
                 {/* Die Skizze erscheint bewusst NUR am Ende (Rücksprache
                     2026-08-14): Im Verlauf lenkte die mitwachsende Karte vom
@@ -582,12 +588,9 @@ export default function ChatDock() {
             ))}
 
             {busy && (
-              <div className="msg-row">
-                <Avatar />
-                <div className="typing" aria-label="Antwort wird erstellt">
-                  <span className="typing-dots"><i /><i /><i /></span>
-                  <span className="typing-label">{BUSY_LABELS[busyLabelIdx]}</span>
-                </div>
+              <div className="typing" aria-label="Antwort wird erstellt">
+                <span className="typing-dots"><i /><i /><i /></span>
+                <span className="typing-label">{BUSY_LABELS[busyLabelIdx]}</span>
               </div>
             )}
 
@@ -629,36 +632,8 @@ export default function ChatDock() {
 
             <div ref={endRef} />
           </div>
-
-          {/* Während der Berater arbeitet, sinkt die Eingabezeile weg: Der
-              Blick bleibt bei der entstehenden Antwort, nicht bei einem
-              gesperrten Feld. Sie kommt zurück, sobald der Text steht. */}
-          <form
-            className={`composer${busy || revealing ? " is-away" : ""}`}
-            onSubmit={submitComposer}
-          >
-            <textarea
-              ref={textareaRef}
-              rows={1}
-              value={draft}
-              maxLength={MAX_CHARS}
-              disabled={busy}
-              onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  submitComposer();
-                }
-              }}
-              placeholder={messages.length === 0 ? "Ihr Ziel oder Problem in ein, zwei Sätzen …" : "Ihre Antwort …"}
-              aria-label="Ihre Nachricht"
-            />
-            <button type="submit" className="dock-send" disabled={busy || !draft.trim()} aria-label="Senden">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <path d="m5 12 14 0M13 6l6 6-6 6" />
-              </svg>
-            </button>
-          </form>
+          {/* Keine eigene Eingabezeile mehr: Die Leiste unten ist dieselbe,
+              mit der das Gespräch begonnen hat. */}
         </section>
       )}
     </>

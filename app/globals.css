@@ -1366,13 +1366,26 @@ button, input, textarea, select {
 
 .dock.has-hints::before { opacity: 1; }
 
-/* Beim Abschicken sinkt die Leiste nach unten weg, bevor der Verlauf aufsteigt. */
+/* Beim Abschicken sinkt die Leiste nach unten weg, bevor der Verlauf aufsteigt.
+   Dasselbe gilt, während der Berater arbeitet — sie kommt zurück, sobald die
+   Antwort steht. */
 .dock.is-sending {
   opacity: 0;
   transform: translateY(34px);
 }
 
 .dock.is-sending .dock-bar { pointer-events: none; }
+
+/* Im Gespräch ist dieselbe Leiste die Antwortzeile: kein Pulsieren mehr,
+   und ein ruhiger Verlauf darunter, damit der Text weich darunter
+   verschwindet statt an einer Kante abzuschneiden. */
+.dock.in-chat .dock-bar { animation: none; }
+
+.dock.in-chat::before {
+  opacity: 1;
+  height: 200px;
+  background: linear-gradient(to top, var(--bg) 42%, transparent);
+}
 
 /* Leiste und Vorschläge stehen übereinander in einer Spalte, damit die
    Bubbles beim Fokus über der Leiste aufsteigen können. */
@@ -1386,12 +1399,14 @@ button, input, textarea, select {
 
 /* Von der Leiste aufsteigender Stapel: erster Vorschlag unten, direkt über
    der Eingabe — column-reverse dreht die Reihenfolge, damit die Staffelung
-   von unten nach oben läuft. */
+   von unten nach oben läuft. Linksbündig an der Kante der Leiste, damit
+   eine Kante entsteht statt einer schwebenden Mitte. */
 .dock-hints {
   display: flex;
   flex-direction: column-reverse;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
+  padding-left: 0.3rem;
   pointer-events: auto;
 }
 
@@ -1399,16 +1414,16 @@ button, input, textarea, select {
    und großer Text dahinter würde sie sonst unruhig wirken lassen. */
 .dock-hint {
   font: inherit;
-  font-size: 0.9rem;
-  font-weight: 500;
-  line-height: 1.45;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
   text-align: left;
   max-width: min(560px, 100%);
-  color: var(--text-soft);
+  color: var(--text);
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 0.62rem 1.05rem;
+  border-radius: 999px;
+  padding: 0.72rem 1.3rem;
   cursor: pointer;
   box-shadow: var(--shadow-md);
   animation: hintPop 0.52s cubic-bezier(0.22, 1, 0.3, 1) both;
@@ -1645,11 +1660,55 @@ button, input, textarea, select {
   .panel, .panel-head, .panel-goal, .stream, .composer { animation: none; }
 }
 
-/* Kopf, Zielzeile und Eingabezeile teilen die zentrierte Innenbreite. */
-.panel-head,
-.panel-goal,
-.composer {
-  padding-inline: var(--chat-pad);
+/* ---------- Minimalistischer Chat-Rahmen ----------
+   Kein Kopfbereich, keine zweite Leiste: nur ein Haarstrich, der den
+   Fortschritt trägt, und eine Fußnotenzeile darunter. */
+
+.chat-progress {
+  height: 2px;
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  overflow: hidden;
+}
+
+.chat-progress span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transform-origin: left center;
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.chat-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem var(--chat-pad);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  animation: fadeIn 0.5s ease 0.2s backwards;
+}
+
+.chat-status i { font-style: normal; opacity: 0.75; }
+.chat-status.done { color: var(--accent); font-weight: 600; }
+
+.chat-close {
+  font: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.chat-close:hover { color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-meta { animation: none; }
+  .chat-progress span { transition: none; }
 }
 
 /* Schließt direkt an die stehengebliebene Navigation an: durchscheinend
@@ -1746,30 +1805,25 @@ button, input, textarea, select {
   white-space: nowrap;
 }
 
+/* Der Verlauf beginnt oben links und läuft nach unten — wie ein Text, der
+   auf der Seite entsteht. Unten bleibt so viel Luft, dass die schwebende
+   Leiste nichts verdeckt. */
 .stream {
   flex: 1;
   overflow-y: auto;
-  padding: 1.7rem var(--chat-pad) 1.2rem;
+  padding: 2.2rem var(--chat-pad) calc(var(--dock-gap) + 6rem);
   display: flex;
   flex-direction: column;
-  gap: 1.05rem;
+  gap: 1.6rem;
   scroll-behavior: smooth;
 }
 
-/* Zwei Breiten, ein System: Das GESPRÄCH läuft in einer ruhigen Lesespalte
-   (Zeilen über ~90 Zeichen liest niemand gern), das ERGEBNIS bricht als
-   breites Artefakt aus. Dieser Wechsel ist die Dramaturgie der Seite. */
+/* Die volle Spalte steht zur Verfügung; die Ausrichtung entscheidet, ob ein
+   Eintrag links (Antwort) oder rechts (eigene Nachricht) sitzt. */
 .stream > * {
   width: 100%;
-  max-width: 54rem;
-  margin-inline: auto;
+  max-width: none;
 }
-
-.stream > .solution { max-width: none; }
-
-/* Das Gespräch sitzt über der Eingabezeile statt oben im Leeren: Solange
-   wenig Inhalt da ist, schiebt der erste Eintrag alles nach unten. */
-.stream > *:first-child { margin-top: auto; }
 
 .msg-row {
   display: flex;
@@ -1795,47 +1849,46 @@ button, input, textarea, select {
 }
 
 .msg {
-  padding: 0.9rem 1.2rem;
-  border-radius: 20px;
-  font-size: 0.975rem;
   line-height: 1.62;
   animation: msgIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 
+/* Die eigene Nachricht ist eine Blase und sitzt rechts — sie ist gesagt. */
 .msg.user {
   align-self: flex-end;
-  margin-left: auto;
-  /* Nie über die Lesebreite hinaus, auch wenn die Spalte breit ist. */
-  max-width: min(80%, 34rem);
+  max-width: min(80%, 32rem);
+  padding: 0.85rem 1.15rem;
+  border-radius: 20px;
+  border-bottom-right-radius: 7px;
+  font-size: 0.95rem;
   background: var(--accent);
   color: var(--on-accent);
-  border-bottom-right-radius: 7px;
 }
 
+/* Die Antwort ist kein Kasten, sondern Text auf der Seite: links, etwas
+   größer als die eigene Nachricht, in ruhiger Lesebreite. */
 .msg.assistant {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-bottom-left-radius: 6px;
-  box-shadow: var(--shadow-sm);
+  align-self: flex-start;
+  max-width: 46rem;
+  font-size: clamp(1.05rem, 1.5vw, 1.22rem);
+  line-height: 1.68;
+  color: var(--text);
+  letter-spacing: -0.005em;
 }
 
 .msg.error {
-  background: transparent;
-  border: 1px dashed var(--danger);
   color: var(--danger);
+  font-size: 1rem;
 }
 
 .typing {
+  align-self: flex-start;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 1rem 1.15rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  border-bottom-left-radius: 6px;
+  gap: 0.7rem;
+  color: var(--text-muted);
 }
 
 .typing-dots {
