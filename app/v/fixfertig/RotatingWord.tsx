@@ -1,84 +1,78 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import s from "./styles.module.css";
 
 /**
- * Wechselndes Wort in der Hauptzeile: „… die Ihre Kunden begeistern."
+ * Wechselnder Adressat als Schreibmaschine: Das Wort steht richtig
+ * geschrieben da, wird nach einer Weile Buchstabe für Buchstabe
+ * weggenommen und das nächste hingeschrieben — wie von Hand radiert und
+ * neu geschrieben. Die Schreibmarke erscheint nur, während tatsächlich
+ * geschrieben oder gelöscht wird; im Stand ist die Zeile ruhig.
  *
- * Das alte Wort wird von links nach rechts weggewischt, das neue wächst in
- * derselben Richtung wieder herein (clip-path). Die Breite des Platzhalters
- * wird gemessen und weich mitgeführt, damit „begeistern." nicht springt.
- * Vor dem Mounten steht das erste Wort ganz normal im Textfluss — so ist
- * die Zeile serverseitig vollständig und bleibt ohne JavaScript lesbar.
+ * Serverseitig steht das erste Wort vollständig im Textfluss — die Zeile
+ * ist ohne JavaScript komplett, die Timer starten erst im Browser.
  */
 
-export default function RotatingWord({
-  words,
-  interval = 2600,
-}: {
-  words: string[];
-  interval?: number;
-}) {
-  const [mounted, setMounted] = useState(false);
-  const [index, setIndex] = useState(0);
-  const [leaving, setLeaving] = useState<number | null>(null);
-  const [width, setWidth] = useState<number>();
-  const refs = useRef<(HTMLSpanElement | null)[]>([]);
-  const current = useRef(0);
+const TYPE_MS = 52;
+const DELETE_MS = 24;
+const HOLD_MS = 2300;
+const PAUSE_MS = 240;
 
-  useEffect(() => setMounted(true), []);
+export default function RotatingWord({ words }: { words: string[] }) {
+  const [text, setText] = useState(words[0]);
+  const [active, setActive] = useState(false);
+  const timer = useRef<number>(0);
 
-  // Bei „Bewegung reduzieren" bleibt das erste Wort einfach stehen.
   useEffect(() => {
-    if (!mounted) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const id = window.setInterval(() => {
-      const from = current.current;
-      const to = (from + 1) % words.length;
-      current.current = to;
-      setLeaving(from);
-      setIndex(to);
-    }, interval);
-    return () => window.clearInterval(id);
-  }, [mounted, words.length, interval]);
 
-  // Das abgehende Wort wird nach seiner Animation wieder geparkt.
-  useEffect(() => {
-    if (leaving === null) return;
-    const id = window.setTimeout(() => setLeaving(null), 520);
-    return () => window.clearTimeout(id);
-  }, [leaving]);
+    let word = 0;
+    let chars = words[0].length;
+    let deleting = true;
 
-  useLayoutEffect(() => {
-    if (!mounted) return;
-    const el = refs.current[index];
-    if (el) setWidth(el.offsetWidth);
-  }, [mounted, index]);
+    const step = () => {
+      if (deleting) {
+        chars -= 1;
+        setText(words[word].slice(0, chars));
+        if (chars <= 0) {
+          deleting = false;
+          word = (word + 1) % words.length;
+          timer.current = window.setTimeout(step, PAUSE_MS);
+        } else {
+          timer.current = window.setTimeout(step, DELETE_MS);
+        }
+      } else {
+        chars += 1;
+        setText(words[word].slice(0, chars));
+        if (chars >= words[word].length) {
+          deleting = true;
+          setActive(false);
+          timer.current = window.setTimeout(() => {
+            setActive(true);
+            step();
+          }, HOLD_MS);
+        } else {
+          timer.current = window.setTimeout(step, TYPE_MS);
+        }
+      }
+    };
 
-  // Erster Durchgang (auch ohne JavaScript): schlicht das erste Wort.
-  if (!mounted) {
-    return <span className={s.rotStatic}>{words[0]}</span>;
-  }
+    timer.current = window.setTimeout(() => {
+      setActive(true);
+      step();
+    }, HOLD_MS);
+
+    return () => window.clearTimeout(timer.current);
+  }, [words]);
 
   return (
-    <span className={s.rot} style={width ? { width } : undefined}>
-      {words.map((word, i) => {
-        const state =
-          i === index ? s.rotActive : i === leaving ? s.rotLeaving : "";
-        return (
-          <span
-            key={word}
-            ref={(el) => {
-              refs.current[i] = el;
-            }}
-            className={`${s.rotWord} ${state}`}
-            aria-hidden={i !== index}
-          >
-            {word}
-          </span>
-        );
-      })}
+    <span className={s.rotType}>
+      {text}
+      <i
+        className={`${s.typeCaret}${active ? "" : ` ${s.typeCaretIdle}`}`}
+        aria-hidden
+      />
     </span>
   );
 }

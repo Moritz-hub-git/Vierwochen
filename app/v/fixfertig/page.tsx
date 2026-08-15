@@ -92,14 +92,14 @@ const METHOD = [
   },
 ];
 
-/** Status-Pille „live" — weiß hinterlegt, grüner Punkt. Skaliert über die
+/** Status-Pille — weiß hinterlegt, grüner Punkt. Skaliert über die
  *  vererbte Schriftgröße automatisch mit ihrem Kontext (kleine Subline,
  *  große Versprechen-Zeile), ohne eigene Größenvarianten zu brauchen. */
-function LivePill() {
+function LivePill({ children = "live" }: { children?: React.ReactNode }) {
   return (
     <span className={s.livePill}>
       <i className={s.liveDot} aria-hidden />
-      live
+      {children}
     </span>
   );
 }
@@ -129,16 +129,25 @@ export default function FixfertigPage() {
             die <RotatingWord words={AUDIENCES} /> begeistern.
           </h1>
           <p className={s.sub}>
-            In vier Wochen <LivePill /> — zum Festpreis. Läuft es nicht,
-            kostet es nichts.
+            <LivePill>Live in vier Wochen</LivePill> — zum Festpreis.
           </p>
           <div className={s.heroCtas}>
             <DialogCta className={s.ctaBtn}>Preiseinschätzung erhalten</DialogCta>
           </div>
+          {/* Reibungskiller direkt unter der Handlung: keine E-Mail, keine
+              Verpflichtung — die Angst vor dem Klick ist die eigentliche
+              Hürde, nicht das Interesse. */}
           <p className={s.heroFacts}>
-            4 Wochen <span aria-hidden>·</span> Festpreis{" "}
-            <span aria-hidden>·</span> 100&nbsp;% Ihr Eigentum
+            In 10 Sekunden <span aria-hidden>·</span> kostenlos &amp;
+            unverbindlich <span aria-hidden>·</span> ohne E-Mail-Adresse
           </p>
+          {/* Der Neugier-Haken: Wer „vier Wochen" liest, denkt „wie soll das
+              gehen?" — genau diese Frage wird hier aufgegriffen und zur
+              Methode geführt, statt sie unbeantwortet stehen zu lassen. */}
+          <a href="#methode" className={s.heroHook}>
+            Klingt zu schnell, um gut zu sein?{" "}
+            <b>So funktioniert die 2+AI-Methode</b> <span aria-hidden>↓</span>
+          </a>
         </header>
 
         {/* ---------- Showcases: folgen direkt auf den Hero und schneiden im

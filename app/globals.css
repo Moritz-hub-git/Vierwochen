@@ -1551,13 +1551,15 @@ html[data-input="mouse"] :focus {
   .dock-bar textarea { transition: none; }
 }
 
-/* Auf schmalen Geräten reicht Sternentfernen allein nicht: „Was kostet Sie
-   gerade am meisten Zeit?" ist mit 38 Zeichen selbst ohne Icon noch zu
-   lang für eine Zeile bei Fließtextgröße. Etwas kleinere Schrift und
-   knappere Ränder holen die restlichen Pixel. */
+/* Auf schmalen Geräten: Die Schrift darf NIE unter 16px fallen — iOS zoomt
+   sonst beim Fokussieren in die Seite hinein (genau das war der Zoom-Fehler
+   beim Antippen der Leiste). Den Platz für die einzeilige Frage holen
+   stattdessen engere Abstände und ein kompakterer Senden-Knopf. */
 @media (max-width: 420px) {
-  .dock-bar { padding-left: 0.9rem; }
-  .dock-bar textarea { font-size: 0.92rem; }
+  .dock { padding-inline: 0.7rem; }
+  .dock-bar { padding-left: 0.8rem; gap: 0.45rem; }
+  .dock-bar textarea { font-size: 16px; }
+  .dock-send { width: 40px; height: 40px; }
 }
 
 /* Die Frage steht fest in der Leiste — kein wechselndes Banner mehr. */
