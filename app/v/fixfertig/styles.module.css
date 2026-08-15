@@ -36,7 +36,15 @@
   text-decoration: none;
 }
 
-.mark i { font-style: normal; color: #4f46e5; }
+/* Derselbe Verlauf wie „live." im Versprechen — die Marke trägt ihn
+   dauerhaft, damit beide dieselbe Handschrift haben. */
+.mark i {
+  font-style: normal;
+  background: linear-gradient(100deg, #4f46e5, #ff6b5e);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
 
 .navLinks { display: flex; gap: 1.5rem; align-items: center; font-size: 0.92rem; font-weight: 600; }
 .navLinks a { color: #6a6d8c; text-decoration: none; transition: color 0.2s ease; }

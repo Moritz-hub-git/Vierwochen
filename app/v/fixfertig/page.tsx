@@ -258,7 +258,7 @@ export default function FixfertigPage() {
           <Link href="/impressum">Impressum</Link>
           <Link href="/datenschutz">Datenschutz</Link>
           <Link href="/termin">Termin direkt buchen</Link>
-          <Link href="/v">← Übersicht</Link>
+          <Link href="/termin">Kontakt</Link>
         </footer>
       </div>
     </div>

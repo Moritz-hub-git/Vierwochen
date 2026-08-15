@@ -374,10 +374,49 @@ export default function ChatDock() {
     [send, fadePageOut]
   );
 
+  /** Verlassen heißt hier: aufräumen. Der nächste Einstieg beginnt frisch. */
+  const closeChat = useCallback(() => {
+    setOpen(false);
+    setMessages([]);
+    setSketch(null);
+    setResult(null);
+    setPhase("question");
+    setInput(null);
+    setBooked(false);
+    setAnimateIdx(null);
+    setDockDraft("");
+    dialogIdRef.current =
+      typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `d-${Date.now()}-${Math.floor(Math.random() * 1e9)}`;
+  }, []);
+
   // Beim Verlassen des Chats kommt die Seite genauso weich zurück.
   useEffect(() => {
     if (!open) restorePage();
   }, [open, restorePage]);
+
+  /**
+   * Die Navigation ist im Gespräch der Rückweg: Ein Klick auf das Logo (oder
+   * einen Sprungmarken-Link) beendet den Chat, statt ins Leere zu springen.
+   * Links auf andere Seiten dürfen weiterhin navigieren.
+   */
+  useEffect(() => {
+    if (!open) return;
+    const nav = document.querySelector(".vw-nav-pinned");
+    if (!nav) return;
+    const onClick = (e: Event) => {
+      const link = (e.target as HTMLElement).closest("a");
+      if (!link) return;
+      const href = link.getAttribute("href") ?? "";
+      const staysHere = href.startsWith("#") || href === window.location.pathname;
+      if (!staysHere && href !== "" && !href.startsWith("/v")) return;
+      e.preventDefault();
+      closeChat();
+    };
+    nav.addEventListener("click", onClick);
+    return () => nav.removeEventListener("click", onClick);
+  }, [open, closeChat]);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -391,11 +430,11 @@ export default function ChatDock() {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") closeChat();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, closeChat]);
 
   const submitDock = (e: React.FormEvent) => {
     e.preventDefault();
@@ -415,6 +454,9 @@ export default function ChatDock() {
     .filter(Boolean)
     .join(" — ");
 
+
+  // An der ersten Antwort hängt die Begrüßung.
+  const firstAssistantIdx = messages.findIndex((m) => m.role === "assistant");
 
   const suggestedAgenda = sketch?.open?.[0] ?? "";
 
@@ -501,37 +543,13 @@ export default function ChatDock() {
 
       {open && (
         <section className="panel" aria-label="Projekt-Dialog">
-          {/* Fortschrittslinie und Zählerzeile sind vorerst raus (Wunsch
-              2026-08-15): Erst soll die Wirkung ohne sie beurteilt werden.
-              Der Rückweg bleibt als einziges Bedienelement stehen. */}
-          <div className="chat-meta">
-            <button
-              type="button"
-              className="chat-close"
-              onClick={() => setOpen(false)}
-              aria-label="Gespräch schließen und zur Seite zurück"
-            >
-              Zurück zur Seite
-            </button>
-          </div>
+          {/* Kein Rahmen, keine Bedienleiste: Zurück geht es über die
+              Navigation, die ohnehin stehen bleibt. */}
 
           <div className="stream">
             {/* Keine Begrüßungsnachricht (Rücksprache 2026-08-14): Das Gespräch
                 beginnt mit dem, was der Nutzer selbst geschrieben hat. Die
                 KI-Offenlegung (EU-KI-VO Art. 50) trägt der Panel-Kopf. */}
-            {/* Begrüßung: steht als erstes im Verlauf und sagt, was jetzt
-                passiert. Sie ist bewusst KEINE Nachricht im Sinne der
-                Historie — sie geht nicht an das Modell zurück. */}
-            <div className="chat-greeting">
-              <strong>
-                <span aria-hidden>👋</span> Willkommen!
-              </strong>
-              <span>
-                Lassen Sie uns Ihre Lösung skizzieren — ein paar kurze Fragen,
-                dann steht Ihr Zeitplan mit Datum und eine Preisschätzung.
-              </span>
-            </div>
-
             {messages.length === 0 && !busy && (
               <div className="starters">
                 <span className="starters-label">Zum Start: ein typischer Fall — oder schreiben Sie unten einfach los.</span>
@@ -559,14 +577,26 @@ export default function ChatDock() {
                 ) : (
                   /* Die Antwort ist Text auf der Seite, keine Sprechblase —
                      das hält den Dialog als Teil der Seite statt als Fenster.
-                     Der jeweils neueste Zug wird herausgeschrieben. */
-                  <div className={`msg assistant${m.error ? " error" : ""}`}>
-                    <StreamedText
-                      text={m.display}
-                      animate={i === animateIdx && !m.error}
-                      onTick={scrollToEnd}
-                    />
-                  </div>
+                     Der jeweils neueste Zug wird herausgeschrieben. Die
+                     Begrüßung gehört zur ersten Antwort und erscheint mit
+                     ihr, statt vorher allein dazustehen. */
+                  <>
+                    {i === firstAssistantIdx && (
+                      <div className="chat-greeting">
+                        <strong>
+                          <span aria-hidden>👋</span> Willkommen!
+                        </strong>
+                        <span>Lassen Sie uns Ihre Lösung skizzieren.</span>
+                      </div>
+                    )}
+                    <div className={`msg assistant${m.error ? " error" : ""}`}>
+                      <StreamedText
+                        text={m.display}
+                        animate={i === animateIdx && !m.error}
+                        onTick={scrollToEnd}
+                      />
+                    </div>
+                  </>
                 )}
                 {/* Die Skizze erscheint bewusst NUR am Ende (Rücksprache
                     2026-08-14): Im Verlauf lenkte die mitwachsende Karte vom
@@ -578,10 +608,12 @@ export default function ChatDock() {
               </Fragment>
             ))}
 
-            {/* Denkanzeige: ein einzelner pulsierender Punkt, wie man ihn
-                aus gängigen Chat-Oberflächen kennt — kein Kasten, kein Text. */}
+            {/* Denkanzeige: drei Punkte, die nacheinander anschwellen —
+                kein Kasten, kein Text. */}
             {busy && (
               <div className="thinking" aria-label="Antwort wird erstellt">
+                <span className="thinking-dot" />
+                <span className="thinking-dot" />
                 <span className="thinking-dot" />
               </div>
             )}

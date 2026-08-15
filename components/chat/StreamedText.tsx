@@ -3,12 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Schreibt Text wortweise heraus, wie ein Modell, das gerade antwortet.
+ * Schreibt Text heraus, wie ein Modell, das gerade antwortet.
  *
  * Die Antwort kommt vom Server am Stück; das Herausschreiben passiert hier
- * im Browser. Nur der jeweils neueste Zug wird geschrieben — ältere stehen
- * sofort vollständig da, damit ein Rückblick nicht erneut tippt.
+ * im Browser. Getaktet wird über die Bildfrequenz statt über einen Timer:
+ * Pro Bild wächst der Text um einen Bruchteil, wodurch er gleichmäßig
+ * fließt, statt in Wortsprüngen zu stocken. Nur der jeweils neueste Zug
+ * wird geschrieben — ältere stehen sofort vollständig da.
  */
+
+/** Zeichen pro Sekunde — schnell genug zum Mitlesen, ruhig genug zum Sehen. */
+const SPEED = 105;
+
 export default function StreamedText({
   text,
   animate,
@@ -18,41 +24,41 @@ export default function StreamedText({
   animate: boolean;
   onTick?: () => void;
 }) {
-  const [shown, setShown] = useState(animate ? "" : text);
+  const [count, setCount] = useState(animate ? 0 : text.length);
   const tickRef = useRef(onTick);
   tickRef.current = onTick;
 
   useEffect(() => {
     if (!animate) {
-      setShown(text);
+      setCount(text.length);
       return;
     }
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setShown(text);
+      setCount(text.length);
       return;
     }
 
-    // Wortweise statt zeichenweise: Das liest sich flüssig mit, statt zu
-    // flackern. Die Trennzeichen bleiben als eigene Stücke erhalten, damit
-    // Zeilenumbrüche im Text nicht verloren gehen.
-    const parts = text.split(/(\s+)/);
-    let i = 0;
-    const id = window.setInterval(() => {
-      i += 1;
-      setShown(parts.slice(0, i).join(""));
-      tickRef.current?.();
-      if (i >= parts.length) window.clearInterval(id);
-    }, 34);
+    let frame = 0;
+    let start = 0;
+    let lastScroll = 0;
 
-    return () => window.clearInterval(id);
+    const step = (now: number) => {
+      if (!start) start = now;
+      const shown = Math.min(text.length, ((now - start) / 1000) * SPEED);
+      setCount(shown);
+      // Nicht bei jedem Bild scrollen — das ruckelt mehr, als es hilft.
+      if (now - lastScroll > 120) {
+        lastScroll = now;
+        tickRef.current?.();
+      }
+      if (shown < text.length) frame = requestAnimationFrame(step);
+      else tickRef.current?.();
+    };
+
+    setCount(0);
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
   }, [text, animate]);
 
-  const running = animate && shown.length < text.length;
-
-  return (
-    <>
-      {shown}
-      {running && <i className="stream-caret" aria-hidden />}
-    </>
-  );
+  return <>{text.slice(0, Math.floor(count))}</>;
 }
