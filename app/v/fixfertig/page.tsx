@@ -3,7 +3,8 @@ import Link from "next/link";
 import DialogCta from "@/components/v/DialogCta";
 import Skin from "@/components/v/Skin";
 import RotatingWord from "./RotatingWord";
-import { Cockpit, Schichtplan, Portal } from "./Mockups";
+import Showcases from "./Showcases";
+import { Cockpit, Schichtplan, Portal, Rechner, Protokoll, Lager } from "./Mockups";
 import s from "./styles.module.css";
 
 /**
@@ -32,22 +33,37 @@ const SHOWCASES = [
     visual: <Cockpit />,
     branch: "Maschinenbau · 38 Mitarbeitende",
     title: "Auftragscockpit",
-    text: "Sechs Excel-Listen und drei Wahrheiten wurden eine Übersicht, die morgens um sieben stimmt — inklusive Liefertermin-Ampel für den Vertrieb.",
-    metrics: ["4 Wochen bis live", "6 Listen abgelöst", "täglich genutzt"],
+    text: "Sechs Excel-Listen wurden eine Übersicht, die morgens um sieben stimmt — mit Liefertermin-Ampel für den Vertrieb.",
   },
   {
     visual: <Schichtplan />,
     branch: "Logistik · 120 Mitarbeitende",
     title: "Schichtplanung",
-    text: "Zuruf, Zettel und Rückfragen wurden ein Plan, den jeder auf dem Handy sieht. Wer tauschen will, tauscht — ohne dass jemand telefonieren muss.",
-    metrics: ["4 Wochen bis live", "0 Rückfragen im Büro", "mobil zuerst"],
+    text: "Zuruf und Zettel wurden ein Plan, den jeder auf dem Handy sieht. Wer tauschen will, tauscht — ohne Anruf im Büro.",
   },
   {
     visual: <Portal />,
     branch: "Großhandel · 65 Mitarbeitende",
     title: "Kundenportal",
-    text: "Ein Postfach voller PDFs wurde ein Portal, in dem Kunden Preise, Bestellungen und Lieferscheine selbst finden — angebunden an die bestehende Warenwirtschaft.",
-    metrics: ["4 Wochen bis live", "an ERP angebunden", "Self-Service"],
+    text: "Statt Postfach voller PDFs finden Kunden Preise, Bestellungen und Lieferscheine selbst — angebunden an die Warenwirtschaft.",
+  },
+  {
+    visual: <Rechner />,
+    branch: "Elektrotechnik · 24 Mitarbeitende",
+    title: "Angebotsrechner",
+    text: "Aus Erfahrungswerten im Kopf wurde eine Kalkulation, die jeder im Vertrieb bedienen kann — Angebot in Minuten statt Tagen.",
+  },
+  {
+    visual: <Protokoll />,
+    branch: "Anlagenbau · 51 Mitarbeitende",
+    title: "Prüfprotokolle",
+    text: "Die Monteure haken auf dem Telefon ab, das Protokoll ist fertig, bevor der Wagen vom Hof rollt. Kein Abtippen mehr.",
+  },
+  {
+    visual: <Lager />,
+    branch: "Handel · 30 Mitarbeitende",
+    title: "Lager & Inventur",
+    text: "Bestände in Echtzeit statt Stichtagszählung — inklusive Warnung, bevor ein Artikel tatsächlich ausgeht.",
   },
 ];
 
@@ -93,10 +109,6 @@ export default function FixfertigPage() {
       <div className={s.wrap}>
         {/* ---------- Hero ---------- */}
         <header className={s.hero}>
-          <span className={s.badge}>
-            <i className={s.dot} aria-hidden /> Studio für digitale Produkte ·
-            Mittelstand
-          </span>
           <h1 className={s.h1}>
             Wir bauen digitale Produkte,
             <br />
@@ -170,32 +182,12 @@ export default function FixfertigPage() {
             <span className={s.kicker}>Arbeiten</span>
             <h2 className={s.h2}>Was in vier Wochen entsteht</h2>
             <p className={s.sectionLead}>
-              Drei typische Produkte aus dem Mittelstand — jedes an einem
-              Ablauf gebaut, der vorher Zeit gekostet hat.
+              Typische Produkte aus dem Mittelstand — jedes an einem Ablauf
+              gebaut, der vorher Zeit gekostet hat. Zum Durchziehen.
             </p>
           </div>
 
-          {SHOWCASES.map((c, i) => (
-            <article
-              key={c.title}
-              className={`${s.case} ${i % 2 === 1 ? s.caseFlip : ""}`}
-            >
-              <div className={s.caseVisual}>
-                <span className={s.placeholderTag}>Platzhalter</span>
-                {c.visual}
-              </div>
-              <div className={s.caseBody}>
-                <span className={s.caseBranch}>{c.branch}</span>
-                <h3 className={s.caseTitle}>{c.title}</h3>
-                <p className={s.caseText}>{c.text}</p>
-                <ul className={s.caseMetrics}>
-                  {c.metrics.map((m) => (
-                    <li key={m}>{m}</li>
-                  ))}
-                </ul>
-              </div>
-            </article>
-          ))}
+          <Showcases items={SHOWCASES} />
         </section>
 
         {/* ---------- Methode erklärt ---------- */}

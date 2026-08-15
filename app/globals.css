@@ -29,6 +29,11 @@
   --radius: 18px;
   --radius-lg: 26px;
   --header-h: 72px;
+  /* Abstand der Dialogleiste zur Unterkante. Schwebende Eingabeleisten
+     sitzen gewohnheitsmäßig knapp über dem Rand (Chat-Composer, Cookie-
+     Leisten) — nicht mitten im unteren Drittel. Hero-Polster unten rechnet
+     mit derselben Variablen, damit nichts verdeckt wird. */
+  --dock-gap: clamp(0.9rem, 3vh, 2rem);
   color-scheme: light;
 }
 
@@ -298,7 +303,7 @@ button, input, textarea, select {
   position: relative;
   padding-top: calc(var(--header-h) + clamp(3.5rem, 9vw, 7rem));
   /* Unten genug Luft, damit die schwebende Dialogleiste nichts verdeckt. */
-  padding-bottom: calc(clamp(4rem, 8vw, 6.5rem) + clamp(1.6rem, 10vh, 7rem) + 40px);
+  padding-bottom: calc(clamp(4rem, 8vw, 6.5rem) + var(--dock-gap) + 40px);
   overflow: hidden;
 }
 
@@ -1323,7 +1328,7 @@ button, input, textarea, select {
   z-index: 70;
   display: flex;
   justify-content: center;
-  padding: 0 1rem calc(clamp(1.6rem, 10vh, 7rem) + env(safe-area-inset-bottom, 0px));
+  padding: 0 1rem calc(var(--dock-gap) + env(safe-area-inset-bottom, 0px));
   pointer-events: none;
   transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1370,7 +1375,14 @@ button, input, textarea, select {
   box-shadow: var(--shadow-lg), var(--glow);
 }
 
-.dock-bar .spark { color: var(--accent); flex-shrink: 0; }
+/* display:flex statt inline — sonst sitzt das SVG auf der Textbaseline und
+   wirkt gegenüber dem Eingabefeld leicht nach oben versetzt. */
+.dock-bar .spark {
+  color: var(--accent);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
 
 .dock-inputwrap {
   position: relative;

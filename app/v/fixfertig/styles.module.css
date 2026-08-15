@@ -50,39 +50,18 @@
 
 .hero {
   text-align: center;
-  padding: clamp(3rem, 8vw, 6rem) 0 clamp(2.5rem, 5vw, 4rem);
+  padding: clamp(3.5rem, 9vw, 6.5rem) 0 clamp(2.5rem, 5vw, 4rem);
 }
 
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(8px);
-  border-radius: 999px;
-  padding: 0.55rem 1.1rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #4f46e5;
-  box-shadow: 0 8px 26px rgba(38, 34, 120, 0.1);
-  margin-bottom: 1.8rem;
-}
-
-.dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.18);
-}
-
+/* Obergrenze bewusst niedrig: Die längste Fassung der Zeile lautet
+   „die Ihre Organisation begeistern." — sie muss auch auf einem 1280er
+   Laptop zweizeilig bleiben, nicht auf drei Zeilen aufbrechen. */
 .h1 {
-  font-size: clamp(2.3rem, 6.4vw, 4.9rem);
+  font-size: clamp(2.05rem, 4.9vw, 3.6rem);
   font-weight: 800;
-  line-height: 1.06;
-  letter-spacing: -0.042em;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
   margin: 0 0 1.5rem;
-  text-wrap: balance;
 }
 
 /* Wechselndes Wort */
@@ -98,41 +77,39 @@
   will-change: width;
 }
 
-/* visibility zusätzlich zu opacity: sonst stehen alle Varianten im
-   Textinhalt der Seite (Kopieren, Vorschau, Suchmaschine). Die Verzögerung
-   hält das Wort sichtbar, bis es fertig ausgeblendet ist. */
+/* Drei Zustände: wartend (links abgeschnitten), sichtbar, abgehend.
+   Das alte Wort wird von links nach rechts weggewischt, das neue wächst in
+   derselben Richtung nach — ein durchlaufender Strich statt eines Blendens.
+   visibility hält die wartenden Fassungen aus dem Textinhalt heraus. */
 .rotWord {
   position: absolute;
   left: 0;
   top: 0;
   white-space: nowrap;
   color: #4f46e5;
-  opacity: 0;
   visibility: hidden;
-  transform: translateY(0.34em) rotate(-1.5deg);
-  filter: blur(5px);
-  transition:
-    opacity 0.42s ease,
-    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-    filter 0.42s ease,
-    visibility 0s linear 0.42s;
+  clip-path: inset(0 100% 0 0);
 }
 
 .rotActive {
-  opacity: 1;
   visibility: visible;
-  transform: none;
-  filter: none;
+  clip-path: inset(0 0 0 0);
   transition:
-    opacity 0.42s ease,
-    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-    filter 0.42s ease,
+    clip-path 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.16s,
     visibility 0s;
+}
+
+.rotLeaving {
+  visibility: visible;
+  clip-path: inset(0 0 0 100%);
+  transition:
+    clip-path 0.34s cubic-bezier(0.65, 0, 0.35, 1),
+    visibility 0s linear 0.34s;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .rot { transition: none; }
-  .rotWord { transition: none; filter: none; transform: none; }
+  .rotWord, .rotActive, .rotLeaving { transition: none; }
 }
 
 .sub {
@@ -333,27 +310,98 @@
 
 .showcases { padding: clamp(4rem, 9vw, 7rem) 0 0; }
 
-.case {
+/* ---------- Karussell ---------- */
+
+.carousel { position: relative; }
+
+.carouselNav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-bottom: 1.2rem;
+}
+
+.navBtn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 0;
+  background: #fff;
+  color: #181a33;
   display: grid;
-  grid-template-columns: 1.15fr 1fr;
-  gap: clamp(1.5rem, 4vw, 3.5rem);
-  align-items: center;
-  margin-bottom: clamp(2.5rem, 5vw, 4.5rem);
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(38, 34, 120, 0.1);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease, color 0.18s ease;
 }
 
-.caseFlip .caseVisual { order: 2; }
-
-@media (max-width: 860px) {
-  .case { grid-template-columns: 1fr; }
-  .caseFlip .caseVisual { order: 0; }
+.navBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  color: #4f46e5;
+  box-shadow: 0 14px 30px rgba(38, 34, 120, 0.16);
 }
 
-.caseVisual {
+.navBtn:disabled { opacity: 0.32; cursor: default; }
+
+/* Der Streifen läuft bis an den Bildschirmrand, damit die nächste Karte
+   angeschnitten sichtbar bleibt — das lädt zum Weiterziehen ein. */
+.track {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  padding: 0.5rem clamp(1rem, 4vw, 2rem) 2rem;
+  margin-inline: calc(clamp(1rem, 4vw, 2rem) * -1);
+  scroll-padding-left: clamp(1rem, 4vw, 2rem);
+  scrollbar-width: none;
+}
+
+.track::-webkit-scrollbar { display: none; }
+
+.card {
+  flex: 0 0 clamp(280px, 78vw, 540px);
+  scroll-snap-align: start;
+  background: #fff;
+  border-radius: 30px;
+  overflow: hidden;
+  box-shadow: 0 14px 40px rgba(38, 34, 120, 0.1);
+  transition: transform 0.24s ease, box-shadow 0.24s ease;
+}
+
+.card:hover { transform: translateY(-5px); box-shadow: 0 24px 56px rgba(38, 34, 120, 0.16); }
+
+.cardVisual {
   position: relative;
   background: linear-gradient(150deg, #e8eafc, #f7f8ff);
-  border-radius: 32px;
-  padding: clamp(1.2rem, 3vw, 2.2rem);
-  box-shadow: 0 18px 50px rgba(38, 34, 120, 0.12);
+  padding: clamp(1rem, 2.5vw, 1.8rem);
+}
+
+.cardBody { padding: 1.4rem clamp(1.2rem, 2.5vw, 1.8rem) 1.7rem; }
+
+.cardBranch {
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #6a6d8c;
+  margin-bottom: 0.55rem;
+}
+
+.cardTitle {
+  font-size: clamp(1.3rem, 2.6vw, 1.75rem);
+  font-weight: 800;
+  letter-spacing: -0.032em;
+  line-height: 1.15;
+  margin: 0 0 0.6rem;
+}
+
+.cardText {
+  margin: 0;
+  font-size: 0.96rem;
+  line-height: 1.65;
+  color: #3c3f5e;
 }
 
 .placeholderTag {
@@ -389,50 +437,6 @@
 .frameBar i:first-child { background: #ff6b5e; opacity: 0.55; }
 
 .mock { display: block; width: 100%; height: auto; }
-
-.caseBranch {
-  display: block;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #6a6d8c;
-  margin-bottom: 0.7rem;
-}
-
-.caseTitle {
-  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
-  font-weight: 800;
-  letter-spacing: -0.035em;
-  line-height: 1.12;
-  margin: 0 0 0.9rem;
-}
-
-.caseText {
-  margin: 0 0 1.3rem;
-  font-size: 1rem;
-  line-height: 1.7;
-  color: #3c3f5e;
-}
-
-.caseMetrics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.caseMetrics li {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 999px;
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #4f46e5;
-  box-shadow: 0 5px 16px rgba(38, 34, 120, 0.07);
-}
 
 /* ---------- Methode ---------- */
 
