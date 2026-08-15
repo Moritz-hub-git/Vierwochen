@@ -2988,8 +2988,8 @@ html[data-skin="klara"] body {
 /* ---------- fixfertig: Bold, Indigo, große Radien, Bento ---------- */
 
 html[data-skin="fixfertig"] {
-  --bg: #edeffb;
-  --bg-raised: #e3e6f8;
+  --bg: #f3f4fd;
+  --bg-raised: #e6e8f8;
   --surface: #ffffff;
   --surface-2: #f4f5ff;
   --text: #181a33;
@@ -3007,13 +3007,15 @@ html[data-skin="fixfertig"] {
   --shadow-md: 0 10px 30px rgba(38, 34, 120, 0.14);
   --shadow-lg: 0 18px 55px rgba(38, 34, 120, 0.2);
   --glow: 0 0 0 4px rgba(79, 70, 229, 0.18);
-  --radius: 20px;
-  --radius-lg: 28px;
+  --radius: 22px;
+  --radius-lg: 30px;
   color-scheme: light;
 }
 
+/* Manrope als Anzeigeschrift: runde, geometrische Formen — moderner und
+   weicher als die kantige Grotesk, die die Variante vorher benutzt hat. */
 html[data-skin="fixfertig"] body {
-  --font-display: var(--font-grotesk);
+  --font-display: var(--font-body);
   background: var(--bg);
 }
 
