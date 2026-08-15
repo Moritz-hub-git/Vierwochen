@@ -1,208 +1,152 @@
 "use client";
 
-import { useState } from "react";
+import Booking from "./Booking";
+import EmailGate from "./EmailGate";
 import Timeline from "./Timeline";
 import type { DialogResult, Sketch } from "./types";
 import { formatEuro } from "./types";
 
 /**
- * Das große Finale des Dialogs: Lösungsskizze, Zeitplan, Preisschätzung.
+ * Das große Finale des Dialogs — bewusst schlank (Rücksprache 2026-08-15:
+ * die vorherige Fassung mit Schritt-für-Schritt-Flow, ROI-Rechner und
+ * separater Beweis-Kachel-Wand war „viel zu umfangreich").
  *
- * Aufbau folgt der Kaufentscheidung:
- *   1. Was bekomme ich?        → Lösung links (Soll-Prozess + Nutzen)
- *   2. Wann habe ich es?       → Zeitschiene rechts mit echten Daten,
- *                                 beginnend beim kostenlosen Beratungsgespräch
- *   3. Was kostet es?          → EIN gerundeter Betrag („unverbindliche
- *                                 Preisschätzung"), plus Kostenanker daneben
- *   4. Warum ist das sicher?   → Proof Points (Festpreis, Quellcode, Garantie …)
+ * Aufbau folgt der psychologischen Reihenfolge, nicht der Datenmenge:
+ *   1. Titel + EIN Satz Zusammenfassung   → was ist das, warum lohnt es sich
+ *   2. Weg zum Launch (knapp) neben dem   → wann habe ich es, was bringt es
+ *      wichtigsten Nutzen
+ *   3. EINE Karte: Preis mit den drei     → was kostet es, ist das sicher,
+ *      wichtigsten Kennzahlen im Pillar-    und der nächste Schritt liegt
+ *      Stil der Startseite, direkt daneben  direkt daneben statt eine
+ *      die Terminbuchung                    Bildschirmlänge weiter unten
  *
- * Die Karte soll nicht abschließen, sondern anfüttern: Das Festangebot gibt es
- * erst nach dem Gespräch — der Termin ist der nächste logische Schritt.
+ * Der frühere Aufwand-gegenrechnen-Regler (ROI-Rechner) entfällt ersatzlos
+ * (Rücksprache 2026-08-15) — er lenkte vom eigentlichen Angebot ab.
  */
 
-const EURO_PER_PERSON_DAY = 300;
-const WORK_WEEKS = 45;
+function addDays(d: Date, days: number): Date {
+  return new Date(d.getTime() + days * 24 * 3600 * 1000);
+}
 
-const PROOF_POINTS: { icon: React.ReactNode; text: string }[] = [
-  {
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
-      </svg>
-    ),
-    text: "Festpreis — keine Überraschungen",
-  },
-  {
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <path d="m16 18 6-6-6-6M8 6l-6 6 6 6" />
-      </svg>
-    ),
-    text: "Voller Quellcode gehört Ihnen",
-  },
-  {
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8m-4-4v4" />
-      </svg>
-    ),
-    text: "Läuft in Ihrer Umgebung — Cloud oder eigener Server",
-  },
-  {
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-      </svg>
-    ),
-    text: "Workshops & Lizenzkosten der Erstellung inklusive",
-  },
-  {
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <path d="m9 12 2 2 4-4" /><circle cx="12" cy="12" r="10" />
-      </svg>
-    ),
-    text: "Ohne bestandene Abnahme keine zweite Rate",
-  },
-  {
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
-      </svg>
-    ),
-    text: "12 Monate Gewährleistung",
-  },
-];
+/** Dieselbe Formel wie in Timeline.tsx — hier nur für das Datum in der Pille. */
+function launchLabel(): string {
+  const today = new Date();
+  const nextMonday = addDays(today, ((8 - today.getDay()) % 7) || 7);
+  const kickoff = addDays(nextMonday, 7);
+  const launch = addDays(kickoff, 25);
+  return new Intl.DateTimeFormat("de-DE", { day: "numeric", month: "long" }).format(launch);
+}
 
-export default function SolutionCard({ sketch, result }: { sketch: Sketch; result: DialogResult }) {
-  const [days, setDays] = useState(result.savings?.personDaysPerWeek ?? 0);
-  const hasSavings = Boolean(result.savings);
-  const annual = Math.round(days * WORK_WEEKS * EURO_PER_PERSON_DAY);
-  const payback = annual > 0 ? Math.max(1, Math.round((result.price / annual) * 12)) : null;
-  const dayLabel = Number.isInteger(days) ? String(days) : days.toFixed(1).replace(".", ",");
+function PillIcon({ kind }: { kind: "live" | "pay" | "shield" }) {
+  if (kind === "live") return <i className="offer-pill-dot" aria-hidden />;
+  if (kind === "pay") {
+    return (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M20.6 13.4 12 22 2 12V4a2 2 0 0 1 2-2h8l8.6 8.6a2 2 0 0 1 0 2.8Z" />
+        <circle cx="7.5" cy="7.5" r="1.6" fill="currentColor" stroke="none" />
+      </svg>
+    );
+  }
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M12 2 4 5.5V11c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5.5L12 2Z" />
+      <path d="m8.8 11.8 2.3 2.3 4.2-4.6" />
+    </svg>
+  );
+}
+
+export default function SolutionCard({
+  sketch,
+  result,
+  dialogId,
+  caseSummary,
+  suggestedAgenda,
+  booked,
+  onBooked,
+}: {
+  sketch: Sketch;
+  result: DialogResult;
+  dialogId: string;
+  caseSummary: string;
+  suggestedAgenda?: string;
+  booked: boolean;
+  onBooked: () => void;
+}) {
+  // Der wichtigste Nutzen zuerst: EIN Satz als Zusammenfassung unter dem
+  // Titel — das Modell schreibt value bereits nutzenorientiert und in
+  // absteigender Wichtigkeit (PROMPT.md „value: konkreter Nutzen").
+  const [summary, ...restValue] = sketch.value;
 
   return (
     <div className="solution">
       <div className="solution-head">
-        <span className="offer-eyebrow">Ihre Lösungsskizze</span>
+        <span className="offer-eyebrow">Ihre Ersteinschätzung</span>
         <h3 className="solution-title">{sketch.title}</h3>
+        {summary && <p className="solution-summary">{summary}</p>}
       </div>
 
-      <div className="solution-grid">
-        {/* Links: die Lösung selbst — motivierend, konkret. */}
-        <div className="solution-main">
-          {sketch.steps.length > 0 && (
-            <div className="solution-block">
-              <div className="sketch-label">So läuft es künftig</div>
-              <ol className="flow">
-                {sketch.steps.map((step, i) => (
-                  <li key={step.label} className="flow-step" style={{ animationDelay: `${i * 0.07}s` }}>
-                    <span className="flow-dot">{i + 1}</span>
-                    <span className="flow-body">
-                      <span className="flow-label">{step.label}</span>
-                      <span className={`auto-tag ${step.automation}`}>{step.automation}</span>
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          )}
-
-          {sketch.value.length > 0 && (
-            <div className="solution-block">
-              <div className="sketch-label">Was Ihnen das bringt</div>
+      {(result.weeks.length > 0 || restValue.length > 0) && (
+        <div className="solution-story">
+          <div className="story-col">
+            <div className="sketch-label">Ihr Weg zum Launch</div>
+            <Timeline weeks={result.weeks} />
+          </div>
+          {restValue.length > 0 && (
+            <div className="story-col">
+              <div className="sketch-label">Ihr Vorteil</div>
               <div className="sketch-list">
-                {sketch.value.map((v) => (
+                {restValue.map((v) => (
                   <div className="sketch-item" key={v}>{v}</div>
                 ))}
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Eine Karte für Preis und Termin (Rücksprache 2026-08-15): Wer die
+          Schätzung sieht, soll im selben Blick auch buchen können, statt
+          eine Bildschirmlänge weiterzuscrollen. */}
+      <div className="offer-card">
+        <div className="offer-price">
+          <span className="offer-price-label">Unverbindliche Preisschätzung</span>
+          <div className="offer-price-value">{formatEuro(result.price)}</div>
+          <p className="offer-price-sub">Festpreis nach Beratungsgespräch · netto zzgl. USt.</p>
+
+          {/* Dieselbe Pillen-Sprache wie auf der Startseite — hier mit den
+              tatsächlichen Werten dieses Angebots statt der Ankerwerte. */}
+          <div className="offer-pills">
+            <span className="offer-pill">
+              <PillIcon kind="live" /> Live am {launchLabel()}
+            </span>
+            <span className="offer-pill">
+              <PillIcon kind="pay" /> 2. Rate erst nach Abnahme
+            </span>
+            <span className="offer-pill">
+              <PillIcon kind="shield" /> 12 Monate Garantie
+            </span>
+          </div>
 
           {result.scope.length > 0 && (
-            <div className="solution-block">
-              <div className="sketch-label">Im Festpreis enthalten</div>
-              <div className="sketch-list">
-                {result.scope.map((s) => (
-                  <div className="sketch-item" key={s}>{s}</div>
-                ))}
-              </div>
-            </div>
+            <p className="offer-scope">Inklusive: {result.scope.slice(0, 3).join(" · ")}</p>
           )}
         </div>
 
-        {/* Rechts: der Zeitplan mit echten Daten. */}
-        <div className="solution-side">
-          <Timeline weeks={result.weeks} />
+        <div className="offer-book">
+          <Booking
+            dialogId={dialogId}
+            caseSummary={caseSummary}
+            suggestedAgenda={suggestedAgenda}
+            onBooked={onBooked}
+          />
         </div>
       </div>
 
-      {/* Preis: ein Betrag, klar gerahmt als Schätzung vor dem Gespräch. */}
-      <div className="solution-price">
-        <div className="solution-price-main">
-          <span className="solution-price-label">Unverbindliche Preisschätzung</span>
-          <span className="solution-price-value">{formatEuro(result.price)}</span>
-          <span className="solution-price-sub">Festpreis nach Beratungsgespräch · netto zzgl. USt.</span>
-        </div>
-        {hasSavings && (
-          <div className="solution-roi">
-            <div className="solution-roi-row">
-              <span className="solution-roi-label">Ihr heutiger Aufwand</span>
-              <span className="solution-roi-stepper">
-                <button
-                  type="button"
-                  className="stepper-btn stepper-btn-sm"
-                  onClick={() => setDays((d) => Math.max(0.5, Math.round((d - 0.5) * 2) / 2))}
-                  disabled={days <= 0.5}
-                  aria-label="Weniger"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden><path d="M5 12h14" /></svg>
-                </button>
-                <strong>{dayLabel}</strong>&nbsp;{days === 1 ? "Personentag" : "Personentage"}/Woche
-                <button
-                  type="button"
-                  className="stepper-btn stepper-btn-sm"
-                  onClick={() => setDays((d) => Math.min(20, Math.round((d + 0.5) * 2) / 2))}
-                  disabled={days >= 20}
-                  aria-label="Mehr"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden><path d="M12 5v14M5 12h14" /></svg>
-                </button>
-              </span>
-            </div>
-            <div className="solution-roi-result" aria-live="polite">
-              ≈ <strong>{formatEuro(annual)}</strong> pro Jahr, immer wieder
-              {payback !== null && payback <= 18 && (
-                <> — die Lösung trägt sich nach <strong>{payback} {payback === 1 ? "Monat" : "Monaten"}</strong></>
-              )}
-            </div>
-            <div className="offer-basis">
-              Gerechnet mit {EURO_PER_PERSON_DAY} € Vollkosten je Personentag, {WORK_WEEKS} Arbeitswochen. Stellen Sie Ihren echten Wert ein.
-            </div>
-          </div>
-        )}
-      </div>
+      {!booked && <EmailGate dialogId={dialogId} sketchTitle={sketch.title} />}
 
-      {/* Proof Points: warum das sicher ist. */}
-      <div className="proof-grid">
-        {PROOF_POINTS.map((p) => (
-          <div className="proof-item" key={p.text}>
-            <span className="proof-icon">{p.icon}</span>
-            <span>{p.text}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Die Expertise liegt nicht nur im Bauen — Überleitung zum Gespräch. */}
-      <div className="solution-ideation">
-        Der wichtigste Schritt ist nicht der Code, sondern die richtige Skizze.
-        Genau daran arbeiten wir im Beratungsgespräch — kostenlos, unverbindlich,
-        30 Minuten.
-      </div>
-
-      <div className="result-disclaimer">
+      <p className="result-disclaimer">
         Unverbindliche Ersteinschätzung, kein Angebot. Alle Beträge netto zzgl. USt.
-      </div>
+      </p>
     </div>
   );
 }

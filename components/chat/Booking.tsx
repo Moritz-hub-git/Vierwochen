@@ -110,6 +110,8 @@ export default function Booking({
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
+  const [companySize, setCompanySize] = useState("");
+  const [industry, setIndustry] = useState("");
   const [phone, setPhone] = useState("");
   const [agenda, setAgenda] = useState(suggestedAgenda ?? "");
   const [busy, setBusy] = useState(false);
@@ -176,6 +178,8 @@ export default function Booking({
           name,
           email,
           company: company.trim() || undefined,
+          companySize: companySize || undefined,
+          industry: industry || undefined,
           phone: channel === "telefon" ? phone : undefined,
           dialogId,
           caseSummary,
@@ -234,28 +238,8 @@ export default function Booking({
 
   return (
     <form className="booking" onSubmit={book}>
-      {/* Gesicht zum Termin: Wer sieht, mit wem er spricht, bucht eher.
-          Das Bild ist ein PLATZHALTER — bitte durch ein echtes Foto ersetzen. */}
-      <div className="advisor">
-        <span className="advisor-photo">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/berater-platzhalter.svg" alt="" width={64} height={64} />
-        </span>
-        <span className="advisor-text">
-          <span className="advisor-eyebrow">Ihr Gesprächspartner</span>
-          <strong>Moritz Schumacher</strong>
-          <span className="advisor-role">
-            Gründer — baut Ihre Software selbst. Kein Vertrieb dazwischen.
-          </span>
-        </span>
-      </div>
-
-      <h3>Kostenloses Beratungsgespräch — 30 Minuten, unverbindlich</h3>
-      <p>
-        <strong>Kein Verkaufsgespräch, keine Präsentation.</strong> Wir schärfen
-        Ihre Skizze, klären die offenen Punkte — danach erhalten Sie das
-        verbindliche Festangebot. Passt Ihr Fall nicht, sage ich Ihnen das im Termin.
-      </p>
+      <h3>Beratungsgespräch buchen</h3>
+      <p className="booking-lead">30 Minuten, kostenlos und unverbindlich.</p>
 
       {loadError && (
         <div className="form-error" role="alert">
@@ -324,6 +308,27 @@ export default function Booking({
                 </span>
               </div>
 
+              {/* Zur gewählten Zeit gehört ein Gesprächspartner — heute
+                  immer derselbe, aber als Auswahl gerahmt statt als
+                  Fließtext, damit die Struktur trägt, sobald es mehr als
+                  einen gibt. Das Foto ist ein PLATZHALTER — bitte durch ein
+                  echtes Foto ersetzen. */}
+              <div className="advisor advisor-chosen" role="group" aria-label="Gesprächspartner">
+                <span className="advisor-photo">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/berater-platzhalter.svg" alt="" width={48} height={48} />
+                </span>
+                <span className="advisor-text">
+                  <strong>Moritz Schumacher</strong>
+                  <span className="advisor-role">Gründer — baut Ihre Software selbst</span>
+                </span>
+                <span className="advisor-picked" aria-hidden>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                </span>
+              </div>
+
               <div className="field">
                 <label htmlFor="booking-email">Geschäftliche E-Mail</label>
                 <input
@@ -388,6 +393,43 @@ export default function Booking({
                 />
               </div>
 
+              <div className="field-row">
+                <div className="field">
+                  <label htmlFor="booking-size">Firmengröße</label>
+                  <select
+                    id="booking-size"
+                    value={companySize}
+                    onChange={(e) => setCompanySize(e.target.value)}
+                  >
+                    <option value="">Bitte wählen</option>
+                    <option value="1–10">1–10 Mitarbeitende</option>
+                    <option value="11–50">11–50 Mitarbeitende</option>
+                    <option value="51–200">51–200 Mitarbeitende</option>
+                    <option value="201–500">201–500 Mitarbeitende</option>
+                    <option value="500+">Über 500 Mitarbeitende</option>
+                  </select>
+                </div>
+                <div className="field">
+                  <label htmlFor="booking-industry">Branche</label>
+                  <select
+                    id="booking-industry"
+                    value={industry}
+                    onChange={(e) => setIndustry(e.target.value)}
+                  >
+                    <option value="">Bitte wählen</option>
+                    <option>Maschinen- &amp; Anlagenbau</option>
+                    <option>Elektrotechnik</option>
+                    <option>Logistik &amp; Spedition</option>
+                    <option>Großhandel</option>
+                    <option>Einzelhandel</option>
+                    <option>Bauwesen &amp; Handwerk</option>
+                    <option>Dienstleistung</option>
+                    <option>IT &amp; Software</option>
+                    <option>Sonstige</option>
+                  </select>
+                </div>
+              </div>
+
               <div className="channel-row" role="radiogroup" aria-label="Gesprächskanal">
                 <button
                   type="button"
@@ -432,7 +474,7 @@ export default function Booking({
               )}
 
               <div className="field">
-                <label htmlFor="booking-agenda">Was soll im Gespräch geklärt werden? (optional)</label>
+                <label htmlFor="booking-agenda">Besondere Fragen? (optional)</label>
                 <textarea
                   id="booking-agenda"
                   rows={2}
@@ -446,12 +488,12 @@ export default function Booking({
               {error && <div className="form-error" role="alert">{error}</div>}
 
               <button type="submit" className="btn btn-primary" disabled={busy} style={{ width: "100%" }}>
-                {busy ? "Wird gebucht …" : "Termin verbindlich reservieren"}
+                {busy ? "Wird gebucht …" : "Termin buchen"}
               </button>
 
               {/* Ehrliche Knappheit an der Entscheidung, nicht nur auf der Startseite (§2.5). */}
               <p className="booking-scarcity">
-                Moritz baut jedes Projekt selbst — deshalb starten pro Monat höchstens zwei.
+                Moritz baut jedes Projekt selbst — deshalb starten pro Monat höchstens zwei neue Projekte.
               </p>
             </div>
           )}

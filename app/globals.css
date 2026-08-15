@@ -71,6 +71,15 @@ html {
   scroll-padding-top: calc(var(--header-h) + 16px);
 }
 
+/* Solange der Dialog offen ist, ist die ausgeblendete Seite dahinter nicht
+   mehr die scrollbare Fläche — sonst lässt sich hinter dem fest stehenden
+   Panel weiterscrollen, obwohl visuell nichts davon zu sehen ist (Bug,
+   Rücksprache 2026-08-15). Der Gesprächsverlauf (.stream) bringt sein
+   eigenes overflow-y mit und scrollt unabhängig davon weiter. */
+html[data-chat="on"] {
+  overflow: hidden;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
@@ -1372,7 +1381,11 @@ html[data-input="mouse"] :focus {
   transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.dock.has-hints::before { opacity: 1; }
+/* Bleibt bestehen, solange das Feld aktiv ist — auch wenn die Vorschläge
+   beim Tippen schon weg sind (Rücksprache 2026-08-15: verschwand vorher
+   sofort beim ersten Zeichen, das wirkte wie ein Flackern). Erst wenn das
+   Feld wieder verlassen wird, blendet der Fade zurück aus. */
+.dock.is-focused::before { opacity: 1; }
 
 /* Beim Abschicken sinkt die Leiste nach unten weg, bevor der Verlauf aufsteigt.
    Dasselbe gilt, während der Berater arbeitet — sie kommt zurück, sobald die
@@ -1403,6 +1416,15 @@ html[data-input="mouse"] :focus {
   flex-direction: column;
   gap: 0.7rem;
   pointer-events: none;
+}
+
+/* Im Gespräch orientiert sich die Leiste an der Breite des Gesprächs
+   (--chat-col in .panel) statt an einer eigenen, schmaleren Spalte — sonst
+   sitzt sie mittig auf dem Bildschirm, während der Verlauf darüber links an
+   der Lesespalte hängt, und beide Kanten laufen nicht zusammen
+   (Rücksprache 2026-08-15). */
+.dock.in-chat .dock-stack {
+  width: min(1120px, 100%);
 }
 
 /* Von der Leiste aufsteigender Stapel: erster Vorschlag unten, direkt über
@@ -1470,48 +1492,42 @@ html[data-input="mouse"] :focus {
   .dock-hint:nth-child(n + 4) { display: none; }
 }
 
+/* Minimalistisch statt schwer (Rücksprache 2026-08-15): kein pulsierender
+   Rand, kein großer grauer Streuschatten im Ruhezustand — nur ein feiner
+   Rand und ein sehr knapper Bodenschatten. Tiefe entsteht erst beim
+   Anfassen, nicht permanent. */
 .dock-bar {
   pointer-events: auto;
   display: flex;
   align-items: center;
   gap: 0.6rem;
   width: 100%;
-  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border);
   /* Flach im Ruhezustand; die Rundung folgt der Höhe, sobald das Feld
      mehrzeilig wird — aus der Pille wird dann weich eine Karte. */
   border-radius: 26px;
   padding: 0.4rem 0.4rem 0.4rem 1.2rem;
-  box-shadow: var(--shadow-lg), 0 0 0 1px color-mix(in srgb, var(--accent) 12%, transparent);
+  box-shadow: 0 1px 2px rgba(15, 20, 30, 0.04), 0 10px 26px -14px rgba(15, 20, 30, 0.16);
   transition:
     box-shadow 0.25s ease,
     border-color 0.25s ease,
     transform 0.25s ease,
-    border-radius 0.3s ease;
-  animation: dockBreath 4.5s ease-in-out infinite;
+    border-radius 0.3s ease,
+    background-color 0.25s ease;
 }
 
-@keyframes dockBreath {
-  0%, 100% { box-shadow: var(--shadow-lg), 0 0 0 1px color-mix(in srgb, var(--accent) 10%, transparent); }
-  50% { box-shadow: var(--shadow-lg), 0 0 0 5px color-mix(in srgb, var(--accent) 9%, transparent); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .dock-bar { animation: none; }
-}
-
-/* Beim Anfassen hebt sich die Leiste an und legt einen tieferen Schatten
-   unter sich — spürbare Tiefe statt nur eines farbigen Rands. */
+/* Beim Anfassen hebt sich die Leiste minimal an — der Schatten bleibt knapp
+   und trägt die Akzentfarbe statt neutralem Grau, das wirkt leichter. */
 .dock-bar:focus-within {
-  animation: none;
   border-color: var(--accent);
-  transform: translateY(-3px);
+  background: var(--surface);
+  transform: translateY(-2px);
   box-shadow:
-    0 30px 60px -18px rgba(15, 20, 30, 0.34),
-    0 12px 24px -10px rgba(15, 20, 30, 0.22),
-    var(--glow);
+    0 2px 4px rgba(15, 20, 30, 0.05),
+    0 18px 36px -16px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1842,10 +1858,14 @@ html[data-input="mouse"] :focus {
 .stream {
   flex: 1;
   overflow-y: auto;
-  padding: 2.2rem var(--chat-pad) calc(var(--dock-gap) + 6rem);
+  /* Etwas knapper als vorher (Rücksprache 2026-08-15: „Größe ist mir
+     wichtig, auf einem MacBook möchte ich alles Relevante sehen") — und
+     unten reichlich Luft, damit die Buchung nicht unter der schwebenden
+     Leiste verschwindet. */
+  padding: 1.7rem var(--chat-pad) calc(var(--dock-gap) + 7.5rem);
   display: flex;
   flex-direction: column;
-  gap: 1.6rem;
+  gap: 1.3rem;
   scroll-behavior: smooth;
 }
 
@@ -1887,11 +1907,13 @@ html[data-input="mouse"] :focus {
 }
 
 /* Frage und Antwort tragen dieselbe Schriftgröße — nur Ausrichtung und
-   Hintergrund unterscheiden sie, nicht das Gewicht der Stimme. */
+   Hintergrund unterscheiden sie, nicht das Gewicht der Stimme. Etwas
+   kompakter als vorher (Rücksprache 2026-08-15: im Vergleich zu Claudes
+   eigenem Chat wirkte die Schrift zu groß). */
 .msg.user,
 .msg.assistant {
-  font-size: clamp(1rem, 1.35vw, 1.12rem);
-  line-height: 1.65;
+  font-size: clamp(0.94rem, 1.05vw, 1rem);
+  line-height: 1.58;
 }
 
 /* Die eigene Nachricht sitzt rechts, in einer zurückhaltenden Fläche statt
@@ -1944,33 +1966,6 @@ html[data-input="mouse"] :focus {
 
 @media (prefers-reduced-motion: reduce) {
   .thinking-dot { animation: none; opacity: 0.55; }
-}
-
-/* Begrüßung: erster Eintrag im Verlauf, ruhig gesetzt. */
-.chat-greeting {
-  align-self: flex-start;
-  max-width: 46rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  animation: riseIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.chat-greeting strong {
-  font-family: var(--font-display), system-ui, sans-serif;
-  font-size: clamp(1.35rem, 2.4vw, 1.8rem);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-}
-
-.chat-greeting span {
-  font-size: clamp(1rem, 1.35vw, 1.12rem);
-  line-height: 1.6;
-  color: var(--text-muted);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .chat-greeting { animation: none; }
 }
 
 .typing-dots {
@@ -2151,7 +2146,15 @@ html[data-input="mouse"] :focus {
   font-size: 0.9rem;
 }
 
+/* Nur so breit wie nötig, nicht die volle Spaltenbreite (Rücksprache
+   2026-08-15): Eine Karte mit einer einzelnen Zahl wirkt verloren, wenn sie
+   über die ganze Lesespalte gestreckt wird. align-self bricht den
+   Stretch-Standard der Stream-Spalte auf. */
 .stepper-card {
+  align-self: flex-start;
+  width: fit-content;
+  min-width: min(20rem, 100%);
+  max-width: 100%;
   background: var(--surface);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
@@ -2391,26 +2394,8 @@ html[data-input="mouse"] :focus {
 
 /* ---------- Zeitschiene zum Launch (im Ergebnis) ---------- */
 
-.sched {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.15rem 1.2rem;
-  height: 100%;
-}
-
-.sched-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.8rem;
-  flex-wrap: wrap;
-  margin-bottom: 1.1rem;
-}
-
-.sched-launch-date { font-size: 0.85rem; color: var(--text-soft); }
-.sched-launch-date strong { color: var(--accent); }
-
+/* Kein eigener Rahmen mehr — .story-col liefert Hintergrund und Rand schon
+   für beide Spalten gleichermaßen (Weg zum Launch UND Kundennutzen). */
 .sched-list {
   list-style: none;
   margin: 0;
@@ -2509,13 +2494,32 @@ html[data-input="mouse"] :focus {
 .sched-item-now .sched-title,
 .sched-item-final .sched-date { color: var(--accent); }
 
-.sched-text {
-  font-size: 0.85rem;
-  color: var(--text-soft);
-  line-height: 1.5;
+/* Die vier Wochen als eine kompakte Zeile statt vier eigener Stationen —
+   „Weg zum Launch muss einfacher sein" (Rücksprache 2026-08-15). */
+.sched-weeks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-top: 0.25rem;
 }
 
-/* ---------- Ergebnis: Loesungsskizze, Preis, Proof Points ---------- */
+.sched-week {
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  line-height: 1.4;
+}
+
+.sched-week b {
+  color: var(--text-muted);
+  font-weight: 700;
+  margin-right: 0.35rem;
+}
+
+/* ---------- Ergebnis: Titel, Weg zum Launch, Angebot ----------
+   Komplett neu gedacht (Rücksprache 2026-08-15): Die vorherige Fassung mit
+   Schritt-für-Schritt-Flow, ROI-Regler und sechsteiliger Beweis-Kachelwand
+   war „viel zu umfangreich". Jetzt: Titel + ein Satz Nutzen, Weg zum Launch
+   neben dem wichtigsten Vorteil, und EINE Karte für Preis und Termin. */
 
 .offer-eyebrow {
   font-size: 0.72rem;
@@ -2525,61 +2529,90 @@ html[data-input="mouse"] :focus {
   color: var(--accent);
 }
 
+/* Deutlich mehr Breite als die Lesespalte der Nachrichten („doppelte
+   Breite", Rücksprache 2026-08-14) — Platz genug, damit Preis und Termin
+   nebeneinander stehen können. */
 .solution {
   background: var(--surface);
   border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
   border-radius: var(--radius-lg);
-  padding: clamp(1.3rem, 3vw, 1.8rem);
+  padding: clamp(1.15rem, 2.4vw, 1.5rem);
   box-shadow: var(--shadow-lg);
   animation: msgIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.solution-head { margin-bottom: 1.3rem; }
+.solution-head { margin-bottom: 1rem; }
 
 .solution-title {
   font-family: var(--font-display), system-ui, sans-serif;
-  font-size: clamp(1.35rem, 3vw, 1.7rem);
+  font-size: clamp(1.25rem, 2.4vw, 1.5rem);
   line-height: 1.25;
-  margin: 0.35rem 0 0;
+  margin: 0.3rem 0 0;
 }
 
-.solution-grid {
+/* Titel + EIN Satz Nutzen reichen als Zusammenfassung — mehr braucht der
+   erste Blick nicht. */
+.solution-summary {
+  margin: 0.45rem 0 0;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: var(--text-soft);
+  max-width: 60ch;
+}
+
+/* Weg zum Launch und Kundennutzen nebeneinander, gleichrangig — vorher stand
+   der Nutzen als Punkt drei einer dichten Liste, jetzt bekommt er dieselbe
+   Bühne wie der Zeitplan. */
+.solution-story {
+  margin-top: 1.15rem;
   display: grid;
-  gap: 1.1rem;
+  gap: 0.9rem;
   grid-template-columns: 1fr;
-  align-items: stretch;
+  /* Eigene Höhe statt Streckung auf die größere Spalte — sonst bleibt bei
+     „Ihr Vorteil" oft viel Leerraum unter zwei, drei Punkten stehen. */
+  align-items: start;
 }
 
-/* Beide Spalten sind gleichwertige Panels. Vorher stand links nackter Text
-   neben der gerahmten Zeitschiene — die kürzere Spalte sah dadurch aus, als
-   wäre ihr der Inhalt ausgegangen. Als Paar wirkt der Höhenunterschied
-   gewollt statt unfertig. */
-.solution-main {
+.story-col {
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1.15rem 1.2rem;
+  padding: 0.9rem 1rem;
 }
 
-.solution-block + .solution-block { margin-top: 1.35rem; }
+@media (min-width: 720px) {
+  .solution-story { grid-template-columns: 1.1fr 1fr; }
+}
 
-.solution-price {
-  margin-top: 1.5rem;
-  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
-  background: var(--surface-2);
-  border-radius: var(--radius);
-  padding: 1.2rem 1.3rem;
+/* ---------- Das Angebot: Preis und Termin auf einer Karte ----------
+   Wer die Schätzung sieht, soll im selben Blick auch buchen können
+   (Rücksprache 2026-08-15), statt eine Bildschirmlänge weiterzuscrollen. */
+.offer-card {
+  margin-top: 1.15rem;
   display: grid;
-  gap: 1.1rem;
+  grid-template-columns: 1fr;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--surface-2);
 }
 
-.solution-price-main {
+@media (min-width: 780px) {
+  .offer-card { grid-template-columns: 1fr 1fr; }
+}
+
+.offer-price {
+  padding: 1.2rem 1.3rem;
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  border-bottom: 1px solid var(--border);
 }
 
-.solution-price-label {
+@media (min-width: 780px) {
+  .offer-price { border-bottom: 0; border-right: 1px solid var(--border); }
+}
+
+.offer-price-label {
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -2587,95 +2620,82 @@ html[data-input="mouse"] :focus {
   color: var(--accent);
 }
 
-.solution-price-value {
+.offer-price-value {
   font-family: var(--font-display), system-ui, sans-serif;
-  font-size: clamp(2rem, 5vw, 2.6rem);
+  font-size: clamp(1.9rem, 4vw, 2.3rem);
   font-weight: 700;
   line-height: 1.1;
+  margin-top: 0.2rem;
 }
 
-.solution-price-sub {
-  font-size: 0.84rem;
+.offer-price-sub {
+  margin-top: 0.15rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
 }
 
-.solution-roi {
+/* Dieselbe Pillen-Sprache wie im Hero der Startseite (weiße Kapsel, Icon +
+   kurzer Text, Rücksprache 2026-08-15) — hier mit den echten Werten dieses
+   Angebots statt der allgemeinen Anker. */
+.offer-pills {
+  margin-top: 0.95rem;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  font-size: 0.9rem;
+  gap: 0.45rem;
 }
 
-.solution-roi-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.8rem;
-  flex-wrap: wrap;
-}
-
-.solution-roi-label { color: var(--text-soft); }
-
-.solution-roi-stepper {
+.offer-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  white-space: nowrap;
+  gap: 0.5rem;
+  align-self: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
 }
 
-.stepper-btn-sm { width: 30px; height: 30px; }
+.offer-pill svg { color: var(--accent); flex-shrink: 0; }
 
-.solution-roi-result { color: var(--text-soft); }
-.solution-roi-result strong { color: var(--text); }
+.offer-pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+  animation: chatLivePulse 2.2s ease-in-out infinite;
+}
 
-.offer-basis {
-  margin-top: 0.4rem;
-  font-size: 0.76rem;
+@keyframes chatLivePulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18); }
+  50% { box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .offer-pill-dot { animation: none; }
+}
+
+.offer-scope {
+  margin-top: 0.95rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
   color: var(--text-muted);
-  line-height: 1.45;
 }
 
-.proof-grid {
-  margin-top: 1.25rem;
-  display: grid;
-  gap: 0.6rem;
-  grid-template-columns: 1fr;
-}
+.offer-book { padding: 1.2rem 1.3rem; }
 
-.proof-item {
-  display: flex;
-  gap: 0.55rem;
-  align-items: flex-start;
-  font-size: 0.88rem;
-  line-height: 1.45;
-  color: var(--text-soft);
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 0.65rem 0.8rem;
-}
-
-.proof-icon { color: var(--accent); flex-shrink: 0; margin-top: 0.1em; }
-
-.solution-ideation {
-  margin-top: 1.25rem;
-  padding: 0.95rem 1.15rem;
-  border-left: 3px solid var(--accent);
-  background: var(--accent-soft);
-  border-radius: 0 12px 12px 0;
-  font-size: 0.95rem;
-  line-height: 1.55;
-}
-
-@media (min-width: 640px) {
-  .proof-grid { grid-template-columns: 1fr 1fr; }
-}
-
-@media (min-width: 880px) {
-  .solution-grid { grid-template-columns: 1.15fr 1fr; }
-  .solution-price { grid-template-columns: auto 1fr; align-items: center; }
-  .solution-roi { border-left: 1px solid var(--border); padding-left: 1.3rem; }
-  .proof-grid { grid-template-columns: 1fr 1fr 1fr; }
+/* Innerhalb der Angebotskarte steht die Buchung nicht mehr in einer eigenen
+   Kartenumrandung — die Spalte selbst ist schon die Karte. */
+.offer-book .booking {
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  background: transparent;
 }
 
 
@@ -2736,25 +2756,34 @@ html[data-input="mouse"] :focus {
   border-top: 1px solid var(--border);
 }
 
-/* ---------- Gesprächspartner (Vertrauen durch ein Gesicht) ---------- */
+/* ---------- Gesprächspartner (Vertrauen durch ein Gesicht) ----------
+   Erscheint erst NACH der Uhrzeitwahl (Rücksprache 2026-08-15): Wer eine
+   Zeit gewählt hat, wählt als Nächstes — heute noch alternativlos, aber als
+   Auswahl gerahmt — mit wem er spricht. Ein grüner Haken markiert die
+   getroffene Wahl, wie bei jedem anderen Auswahlschritt im Formular. */
 
 .advisor {
   display: flex;
   align-items: center;
-  gap: 0.95rem;
-  padding-bottom: 1.15rem;
-  margin-bottom: 1.15rem;
-  border-bottom: 1px solid var(--border);
+  gap: 0.8rem;
+}
+
+.advisor-chosen {
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+  border-radius: var(--radius);
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 0.9rem;
 }
 
 .advisor-photo {
   flex-shrink: 0;
-  width: 64px;
-  height: 64px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   overflow: hidden;
-  background: var(--accent-soft);
-  box-shadow: 0 0 0 3px var(--surface), 0 0 0 4px color-mix(in srgb, var(--accent) 30%, transparent);
+  background: var(--surface);
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 .advisor-photo img {
@@ -2767,82 +2796,106 @@ html[data-input="mouse"] :focus {
 .advisor-text {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
+  gap: 0.05rem;
   min-width: 0;
-}
-
-.advisor-eyebrow {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
-  color: var(--accent);
+  flex: 1;
 }
 
 .advisor-text strong {
   font-family: var(--font-display), system-ui, sans-serif;
-  font-size: 1.02rem;
+  font-size: 0.95rem;
   font-weight: 600;
 }
 
 .advisor-role {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
-  line-height: 1.45;
+  line-height: 1.4;
 }
 
-/* ---------- Gate & Buchung ---------- */
+.advisor-picked {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: var(--on-accent);
+}
 
-.gate, .booking {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  box-shadow: var(--shadow-sm);
-  margin-bottom: 1.4rem;
+/* ---------- Buchung ----------
+   War eine eigene Karte unter dem Angebot, ist jetzt die rechte Hälfte der
+   Angebotskarte (Rücksprache 2026-08-15) — daher kein eigener Rahmen mehr
+   hier; .offer-book setzt Rahmen/Hintergrund für die ganze Spalte.
+   Abstände insgesamt knapper: „hier wird Platz verschwendet". */
+.booking {
   animation: msgIn 0.5s ease;
 }
 
-.gate h3, .booking h3 {
-  font-size: 1.05rem;
-  margin-bottom: 0.4rem;
+.booking h3 {
+  font-size: 1rem;
+  margin-bottom: 0.2rem;
 }
 
-.gate p, .booking p {
-  font-size: 0.9rem;
+.booking p {
+  font-size: 0.86rem;
   color: var(--text-muted);
-  margin-bottom: 1rem;
+  margin-bottom: 0.85rem;
 }
+
+.booking-lead { margin-top: -0.1rem; }
 
 .field {
   display: grid;
-  gap: 0.35rem;
-  margin-bottom: 0.9rem;
+  gap: 0.3rem;
+  margin-bottom: 0.7rem;
 }
 
 .field label {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--text-soft);
 }
 
 .field input,
+.field select,
 .field textarea {
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--bg);
-  padding: 0.65rem 0.9rem;
-  font-size: 0.95rem;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.92rem;
   font-family: inherit;
+  color: var(--text);
   resize: vertical;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.field select { cursor: pointer; }
+
 .field input:focus,
+.field select:focus,
 .field textarea:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: var(--glow);
+}
+
+/* Firmengröße und Branche nebeneinander statt untereinander — zwei kurze
+   Auswahlfelder brauchen nicht die volle Breite einzeln. */
+.field-row {
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: 1fr;
+  margin-bottom: 0.7rem;
+}
+
+.field-row .field { margin-bottom: 0; }
+
+@media (min-width: 420px) {
+  .field-row { grid-template-columns: 1fr 1fr; }
 }
 
 /* KI-Autofill aus der E-Mail: sichtbares „Lesen", dann kurzes Aufblitzen. */
@@ -2969,8 +3022,8 @@ html[data-input="mouse"] :focus {
   border: 1px solid var(--border);
   background: var(--bg);
   border-radius: 12px;
-  padding: 0.7rem;
-  font-size: 0.9rem;
+  padding: 0.55rem;
+  font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;

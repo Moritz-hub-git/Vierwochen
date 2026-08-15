@@ -3,10 +3,8 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { track } from "@/lib/track";
-import Booking from "./Booking";
 import StreamedText from "./StreamedText";
 import { Chips, MultiChips, Stepper } from "./Controls";
-import EmailGate from "./EmailGate";
 import SolutionCard from "./SolutionCard";
 import type { DialogInput, DialogResult, DialogTurn, Sketch, UiMessage } from "./types";
 
@@ -29,7 +27,12 @@ const STARTERS = [
 
 /** Vorschläge, die beim Anklicken der Dialogleiste aufsteigen. Auf der
  *  Bubble steht die Quintessenz; in die Leiste wandert eine ausformulierte
- *  Problembeschreibung, die man übernehmen oder weiterschreiben kann. */
+ *  Beschreibung, die man übernehmen oder weiterschreiben kann.
+ *
+ *  Bewusst gemischt statt nur Schmerzpunkte: Wer schon weiß, was er will
+ *  („Portal für Kunden", „Auswertung per Klick"), findet sich in einer reinen
+ *  Problemliste nicht wieder. Die Mischung aus Zeitfressern, Wünschen und
+ *  Vorhaben zeigt außerdem die Bandbreite dessen, was hier gebaut wird. */
 const DOCK_HINTS = [
   {
     label: "Daten in Excel-Listen",
@@ -40,16 +43,28 @@ const DOCK_HINTS = [
     text: "Bestellungen erreichen uns als PDF oder Mail im Sammelpostfach. Jemand muss sie von Hand ins System übertragen, dabei bleibt regelmäßig etwas liegen und Kunden fragen nach.",
   },
   {
-    label: "Planung per Zuruf",
-    text: "Unsere Einsatz- und Schichtplanung läuft über Zuruf, Aushang und Telefon. Wer tauschen will, ruft im Büro an, und Änderungen erreichen nicht zuverlässig alle.",
+    label: "Ein Portal für unsere Kunden",
+    text: "Unsere Kunden sollen Preise, Bestellungen und Lieferscheine selbst einsehen können, statt bei uns anzurufen — angebunden an die Daten, die wir ohnehin schon pflegen.",
+  },
+  {
+    label: "Auswertungen per Klick",
+    text: "Unser Reporting entsteht jeden Monat per Copy-Paste aus mehreren Systemen. Ich hätte die wichtigsten Zahlen gern jederzeit aktuell auf einem Bildschirm, statt sie zusammenzubauen.",
   },
   {
     label: "Angebote dauern zu lang",
     text: "Ein Angebot zu kalkulieren dauert bei uns ein bis zwei Tage, weil die Preise aus Erfahrungswerten und alten Angeboten zusammengesucht werden. Schnelle Anfragen verlieren wir dadurch.",
   },
   {
-    label: "Kunden fragen ständig nach",
-    text: "Kunden rufen an oder schreiben, um den Stand ihrer Bestellung zu erfahren. Die Auskunft kostet uns täglich Zeit, weil sie erst aus mehreren Stellen zusammengesucht werden muss.",
+    label: "Papier aus dem Außendienst",
+    text: "Unsere Monteure füllen Protokolle und Stundenzettel auf Papier aus. Im Büro wird alles abgetippt, Rückfragen kommen Tage später und die Abrechnung verzögert sich.",
+  },
+  {
+    label: "Planung per Zuruf",
+    text: "Unsere Einsatz- und Schichtplanung läuft über Zuruf, Aushang und Telefon. Wer tauschen will, ruft im Büro an, und Änderungen erreichen nicht zuverlässig alle.",
+  },
+  {
+    label: "KI für unsere Unterlagen",
+    text: "Wir haben viele Dokumente, Angebote und Mails, in denen das Wissen unserer Firma steckt. Ich hätte gern eine Suche, die Fragen dazu in normaler Sprache beantwortet.",
   },
 ];
 
@@ -419,7 +434,7 @@ export default function ChatDock() {
           Gespräch die Antwortzeile. Sie wird nie ersetzt, nur umgedeutet. */}
       {!dockSuppressed && (
       <div
-        className={`dock${open ? " in-chat" : ""}${sending || (open && (busy || revealing)) ? " is-sending" : ""}${!open && dockFocused && !dockDraft ? " has-hints" : ""}`}
+        className={`dock${open ? " in-chat" : ""}${sending || (open && (busy || revealing)) ? " is-sending" : ""}${!open && dockFocused ? " is-focused" : ""}`}
       >
         <div className="dock-stack">
           {/* Beim Anklicken der Leiste poppen Beispiele auf. Ein Klick schreibt
@@ -428,7 +443,11 @@ export default function ChatDock() {
               Fokus im Feld, sonst verschwänden die Vorschläge vor dem Klick. */}
           {!open && dockFocused && !dockDraft && (
             <div className="dock-hints" role="group" aria-label="Beispiele zum Übernehmen">
-              {DOCK_HINTS.map((hint, i) => (
+              {/* Nur fünf zeigen, nicht alle acht — sonst stapeln sich die
+                  Bubbles über den ganzen Bildschirm und verdecken den Knopf
+                  darunter (Rücksprache 2026-08-15). Der Rest bleibt im Pool
+                  für spätere Variation. */}
+              {DOCK_HINTS.slice(0, 5).map((hint, i) => (
                 <button
                   key={hint.label}
                   type="button"
@@ -526,33 +545,33 @@ export default function ChatDock() {
                   /* Die Antwort ist Text auf der Seite, keine Sprechblase —
                      das hält den Dialog als Teil der Seite statt als Fenster.
                      Der jeweils neueste Zug wird herausgeschrieben. Die
-                     Begrüßung gehört zur ersten Antwort und erscheint mit
-                     ihr, statt vorher allein dazustehen. */
-                  <>
-                    {i === firstAssistantIdx && (
-                      <div className="chat-greeting">
-                        <strong>
-                          <span aria-hidden>👋</span> Willkommen!
-                        </strong>
-                        <span>Lassen Sie uns Ihre Lösung skizzieren.</span>
-                      </div>
-                    )}
-                    <div className={`msg assistant${m.error ? " error" : ""}`}>
-                      <StreamedText
-                        text={m.display}
-                        animate={i === animateIdx && !m.error}
-                        onTick={scrollToEnd}
-                        onDone={i === animateIdx ? () => setTextSettled(true) : undefined}
-                      />
-                    </div>
-                  </>
+                     Begrüßung ist keine eigene Zeile mehr mit eigener
+                     Schrift, sondern der erste Halbsatz der ersten Antwort —
+                     eine Stimme statt drei (Rücksprache 2026-08-15). */
+                  <div className={`msg assistant${m.error ? " error" : ""}`}>
+                    <StreamedText
+                      text={i === firstAssistantIdx ? `Willkommen! ${m.display}` : m.display}
+                      animate={i === animateIdx && !m.error}
+                      onTick={scrollToEnd}
+                      onDone={i === animateIdx ? () => setTextSettled(true) : undefined}
+                    />
+                  </div>
                 )}
                 {/* Die Skizze erscheint bewusst NUR am Ende (Rücksprache
                     2026-08-14): Im Verlauf lenkte die mitwachsende Karte vom
                     Gespräch ab. Der Zähler in der Zielzeile hält die Spannung,
-                    die große Enthüllung bleibt der Lohn. */}
+                    die große Enthüllung bleibt der Lohn. Preis und Termin
+                    stehen auf derselben Karte (Rücksprache 2026-08-15). */}
                 {m.result && (m.sketch ?? sketch) && textSettled && (
-                  <SolutionCard sketch={(m.sketch ?? sketch)!} result={m.result} />
+                  <SolutionCard
+                    sketch={(m.sketch ?? sketch)!}
+                    result={m.result}
+                    dialogId={dialogIdRef.current}
+                    caseSummary={caseSummary}
+                    suggestedAgenda={suggestedAgenda}
+                    booked={booked}
+                    onBooked={() => setBooked(true)}
+                  />
                 )}
               </Fragment>
             ))}
@@ -585,23 +604,6 @@ export default function ChatDock() {
             )}
             {!busy && textSettled && input?.kind === "number" && (
               <Stepper input={input} onSubmit={(v) => void send(v)} />
-            )}
-
-            {/* Abschluss: Termin direkt im Gesprächsverlauf. Booking bleibt nach
-                der Buchung eingehängt — es zeigt selbst den Erfolgsbildschirm;
-                nur die leise E-Mail-Alternative verschwindet dann. */}
-            {phase === "result" && result && textSettled && (
-              <>
-                <Booking
-                  dialogId={dialogIdRef.current}
-                  caseSummary={caseSummary}
-                  suggestedAgenda={suggestedAgenda}
-                  onBooked={() => setBooked(true)}
-                />
-                {!booked && (
-                  <EmailGate dialogId={dialogIdRef.current} sketchTitle={sketch?.title ?? ""} />
-                )}
-              </>
             )}
 
             <div ref={endRef} />

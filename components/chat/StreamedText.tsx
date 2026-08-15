@@ -12,8 +12,10 @@ import { useEffect, useRef, useState } from "react";
  * wird geschrieben — ältere stehen sofort vollständig da.
  */
 
-/** Zeichen pro Sekunde — schnell genug zum Mitlesen, ruhig genug zum Sehen. */
-const SPEED = 105;
+/** Zeichen pro Sekunde — schnell genug zum Mitlesen, ruhig genug zum Sehen.
+ *  War 105: Das wirkte wie hingeworfen statt wie geschrieben (Rücksprache
+ *  2026-08-15). 58 liegt näher an echter Lesegeschwindigkeit. */
+const SPEED = 58;
 
 export default function StreamedText({
   text,

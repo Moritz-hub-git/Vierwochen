@@ -26,6 +26,8 @@ interface BookRequest {
   name?: string;
   email?: string;
   company?: string;
+  companySize?: string;
+  industry?: string;
   phone?: string;
   dialogId?: string;
   caseSummary?: string;
@@ -80,6 +82,10 @@ export async function POST(req: Request) {
   const agenda = typeof body.agenda === "string" ? body.agenda.trim().slice(0, 500) : "";
   const company = typeof body.company === "string" ? body.company.trim().slice(0, 200) : "";
   const caseSummary = typeof body.caseSummary === "string" ? body.caseSummary.slice(0, 2000) : "";
+  // Firmengröße/Branche: freies Feld aus einer festen Auswahl im Formular —
+  // trotzdem nur als kurze Zeichenkette übernehmen, kein Freitext-Risiko.
+  const companySize = typeof body.companySize === "string" ? body.companySize.trim().slice(0, 40) : "";
+  const industry = typeof body.industry === "string" ? body.industry.trim().slice(0, 60) : "";
   // Werbe-Herkunft dauerhaft an der Buchung: Grundlage für die spätere
   // Rückmeldung an Google Ads (gclid, 90-Tage-Fenster).
   const attr = cleanAttribution(body.attr);
@@ -94,7 +100,7 @@ export async function POST(req: Request) {
       dialogId: typeof body.dialogId === "string" ? body.dialogId.slice(0, 64) : null,
       path: "/api/booking/book",
       attr,
-      meta: { mode, channel, hasCompany: company !== "" },
+      meta: { mode, channel, hasCompany: company !== "", companySize, industry },
     });
   };
 
@@ -139,6 +145,8 @@ export async function POST(req: Request) {
           name,
           email: emailCheck.email,
           company: company || null,
+          companySize: companySize || null,
+          industry: industry || null,
           channel,
           phone: channel === "telefon" ? phone : null,
           dialogId: typeof body.dialogId === "string" ? body.dialogId.slice(0, 64) : null,

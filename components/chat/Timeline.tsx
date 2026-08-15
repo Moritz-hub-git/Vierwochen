@@ -1,17 +1,12 @@
 "use client";
 
 /**
- * Der Weg zum Launch als Schiene mit ECHTEN Daten.
- *
- * Warum das verkauft: Die Vier-Wochen-Zusage ist das zentrale Versprechen der
- * Marke. Als Aufzählung bleibt sie eine Behauptung; mit Kalenderdaten wird sie
- * ein Plan, den man sich vorstellen kann. Die Schiene beginnt bewusst beim
- * kostenlosen Beratungsgespräch — der nächste Schritt des Nutzers ist Teil
- * desselben Plans, nicht ein getrennter Formularprozess.
- *
- * Datumslogik: Kick-off am übernächsten Montag (realistisch, weil vor dem
- * Start noch Beratungsgespräch und Festangebot liegen), Launch am Freitag der
- * vierten Woche.
+ * Der Weg zum Launch — bewusst knapp (Rücksprache 2026-08-15: die vorherige
+ * Fassung mit sechs Einzelschritten wirkte überladen). Drei Stationen genügen,
+ * um aus der Vier-Wochen-Zusage einen Plan mit echten Daten zu machen: das
+ * Beratungsgespräch (der nächste Klick), der Kick-off, der Launch. Die
+ * Bauphase selbst steht kompakt als eine Zeile mit den vier Wochenzielen,
+ * statt als vier eigene Stationen.
  */
 
 function addDays(d: Date, days: number): Date {
@@ -20,33 +15,28 @@ function addDays(d: Date, days: number): Date {
 
 const fmtLong = (d: Date) =>
   new Intl.DateTimeFormat("de-DE", { weekday: "short", day: "numeric", month: "long" }).format(d);
-const fmtShort = (d: Date) =>
-  new Intl.DateTimeFormat("de-DE", { day: "numeric", month: "short" }).format(d);
+
+export function launchDate(): Date {
+  const today = new Date();
+  const nextMonday = addDays(today, ((8 - today.getDay()) % 7) || 7);
+  const kickoff = addDays(nextMonday, 7);
+  return addDays(kickoff, 25); // Freitag der vierten Woche
+}
 
 export default function Timeline({ weeks }: { weeks: { week: number; label: string }[] }) {
   const today = new Date();
-  // Übernächster Montag: erst der kommende, dann eine Woche drauf.
   const nextMonday = addDays(today, ((8 - today.getDay()) % 7) || 7);
   const kickoff = addDays(nextMonday, 7);
-  const launch = addDays(kickoff, 25); // Freitag der vierten Woche
+  const launch = addDays(kickoff, 25);
 
   return (
     <div className="sched">
-      <div className="sched-head">
-        <span className="sketch-label">Ihr Weg zum Launch</span>
-        <span className="sched-launch-date">
-          live am <strong>{fmtLong(launch)}</strong>
-        </span>
-      </div>
-
       <ol className="sched-list">
-        {/* Schritt 0: das Beratungsgespräch — der nächste Klick des Nutzers. */}
         <li className="sched-item sched-item-now">
           <span className="sched-dot sched-dot-pulse" aria-hidden />
           <span className="sched-body">
-            <span className="sched-date">Diese Woche — Termin frei wählbar</span>
-            <span className="sched-title">Kostenloses Beratungsgespräch</span>
-            <span className="sched-text">30 Minuten, unverbindlich. Wir schärfen die Skizze und klären die offenen Punkte.</span>
+            <span className="sched-date">Diese Woche</span>
+            <span className="sched-title">Beratungsgespräch</span>
           </span>
         </li>
 
@@ -55,20 +45,24 @@ export default function Timeline({ weeks }: { weeks: { week: number; label: stri
           <span className="sched-body">
             <span className="sched-date">{fmtLong(kickoff)}</span>
             <span className="sched-title">Kick-off-Workshop</span>
-            <span className="sched-text">Ziele, Daten, Abnahmekriterien — danach erhalten Sie das verbindliche Festangebot.</span>
           </span>
         </li>
 
-        {weeks.map((w, i) => (
-          <li className="sched-item" key={w.week} style={{ animationDelay: `${i * 0.08}s` }}>
-            <span className="sched-dot sched-dot-num" aria-hidden>{w.week}</span>
+        {weeks.length > 0 && (
+          <li className="sched-item sched-item-build">
+            <span className="sched-dot sched-dot-num" aria-hidden>4</span>
             <span className="sched-body">
-              <span className="sched-date">ab {fmtShort(addDays(kickoff, (w.week - 1) * 7))}</span>
-              <span className="sched-title">Woche {w.week}</span>
-              <span className="sched-text">{w.label}</span>
+              <span className="sched-date">4 Wochen Bauzeit</span>
+              <span className="sched-weeks">
+                {weeks.map((w) => (
+                  <span className="sched-week" key={w.week}>
+                    <b>W{w.week}</b> {w.label}
+                  </span>
+                ))}
+              </span>
             </span>
           </li>
-        ))}
+        )}
 
         <li className="sched-item sched-item-final">
           <span className="sched-dot sched-dot-final" aria-hidden>
@@ -79,9 +73,6 @@ export default function Timeline({ weeks }: { weeks: { week: number; label: stri
           <span className="sched-body">
             <span className="sched-date">{fmtLong(launch)}</span>
             <span className="sched-title">Launch &amp; Abnahme</span>
-            <span className="sched-text">
-              Ihre Software läuft. Sie prüfen gegen die vereinbarten Kriterien — erst dann wird die zweite Hälfte fällig.
-            </span>
           </span>
         </li>
       </ol>
