@@ -159,7 +159,8 @@ export default function Landing({ variant }: { variant: VariantKey }) {
           <h1 className={s.h1}>
             Wir bauen digitale Produkte,
             <br />
-            die <RotatingWord words={AUDIENCES} /> begeistern.
+            die <RotatingWord words={AUDIENCES} />
+            <br className={s.h1Break} /> begeistern.
           </h1>
           {/* Drei Versprechen statt einer Subline: Tempo, Qualität, Risiko.
               Klickbar — jeder Chip springt zu der Sektion, die ihn einlöst. */}
