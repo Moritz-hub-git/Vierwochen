@@ -107,6 +107,12 @@ export async function POST(req: Request) {
               messages: [...messages, { role: "assistant", content: JSON.stringify(turn) }],
               lastPhase: turn.phase,
               sketchTitle: turn.sketch.title,
+              // Ergebniskennzahlen flach mitschreiben, damit die Auswertung
+              // sie lesen kann, ohne jeden Zug zu parsen (Nachfragetest).
+              resultTier: turn.result?.tier ?? null,
+              resultPrice: turn.result?.price ?? null,
+              resultPersonDays: turn.result?.savings?.personDaysPerWeek ?? null,
+              resultAnnualEuro: turn.result?.savings?.annualEuro ?? null,
               finishReason,
               repaired,
               ip,

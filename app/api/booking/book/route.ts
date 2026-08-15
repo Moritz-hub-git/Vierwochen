@@ -11,6 +11,7 @@ import { FieldValue } from "@google-cloud/firestore";
 import { bookingCalendarId, busyIntervals, createEvent, overlapsBusy } from "@/lib/calendar";
 import { BOOKING } from "@/lib/config";
 import { checkBusinessEmail } from "@/lib/email";
+import { cleanAttribution, recordEvent } from "@/lib/events";
 import { firestore, safe } from "@/lib/firestore";
 import { bookingConfirmationHtml, sendMail } from "@/lib/mail";
 import { clientIp } from "@/lib/ratelimit";
@@ -29,6 +30,8 @@ interface BookRequest {
   dialogId?: string;
   caseSummary?: string;
   agenda?: string;
+  sessionId?: string;
+  attr?: unknown;
 }
 
 function bad(status: number, error: string) {
@@ -77,6 +80,23 @@ export async function POST(req: Request) {
   const agenda = typeof body.agenda === "string" ? body.agenda.trim().slice(0, 500) : "";
   const company = typeof body.company === "string" ? body.company.trim().slice(0, 200) : "";
   const caseSummary = typeof body.caseSummary === "string" ? body.caseSummary.slice(0, 2000) : "";
+  // Werbe-Herkunft dauerhaft an der Buchung: Grundlage für die spätere
+  // Rückmeldung an Google Ads (gclid, 90-Tage-Fenster).
+  const attr = cleanAttribution(body.attr);
+  const trackSessionId = typeof body.sessionId === "string" ? body.sessionId.slice(0, 64) : "";
+
+  // Erfolg serverseitig zählen — verlässlicher als ein Browser-Ereignis, das
+  // beim Schließen des Tabs verloren gehen kann.
+  const recordBooked = (mode: string) => {
+    void recordEvent({
+      type: "booked",
+      sessionId: trackSessionId || `booking-${slotStartIso}`,
+      dialogId: typeof body.dialogId === "string" ? body.dialogId.slice(0, 64) : null,
+      path: "/api/booking/book",
+      attr,
+      meta: { mode, channel, hasCompany: company !== "" },
+    });
+  };
 
   // Bestätigungsmail nach erfolgreicher Buchung — nachgelagert und ohne die
   // Antwort zu verzögern; ein Fehlschlag bricht den Funnel nie.
@@ -124,6 +144,8 @@ export async function POST(req: Request) {
           dialogId: typeof body.dialogId === "string" ? body.dialogId.slice(0, 64) : null,
           caseSummary: caseSummary || null,
           agenda: agenda || null,
+          attr,
+          sessionId: trackSessionId || null,
           status: requestMode ? "angefragt" : "reserviert",
           ip: clientIp(req),
           createdAt: FieldValue.serverTimestamp(),
@@ -147,6 +169,7 @@ export async function POST(req: Request) {
   // --- Anfrage-Modus: kein Kalender konfiguriert, manuelle Bestätigung ---
   if (requestMode) {
     queueConfirmationMail("angefragt");
+    recordBooked("angefragt");
     return NextResponse.json({
       ok: true,
       mode: "angefragt",
@@ -193,6 +216,7 @@ export async function POST(req: Request) {
       );
     }
     queueConfirmationMail("bestätigt", event.meetLink);
+    recordBooked("bestätigt");
     return NextResponse.json({
       ok: true,
       mode: "bestätigt",
@@ -209,6 +233,7 @@ export async function POST(req: Request) {
     }
     // Funnel nicht brechen: Anfrage ist gespeichert, Bestätigung folgt manuell.
     queueConfirmationMail("angefragt");
+    recordBooked("angefragt");
     return NextResponse.json({
       ok: true,
       mode: "angefragt",

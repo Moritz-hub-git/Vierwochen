@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import RevealObserver from "@/components/RevealObserver";
+import Track from "@/components/Track";
 
 // Schriften liegen im Repository — der Build lädt nichts aus dem Netz.
 const manrope = localFont({
@@ -76,6 +77,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={`${manrope.variable} ${sora.variable} ${grotesk.variable} ${fraunces.variable} ${mono.variable}`}>
         <RevealObserver />
+        <Track />
         {children}
       </body>
     </html>

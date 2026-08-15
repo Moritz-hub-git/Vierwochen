@@ -6,6 +6,7 @@
 import { NextResponse } from "next/server";
 import { FieldValue } from "@google-cloud/firestore";
 import { checkBusinessEmail } from "@/lib/email";
+import { recordEvent } from "@/lib/events";
 import { safe } from "@/lib/firestore";
 import { clientIp } from "@/lib/ratelimit";
 
@@ -54,6 +55,14 @@ export async function POST(req: Request) {
       }),
     "Lead speichern"
   );
+
+  void recordEvent({
+    type: "lead_email",
+    sessionId: dialogId ?? `lead-${check.domain}`,
+    dialogId,
+    path: "/api/lead",
+    meta: { domain: check.domain },
+  });
 
   return NextResponse.json({ ok: true });
 }

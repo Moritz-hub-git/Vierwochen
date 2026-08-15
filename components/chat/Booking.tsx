@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { captureAttribution, sessionId, track } from "@/lib/track";
 
 /**
  * Terminbuchung direkt unter dem Ergebnis (PROMPT.md §2.2, §5.6, §7).
@@ -179,6 +180,10 @@ export default function Booking({
           dialogId,
           caseSummary,
           agenda: agenda.trim() || undefined,
+          // Werbe-Herkunft mitgeben: Sie muss dauerhaft an der Buchung hängen,
+          // damit später die Conversion an Google zurückgemeldet werden kann.
+          sessionId: sessionId(),
+          attr: captureAttribution(),
         }),
       });
       const data = (await res.json()) as { ok: boolean; mode?: string; message?: string; error?: string };
@@ -294,7 +299,12 @@ export default function Booking({
                 key={s.startUtc}
                 type="button"
                 className={`slot-time${slot === s.startUtc ? " active" : ""}`}
-                onClick={() => setSlot(s.startUtc)}
+                onClick={() => {
+                  // Trichter: Die Slotwahl ist das Mikro-Commitment vor dem
+                  // Formular — hier trennt sich Interesse von Absicht.
+                  if (!slot) track("booking_slot_selected", { dialogId });
+                  setSlot(s.startUtc);
+                }}
                 aria-pressed={slot === s.startUtc}
               >
                 {berlinTime(s.startUtc)}

@@ -26,9 +26,21 @@ steps:
       - --region=europe-west3
       - --service-account=vierwochen-app@$PROJECT_ID.iam.gserviceaccount.com
       - --allow-unauthenticated
+      # Achtung: --set-env-vars ERSETZT alle Variablen des Dienstes. Was hier
+      # nicht steht, ist nach dem Ausrollen weg — deshalb gehört jede dauerhaft
+      # benötigte Variable in diese Zeile.
+      # ^##^ setzt ## als Trennzeichen, damit Passwörter Kommas enthalten dürfen.
       # VERTEX_LOCATION=global: gemini-3.5-flash-lite steht in europe-west4
       # nicht bereit (siehe lib/config.ts). Datenschutzerklärung angepasst.
-      - --set-env-vars=GOOGLE_CLOUD_PROJECT=$PROJECT_ID,VERTEX_LOCATION=global
+      - --set-env-vars=^##^GOOGLE_CLOUD_PROJECT=$PROJECT_ID##VERTEX_LOCATION=global##ADMIN_PASSWORD=${_ADMIN_PASSWORD}##MAIL_SENDER=${_MAIL_SENDER}
+
+# Geheimnisse stehen NICHT im Repository, sondern als Substitutionsvariablen am
+# Cloud-Build-Trigger (Konsole → Trigger → Erweitert → Substitutionsvariablen).
+# Leer gelassen bedeutet: Funktion deaktiviert — die Auswertung /admin ist dann
+# gesperrt, der Mailversand wird übersprungen. Nichts bricht.
+substitutions:
+  _ADMIN_PASSWORD: ""
+  _MAIL_SENDER: ""
 
 # Pflicht bei eigenem Bau-Dienstkonto, sonst schlägt der Build fehl (PROMPT.md §9).
 options:

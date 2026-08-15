@@ -2,6 +2,7 @@
 
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { track } from "@/lib/track";
 import Booking from "./Booking";
 import { Chips, MultiChips, Stepper } from "./Controls";
 import EmailGate from "./EmailGate";
@@ -193,6 +194,12 @@ export default function ChatDock() {
       setInput(null);
       const history = messagesRef.current.filter((m) => !m.error);
       const nextMessages: UiMessage[] = [...history, { role: "user", display: trimmed }];
+      // Trichter: Die erste eigene Antwort ist die Stufe, an der aus einem
+      // Besucher ein Interessent wird — sie zählt gesondert.
+      track(history.length === 0 ? "dialog_started" : "dialog_question", {
+        dialogId: dialogIdRef.current,
+        meta: { turn: history.filter((m) => m.role === "user").length + 1 },
+      });
       setMessages(nextMessages);
       setBusy(true);
 
@@ -231,6 +238,18 @@ export default function ChatDock() {
             if (isResult && turn.result) setResult(turn.result);
             setRevealing(false);
           };
+          if (isResult && turn.result) {
+            track("result_delivered", {
+              dialogId: dialogIdRef.current,
+              meta: {
+                tier: turn.result.tier,
+                price: turn.result.price,
+                annualEuro: turn.result.savings?.annualEuro ?? 0,
+              },
+            });
+          } else if (turn.phase === "reject") {
+            track("rejected", { dialogId: dialogIdRef.current });
+          }
           if (isResult) {
             // Kurzer Moment der Entstehung vor dem großen Ergebnis.
             const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -274,6 +293,7 @@ export default function ChatDock() {
   const openPanel = useCallback(
     (initialText?: string) => {
       setOpen(true);
+      track("dialog_opened", { dialogId: dialogIdRef.current });
       const text = (initialText ?? "").trim();
       if (text) void send(text);
       setTimeout(() => textareaRef.current?.focus(), 350);

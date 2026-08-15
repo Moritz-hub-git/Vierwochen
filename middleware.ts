@@ -21,6 +21,11 @@ export async function middleware(req: NextRequest) {
   if (pathname === "/zugang" || pathname === "/api/access" || pathname === "/api/health") {
     return NextResponse.next();
   }
+  // Die Auswertung bringt ihren eigenen Schutz mit (ADMIN_PASSWORD) und wird
+  // hier durchgelassen — sonst bräuchte der Betreiber zwei Passwörter.
+  if (pathname === "/admin" || pathname.startsWith("/admin/") || pathname.startsWith("/api/admin/")) {
+    return NextResponse.next();
+  }
 
   const cookie = req.cookies.get("vw_access")?.value;
   if (cookie && cookie === (await sha256Hex(password.trim()))) {

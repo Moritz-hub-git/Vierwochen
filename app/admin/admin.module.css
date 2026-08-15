@@ -1,0 +1,202 @@
+/* Auswertung: nüchtern, dicht, zum Lesen — kein Marketing-Layout. */
+
+.page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2rem 1.2rem 6rem;
+}
+
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  padding-bottom: 1.1rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2rem;
+}
+
+.head h1 { font-size: 1.9rem; margin: 0; }
+.sub { color: var(--text-muted); font-size: 0.9rem; margin: 0.2rem 0 0; }
+
+.range { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+
+.range a {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  text-decoration: none;
+  color: var(--text-soft);
+}
+
+.rangeActive {
+  background: var(--accent);
+  border-color: var(--accent) !important;
+  color: var(--on-accent) !important;
+}
+
+.export {
+  border-style: dashed !important;
+  color: var(--accent) !important;
+}
+
+.empty {
+  background: var(--surface-2);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.section { margin-bottom: 2.8rem; }
+.section h2 { font-size: 1.15rem; margin-bottom: 1rem; }
+
+.hint {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin-top: 0.9rem;
+}
+
+/* ---------- Trichter ---------- */
+
+.funnel { display: grid; gap: 0.5rem; }
+
+.funnelRow {
+  display: grid;
+  grid-template-columns: minmax(150px, 1.1fr) minmax(80px, 2fr) 3.5rem minmax(110px, 1fr);
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 720px) {
+  .funnelRow { grid-template-columns: 1fr 3.2rem; }
+  .funnelBarWrap, .funnelPct { display: none; }
+}
+
+.funnelLabel { color: var(--text-soft); }
+
+.funnelBarWrap {
+  height: 22px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.funnelBar {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 5px 0 0 5px;
+  transition: width 0.4s ease;
+}
+
+.funnelNum {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.funnelPct { color: var(--text-muted); font-size: 0.82rem; }
+
+/* ---------- Tabellen ---------- */
+
+.tableWrap { overflow-x: auto; }
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.table th, .table td {
+  text-align: left;
+  padding: 0.6rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.table th {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  white-space: nowrap;
+}
+
+.table tr:last-child td { border-bottom: 0; }
+
+.mono { font-family: var(--font-mono), ui-monospace, monospace; font-size: 0.82rem; }
+.wrapCell { max-width: 260px; }
+
+/* ---------- Fälle ---------- */
+
+.cases { display: grid; gap: 0.85rem; }
+
+@media (min-width: 900px) {
+  .cases { grid-template-columns: 1fr 1fr; }
+}
+
+.case {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.15rem;
+}
+
+.caseHead {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.6rem;
+}
+
+.caseDate { font-size: 0.78rem; color: var(--text-muted); }
+.caseTurns { font-size: 0.78rem; color: var(--text-muted); margin-left: auto; }
+
+.badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+}
+
+.badgeOk { background: var(--accent-soft); color: var(--accent); }
+.badgeWarn { background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--danger); }
+.badgeMuted { background: var(--surface-2); color: var(--text-muted); }
+
+.caseQuote {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  margin: 0 0 0.5rem;
+}
+
+.caseTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 0.4rem;
+}
+
+.caseNums {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  border-top: 1px dashed var(--border);
+  padding-top: 0.5rem;
+}
