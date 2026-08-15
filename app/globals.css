@@ -1518,15 +1518,6 @@ html[data-input="mouse"] :focus {
   .dock-bar:focus-within { transform: none; }
 }
 
-/* display:flex statt inline — sonst sitzt das SVG auf der Textbaseline und
-   wirkt gegenüber dem Eingabefeld leicht nach oben versetzt. */
-.dock-bar .spark {
-  color: var(--accent);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-}
-
 .dock-inputwrap {
   position: relative;
   flex: 1;
@@ -1558,6 +1549,15 @@ html[data-input="mouse"] :focus {
 
 @media (prefers-reduced-motion: reduce) {
   .dock-bar textarea { transition: none; }
+}
+
+/* Auf schmalen Geräten reicht Sternentfernen allein nicht: „Was kostet Sie
+   gerade am meisten Zeit?" ist mit 38 Zeichen selbst ohne Icon noch zu
+   lang für eine Zeile bei Fließtextgröße. Etwas kleinere Schrift und
+   knappere Ränder holen die restlichen Pixel. */
+@media (max-width: 420px) {
+  .dock-bar { padding-left: 0.9rem; }
+  .dock-bar textarea { font-size: 0.92rem; }
 }
 
 /* Die Frage steht fest in der Leiste — kein wechselndes Banner mehr. */

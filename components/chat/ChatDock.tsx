@@ -446,10 +446,11 @@ export default function ChatDock() {
               ))}
             </div>
           )}
+        {/* Kein Stern-Icon mehr: Auf dem Handy trieb er die Frage in den
+            Umbruch (kein Platz für „Was kostet Sie gerade am meisten Zeit?"
+            in einer Zeile). Der linke Innenabstand der Leiste übernimmt
+            jetzt den Raum, den das Icon vorher eingenommen hat. */}
         <form className="dock-bar" onSubmit={submitDock}>
-          <span className="spark" aria-hidden>
-            <SparkIcon size={20} />
-          </span>
           <span className="dock-inputwrap">
             {/* Textfeld statt einzeiliger Eingabe: Es beginnt flach und wächst
                 mit dem Umbruch mit. Eingabe schickt ab, Umschalt+Eingabe

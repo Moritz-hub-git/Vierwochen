@@ -10,10 +10,12 @@ import s from "./styles.module.css";
 /**
  * Variante „neoapp.studio" — digitale Produkte, in vier Wochen live.
  *
- * Aufbau: Hauptzeile mit wechselndem Adressaten → das Versprechen
- * („In vier Wochen live.") samt Name der Methode → große Showcases
- * (noch Platzhalter, bis echte Projekte gezeigt werden dürfen) → die
- * Methode selbst erklärt → Vertrag → Dialog.
+ * Aufbau (überarbeitet 2026-08-15, Fold-Dramaturgie): Hauptzeile mit
+ * wechselndem Adressaten → EIN Versprechen-Satz → EIN Knopf → stille
+ * Faktenzeile → Showcases (im Fold angeschnitten, das lädt zum Scrollen
+ * ein) → „In vier Wochen live." als große Aussage samt 2+AI-Methode und
+ * den vier Schritten → Vertrag → Dialog. Der erste Bildschirm zeigt genau
+ * eine Kaskade: was es ist → was es bringt → was zu tun ist.
  */
 
 export const metadata: Metadata = {
@@ -90,6 +92,18 @@ const METHOD = [
   },
 ];
 
+/** Status-Pille „live" — weiß hinterlegt, grüner Punkt. Skaliert über die
+ *  vererbte Schriftgröße automatisch mit ihrem Kontext (kleine Subline,
+ *  große Versprechen-Zeile), ohne eigene Größenvarianten zu brauchen. */
+function LivePill() {
+  return (
+    <span className={s.livePill}>
+      <i className={s.liveDot} aria-hidden />
+      live
+    </span>
+  );
+}
+
 export default function FixfertigPage() {
   return (
     <div className={s.page}>
@@ -107,7 +121,7 @@ export default function FixfertigPage() {
       </nav>
 
       <div className={s.wrap}>
-        {/* ---------- Hero ---------- */}
+        {/* ---------- Hero: EINE Kaskade — was es ist, was es bringt, was zu tun ist ---------- */}
         <header className={s.hero}>
           <h1 className={s.h1}>
             Wir bauen digitale Produkte,
@@ -115,22 +129,36 @@ export default function FixfertigPage() {
             die <RotatingWord words={AUDIENCES} /> begeistern.
           </h1>
           <p className={s.sub}>
-            Keine Präsentation, keine Plattform, kein Projekt ohne Ende — eine
-            Anwendung, die ein echtes Problem löst. Zum Festpreis. Besteht die
-            Abnahme nicht, zahlen Sie nichts.
+            In vier Wochen <LivePill /> — zum Festpreis. Läuft es nicht,
+            kostet es nichts.
           </p>
           <div className={s.heroCtas}>
-            <DialogCta className={s.ctaBtn}>Projekt beschreiben</DialogCta>
-            <a href="#showcases" className={s.ghostBtn}>
-              Arbeiten ansehen
-            </a>
+            <DialogCta className={s.ctaBtn}>Preiseinschätzung erhalten</DialogCta>
           </div>
+          <p className={s.heroFacts}>
+            4 Wochen <span aria-hidden>·</span> Festpreis{" "}
+            <span aria-hidden>·</span> 100&nbsp;% Ihr Eigentum
+          </p>
         </header>
 
-        {/* ---------- Versprechen + Methodenname ---------- */}
-        <section className={s.promise} aria-label="Das Versprechen">
+        {/* ---------- Showcases: folgen direkt auf den Hero und schneiden im
+            sichtbaren Bereich an — das signalisiert „hier geht es weiter"
+            von selbst, ganz ohne Scroll-Pfeil. ---------- */}
+        <section id="showcases" className={s.showcases}>
+          <div className={`${s.sectionHead} ${s.sectionHeadTight}`}>
+            <span className={s.kicker}>Arbeiten</span>
+            <h2 className={s.h2}>Was in vier Wochen entsteht</h2>
+            <p className={s.sectionLead}>Zum Durchziehen — Beispiele aus dem Mittelstand.</p>
+          </div>
+
+          <Showcases items={SHOWCASES} />
+        </section>
+
+        {/* ---------- Versprechen + Methode: die große Aussage, jetzt als
+            eigene Station nach den Showcases statt im Fold. ---------- */}
+        <section id="methode" className={s.promise} aria-label="Das Versprechen">
           <h2 className={s.promiseLine}>
-            In vier Wochen <em>live.</em>
+            In vier Wochen <LivePill />
           </h2>
           <p className={s.promiseSub}>
             Möglich macht das die <b>2+AI-Methode</b> — der Grund, warum hier
@@ -176,22 +204,8 @@ export default function FixfertigPage() {
           </p>
         </section>
 
-        {/* ---------- Showcases ---------- */}
-        <section id="showcases" className={s.showcases}>
-          <div className={s.sectionHead}>
-            <span className={s.kicker}>Arbeiten</span>
-            <h2 className={s.h2}>Was in vier Wochen entsteht</h2>
-            <p className={s.sectionLead}>
-              Typische Produkte aus dem Mittelstand — jedes an einem Ablauf
-              gebaut, der vorher Zeit gekostet hat. Zum Durchziehen.
-            </p>
-          </div>
-
-          <Showcases items={SHOWCASES} />
-        </section>
-
         {/* ---------- Methode erklärt ---------- */}
-        <section id="methode" className={s.method}>
+        <section className={s.method}>
           <div className={s.sectionHead}>
             <span className={s.kicker}>Die 2+AI-Methode</span>
             <h2 className={s.h2}>Warum vier Wochen genügen</h2>

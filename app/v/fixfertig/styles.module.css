@@ -56,9 +56,12 @@
 
 /* ---------- Hero ---------- */
 
+/* Unten knapper als früher: Die Showcases folgen jetzt direkt und sollen
+   im ersten Bildschirm bereits anschneiden — das ist der Hinweis zum
+   Weiterscrollen, kein Pfeil nötig. */
 .hero {
   text-align: center;
-  padding: clamp(3.5rem, 9vw, 6.5rem) 0 clamp(2.5rem, 5vw, 4rem);
+  padding: clamp(2.4rem, 6vw, 4.6rem) 0 clamp(1rem, 2vw, 1.6rem);
 }
 
 /* Obergrenze bewusst niedrig: Die längste Fassung der Zeile lautet
@@ -133,8 +136,20 @@
   gap: 0.8rem;
   justify-content: center;
   flex-wrap: wrap;
-  margin-top: 2.2rem;
+  margin-top: 2rem;
 }
+
+/* Stille Faktenzeile: kein zweiter Knopf, kein zweiter Beweis — nur die
+   drei Kennzahlen, unaufdringlich unter der Handlung. */
+.heroFacts {
+  margin: 0.9rem 0 0;
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #6a6d8c;
+}
+
+.heroFacts span { margin: 0 0.55rem; color: #b6b9d8; }
 
 .ctaBtn {
   font-family: inherit;
@@ -157,19 +172,44 @@
   box-shadow: 0 20px 44px rgba(79, 70, 229, 0.42);
 }
 
-.ghostBtn {
-  font-size: 1.05rem;
-  font-weight: 700;
+/* ---------- Live-Status-Pille ----------
+   Weiß hinterlegt, grüner Punkt — dieselbe Pille erscheint klein in der
+   Subline und groß in der Versprechen-Zeile; sie skaliert automatisch mit
+   der geerbten Schriftgröße ihres Kontexts, ohne eigene Größenklasse. */
+
+.livePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.36em;
+  background: #fff;
   color: #181a33;
-  background: rgba(255, 255, 255, 0.8);
   border-radius: 999px;
-  padding: 1.05rem 2.2rem;
-  text-decoration: none;
-  box-shadow: 0 8px 24px rgba(38, 34, 120, 0.08);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  padding: 0.2em 0.62em 0.2em 0.5em;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  box-shadow: 0 0.5em 1.4em -0.3em rgba(38, 34, 120, 0.22);
+  vertical-align: middle;
 }
 
-.ghostBtn:hover { transform: translateY(-3px); box-shadow: 0 14px 34px rgba(38, 34, 120, 0.14); }
+.liveDot {
+  width: 0.5em;
+  height: 0.5em;
+  min-width: 7px;
+  min-height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 0.22em rgba(34, 197, 94, 0.18);
+  animation: liveDotPulse 2.2s ease-in-out infinite;
+}
+
+@keyframes liveDotPulse {
+  0%, 100% { box-shadow: 0 0 0 0.16em rgba(34, 197, 94, 0.2); }
+  50% { box-shadow: 0 0 0 0.32em rgba(34, 197, 94, 0.05); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liveDot { animation: none; }
+}
 
 /* ---------- Versprechen + Methodenname ---------- */
 
@@ -184,14 +224,6 @@
   letter-spacing: -0.045em;
   line-height: 1.02;
   margin: 0;
-}
-
-.promiseLine em {
-  font-style: normal;
-  background: linear-gradient(100deg, #4f46e5, #ff6b5e);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
 }
 
 .promiseSub {
@@ -284,8 +316,19 @@
 
 .sectionHead {
   max-width: 62ch;
-  margin: 0 auto clamp(2rem, 4vw, 3rem);
+  margin: 0 auto clamp(1.3rem, 2.6vw, 1.9rem);
   text-align: center;
+}
+
+/* Knappere Fassung eigens für die Showcases: Diese Kopfzeile steht im
+   ersten Bildschirm und darf nicht die ganze Höhe für sich beanspruchen —
+   die Karte darunter soll noch anschneiden. */
+.sectionHeadTight {
+  margin-bottom: clamp(0.9rem, 2vw, 1.3rem);
+}
+
+.sectionHeadTight .h2 {
+  font-size: clamp(1.5rem, 3.4vw, 2.1rem);
 }
 
 .kicker {
@@ -308,7 +351,7 @@
 }
 
 .sectionLead {
-  margin: 1rem 0 0;
+  margin: 0.7rem 0 0;
   font-size: clamp(0.98rem, 1.7vw, 1.1rem);
   line-height: 1.7;
   color: #3c3f5e;
@@ -316,7 +359,9 @@
 
 /* ---------- Showcases ---------- */
 
-.showcases { padding: clamp(4rem, 9vw, 7rem) 0 0; }
+/* Knapp oben: Die Sektion folgt jetzt direkt dem Hero, und die erste Karte
+   soll im ersten Bildschirm bereits anschneiden. */
+.showcases { padding: clamp(0.6rem, 2vw, 1.2rem) 0 0; }
 
 /* ---------- Karussell ---------- */
 
@@ -326,7 +371,7 @@
   display: flex;
   justify-content: flex-end;
   gap: 0.6rem;
-  margin-bottom: 1.2rem;
+  margin-bottom: 0.7rem;
 }
 
 .navBtn {
