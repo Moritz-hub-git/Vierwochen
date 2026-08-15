@@ -1382,3 +1382,26 @@ a.pillar:hover {
 @media (max-width: 560px) {
   .pillar { font-size: 0.86rem; padding: 0.5rem 0.9rem; }
 }
+
+/* Pillar-Icons: Lineal (Maßarbeit) und Preisschild (Festpreis) — der
+   animierte grüne Punkt bleibt exklusiv beim Live-Chip. */
+.pIcon { width: 15px; height: 15px; flex-shrink: 0; }
+.pIcon_fit { color: #4f46e5; }
+.pIcon_pay { color: #ff6b5e; }
+
+/* Anker-Bruch in der Danach-Sektion: belegbare Marktrechnung
+   durchgestrichen, daneben der Festpreis. */
+.priceBreak {
+  margin: 1.1rem 0 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #6a6d8c;
+}
+
+.priceBreak s {
+  text-decoration-color: #e2503f;
+  text-decoration-thickness: 2px;
+  margin-right: 0.6rem;
+}
+
+.priceBreak b { color: #181a33; font-weight: 800; white-space: nowrap; }

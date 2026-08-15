@@ -33,21 +33,45 @@ const VARIANTS: Record<
 };
 
 /**
- * Die drei Versprechen — Tempo, Qualität, Risiko. Jedes ist ein Anker:
- * Ein Klick führt zu der Sektion, die es einlöst. Dort wiederholt ein
- * kleines Echo denselben Chip, damit das Einlösen sichtbar ist.
+ * Der Dreiklang — Tempo, Qualität, Preis (Entscheidung 2026-08-15).
+ * Jeder Chip ist ein Anker: Ein Klick führt zu der Sektion, die ihn
+ * einlöst; dort wiederholt ein kleines Echo denselben Chip. Der grüne
+ * Live-Punkt gehört nur dem ersten — Maßarbeit trägt ein Lineal, der
+ * Festpreis ein Preisschild.
  */
 const PILLARS = [
-  { dot: "live", text: "Live in vier Wochen", href: "#zeitplan" },
-  { dot: "fit", text: "Passgenau statt ungefähr", href: "#methode" },
-  { dot: "pay", text: "Bezahlt wird, was läuft", href: "#garantie" },
+  { icon: "live", text: "Live in 4 Wochen", href: "#zeitplan" },
+  { icon: "fit", text: "Digitale Maßarbeit", href: "#methode" },
+  { icon: "pay", text: "Festpreis ab 9.500 €", href: "#danach" },
 ] as const;
+
+function PillarIcon({ kind }: { kind: "live" | "fit" | "pay" }) {
+  if (kind === "live") {
+    return <i className={`${s.pDot} ${s.pDot_live}`} aria-hidden />;
+  }
+  if (kind === "fit") {
+    // Lineal mit Teilstrichen — Maßarbeit
+    return (
+      <svg className={`${s.pIcon} ${s.pIcon_fit}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <rect x="2.5" y="8.5" width="19" height="7" rx="1.8" />
+        <path d="M7 8.5v3.2M11.5 8.5v3.2M16 8.5v3.2" />
+      </svg>
+    );
+  }
+  // Preisschild — Festpreis
+  return (
+    <svg className={`${s.pIcon} ${s.pIcon_pay}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M20.6 13.4 12 22 2 12V4a2 2 0 0 1 2-2h8l8.6 8.6a2 2 0 0 1 0 2.8Z" />
+      <circle cx="7.5" cy="7.5" r="1.6" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
 
 export function PillarEcho({ n }: { n: 0 | 1 | 2 }) {
   const p = PILLARS[n];
   return (
     <span className={`${s.pillar} ${s.pillarEcho}`}>
-      <i className={`${s.pDot} ${s[`pDot_${p.dot}`]}`} aria-hidden />
+      <PillarIcon kind={p.icon} />
       {p.text}
     </span>
   );
@@ -142,7 +166,7 @@ export default function Landing({ variant }: { variant: VariantKey }) {
           <nav className={s.pillars} aria-label="Unsere drei Versprechen">
             {PILLARS.map((p) => (
               <a key={p.href} href={p.href} className={s.pillar}>
-                <i className={`${s.pDot} ${s[`pDot_${p.dot}`]}`} aria-hidden />
+                <PillarIcon kind={p.icon} />
                 {p.text}
               </a>
             ))}
@@ -194,21 +218,28 @@ export default function Landing({ variant }: { variant: VariantKey }) {
           <Timeline />
         </section>
 
-        {/* ---------- Und danach? Die zwei unterschätzten Argumente ---------- */}
-        <section className={s.afterSection} aria-label="Nach den vier Wochen">
+        {/* ---------- Und danach? Wirtschaftlichkeit + die Preis-Einlösung ---------- */}
+        <section id="danach" className={s.afterSection} aria-label="Nach den vier Wochen">
           <div className={s.sectionHead}>
+            <PillarEcho n={2} />
             <span className={s.kicker}>Und danach?</span>
             <h2 className={s.h2}>Die vier Wochen sind der Anfang</h2>
             <p className={s.sectionLead}>
               Software ist nie fertig. Entscheidend ist, was eine Änderung
               <em> danach</em> kostet.
             </p>
+            {/* Der Anker-Bruch: die belegbare Marktrechnung (Senior-Tagessätze
+                800–1.200 €), durchgestrichen — daneben der Festpreis. */}
+            <p className={s.priceBreak}>
+              <s>16.000–24.000 € — vier Wochen Senior-Entwicklung am Markt</s>{" "}
+              <b>Festpreis ab 9.500&nbsp;€</b>
+            </p>
           </div>
           <v.After />
         </section>
 
         {/* ---------- Leistungen als Bento ---------- */}
-        <Benefits echo={<PillarEcho n={2} />} />
+        <Benefits />
 
         {/* ---------- Einwände, ehrlich beantwortet ---------- */}
         <FAQ />
