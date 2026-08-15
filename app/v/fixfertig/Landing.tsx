@@ -80,7 +80,7 @@ export function PillarEcho({ n }: { n: 0 | 1 | 2 }) {
 const AUDIENCES = [
   "Ihr Unternehmen",
   "Ihre Kunden",
-  "Ihre Mitarbeiter",
+  "Ihr Team",
   "Ihre Partner",
   "Ihre Organisation",
 ];
