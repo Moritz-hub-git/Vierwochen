@@ -105,6 +105,14 @@ button, input, textarea, select {
   border-radius: 6px;
 }
 
+/* Übersteuert :focus-visible bei Maus/Touch: Safari markiert Buttons nach
+   einem Klick fälschlich als "sichtbar fokussiert" (bekannter WebKit-Fehler)
+   — der Rahmen bleibt dann stehen, obwohl niemand mit Tastatur navigiert.
+   InputModality.tsx setzt data-input anhand des zuletzt genutzten Geräts. */
+html[data-input="mouse"] :focus {
+  outline: none;
+}
+
 ::selection {
   background: var(--accent-soft);
 }
@@ -1644,6 +1652,27 @@ button, input, textarea, select {
   to { opacity: 1; }
 }
 
+/* Einflug für alles, was im Gespräch nachrückt: Nachrichten, Vorschläge,
+   Regler, Karten. War an acht Stellen referenziert, aber nie definiert —
+   die Elemente erschienen deshalb hart. Sie steigen jetzt von unten auf,
+   sichtbar NACH dem Text, zu dem sie gehören. */
+@keyframes msgIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chip-btn,
+  .stepper-card,
+  .msg { animation: none !important; }
+}
+
 @keyframes riseIn {
   from { transform: translateY(14px); opacity: 0; }
   to { transform: none; opacity: 1; }
@@ -2126,7 +2155,9 @@ button, input, textarea, select {
   border-radius: var(--radius-lg);
   padding: 1.2rem;
   box-shadow: var(--shadow-sm);
-  animation: msgIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  /* Etwas später als die Chips: Die Karte ist schwerer und darf sich Zeit
+     lassen, nachdem der Text steht. */
+  animation: msgIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.08s backwards;
 }
 
 .stepper-label {

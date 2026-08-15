@@ -19,22 +19,31 @@ export default function StreamedText({
   text,
   animate,
   onTick,
+  onDone,
 }: {
   text: string;
   animate: boolean;
   onTick?: () => void;
+  /** Feuert genau einmal, sobald der Text vollständig steht — auch dann,
+   *  wenn gar nicht animiert wird. Darauf warten Elemente, die erst NACH
+   *  der fertigen Antwort erscheinen dürfen (Vorschläge, Regler, Karten). */
+  onDone?: () => void;
 }) {
   const [count, setCount] = useState(animate ? 0 : text.length);
   const tickRef = useRef(onTick);
+  const doneRef = useRef(onDone);
   tickRef.current = onTick;
+  doneRef.current = onDone;
 
   useEffect(() => {
     if (!animate) {
       setCount(text.length);
+      doneRef.current?.();
       return;
     }
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setCount(text.length);
+      doneRef.current?.();
       return;
     }
 
@@ -51,8 +60,12 @@ export default function StreamedText({
         lastScroll = now;
         tickRef.current?.();
       }
-      if (shown < text.length) frame = requestAnimationFrame(step);
-      else tickRef.current?.();
+      if (shown < text.length) {
+        frame = requestAnimationFrame(step);
+      } else {
+        tickRef.current?.();
+        doneRef.current?.();
+      }
     };
 
     setCount(0);

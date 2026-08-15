@@ -94,6 +94,10 @@ export default function ChatDock() {
   const [sending, setSending] = useState(false);
   // Index des Zuges, der gerade herausgeschrieben wird (nur der neueste).
   const [animateIdx, setAnimateIdx] = useState<number | null>(null);
+  // Erst wenn der Text vollständig steht, dürfen Vorschläge, Regler und
+  // Karten erscheinen — sonst poppen sie vor der Antwort auf und wirken
+  // dem Lesefluss vorgreifend statt aus ihm hervorgehend.
+  const [textSettled, setTextSettled] = useState(true);
 
   const dialogIdRef = useRef<string>("");
   const endRef = useRef<HTMLDivElement>(null);
@@ -173,6 +177,7 @@ export default function ChatDock() {
           const pushTurn = () => {
             // Der neue Zug bekommt den nächsten Index — nur er wird geschrieben.
             setAnimateIdx(messagesRef.current.length);
+            setTextSettled(false);
             setMessages((prev) => [
               ...prev,
               {
@@ -216,6 +221,8 @@ export default function ChatDock() {
           }
           pushTurn();
         } else {
+          setAnimateIdx(null);
+          setTextSettled(true);
           setMessages((prev) => [
             ...prev,
             {
@@ -226,6 +233,8 @@ export default function ChatDock() {
           ]);
         }
       } catch {
+        setAnimateIdx(null);
+        setTextSettled(true);
         setMessages((prev) => [
           ...prev,
           {
@@ -317,6 +326,7 @@ export default function ChatDock() {
     setInput(null);
     setBooked(false);
     setAnimateIdx(null);
+    setTextSettled(true);
     setDockDraft("");
     dialogIdRef.current =
       typeof crypto.randomUUID === "function"
@@ -531,6 +541,7 @@ export default function ChatDock() {
                         text={m.display}
                         animate={i === animateIdx && !m.error}
                         onTick={scrollToEnd}
+                        onDone={i === animateIdx ? () => setTextSettled(true) : undefined}
                       />
                     </div>
                   </>
@@ -539,7 +550,7 @@ export default function ChatDock() {
                     2026-08-14): Im Verlauf lenkte die mitwachsende Karte vom
                     Gespräch ab. Der Zähler in der Zielzeile hält die Spannung,
                     die große Enthüllung bleibt der Lohn. */}
-                {m.result && (m.sketch ?? sketch) && (
+                {m.result && (m.sketch ?? sketch) && textSettled && (
                   <SolutionCard sketch={(m.sketch ?? sketch)!} result={m.result} />
                 )}
               </Fragment>
@@ -563,21 +574,22 @@ export default function ChatDock() {
               </div>
             )}
 
-            {/* Bedienelemente des letzten Zuges */}
-            {!busy && input?.kind === "chips" && input.options && (
+            {/* Bedienelemente des letzten Zuges — sie fliegen erst ein, wenn
+                die Antwort fertig geschrieben ist (textSettled). */}
+            {!busy && textSettled && input?.kind === "chips" && input.options && (
               <Chips options={input.options} onPick={(v) => void send(v)} />
             )}
-            {!busy && input?.kind === "multichips" && input.options && (
+            {!busy && textSettled && input?.kind === "multichips" && input.options && (
               <MultiChips options={input.options} onSubmit={(v) => void send(v)} />
             )}
-            {!busy && input?.kind === "number" && (
+            {!busy && textSettled && input?.kind === "number" && (
               <Stepper input={input} onSubmit={(v) => void send(v)} />
             )}
 
             {/* Abschluss: Termin direkt im Gesprächsverlauf. Booking bleibt nach
                 der Buchung eingehängt — es zeigt selbst den Erfolgsbildschirm;
                 nur die leise E-Mail-Alternative verschwindet dann. */}
-            {phase === "result" && result && (
+            {phase === "result" && result && textSettled && (
               <>
                 <Booking
                   dialogId={dialogIdRef.current}
