@@ -126,15 +126,17 @@ const ITEMS: {
   },
 ];
 
-export default function Benefits() {
+export default function Benefits({ echo }: { echo?: React.ReactNode }) {
   return (
-    <section className={s.benefitsSection} aria-label="Was Sie bekommen">
+    <section id="garantie" className={s.benefitsSection} aria-label="Was Sie bekommen">
       <div className={s.sectionHead}>
+        {echo}
         <span className={s.kicker}>Was Sie bekommen</span>
         <h2 className={s.h2}>Alles, was dazugehört</h2>
         <p className={s.sectionLead}>
-          Qualität behaupten kann jeder. Wir hängen Haftung dran — genau
-          deshalb können Sie sie glauben:
+          Bezahlt wird, was läuft: Festpreis, Abnahme nach vereinbarten
+          Kriterien, zwölf Monate Garantie. Qualität behaupten kann jeder —
+          wir hängen Haftung dran:
         </p>
       </div>
       <div className={s.benefits}>

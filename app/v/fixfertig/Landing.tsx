@@ -12,50 +12,46 @@ import FAQ from "./FAQ";
 import s from "./styles.module.css";
 
 /**
- * Gemeinsame neoapp.studio-Landing — in fünf Varianten, die sich in genau
- * zwei Dingen unterscheiden: dem Neugier-Haken unter dem Hero-Knopf und
- * der grafischen Darstellung der 2+AI-Methode. Alles andere (Hero,
- * Showcases, Zeitplan mit echten Daten, Leistungs-Bento, Abschluss) ist
- * identisch, damit der Vergleich fair bleibt.
+ * Gemeinsame neoapp.studio-Landing — in fünf Varianten, die sich nur in
+ * der grafischen Darstellung von Methode und Danach-Argument
+ * unterscheiden. Der Hero trägt die drei Versprechen (Tempo, Qualität,
+ * Risiko) als klickbare Chips; jede Ziel-Sektion wiederholt ihren Chip
+ * als Echo — Versprechen oben, Einlösung unten.
  */
 
 export type VariantKey = "wege" | "formel" | "kern" | "bento" | "plan";
 
 const VARIANTS: Record<
   VariantKey,
-  { hookQ: string; hookB: string; Visual: React.ComponentType; After: React.ComponentType }
+  { Visual: React.ComponentType; After: React.ComponentType }
 > = {
-  wege: {
-    hookQ: "Sechs Übergaben oder eine.",
-    hookB: "Sehen Sie, wo bei anderen die Monate bleiben",
-    Visual: WegeVisual,
-    After: AfterWege,
-  },
-  formel: {
-    hookQ: "Wie das gehen soll?",
-    hookB: "Die Rechnung: 1 + 1 + AI",
-    Visual: FormelVisual,
-    After: AfterFormel,
-  },
-  kern: {
-    hookQ: "Kein Zauber —",
-    hookB: "Businessverständnis und Code in einem Kopf",
-    Visual: KernVisual,
-    After: AfterKern,
-  },
-  bento: {
-    hookQ: "Neugierig, wie das funktioniert?",
-    hookB: "Die Methode auf einen Blick",
-    Visual: BentoVisual,
-    After: AfterBento,
-  },
-  plan: {
-    hookQ: "Vier Wochen, Tag für Tag:",
-    hookB: "der Bauplan mit echten Daten",
-    Visual: PlanVisual,
-    After: AfterPlan,
-  },
+  wege: { Visual: WegeVisual, After: AfterWege },
+  formel: { Visual: FormelVisual, After: AfterFormel },
+  kern: { Visual: KernVisual, After: AfterKern },
+  bento: { Visual: BentoVisual, After: AfterBento },
+  plan: { Visual: PlanVisual, After: AfterPlan },
 };
+
+/**
+ * Die drei Versprechen — Tempo, Qualität, Risiko. Jedes ist ein Anker:
+ * Ein Klick führt zu der Sektion, die es einlöst. Dort wiederholt ein
+ * kleines Echo denselben Chip, damit das Einlösen sichtbar ist.
+ */
+const PILLARS = [
+  { dot: "live", text: "Live in vier Wochen", href: "#zeitplan" },
+  { dot: "fit", text: "Passgenau statt ungefähr", href: "#methode" },
+  { dot: "pay", text: "Bezahlt wird, was läuft", href: "#garantie" },
+] as const;
+
+export function PillarEcho({ n }: { n: 0 | 1 | 2 }) {
+  const p = PILLARS[n];
+  return (
+    <span className={`${s.pillar} ${s.pillarEcho}`}>
+      <i className={`${s.pDot} ${s[`pDot_${p.dot}`]}`} aria-hidden />
+      {p.text}
+    </span>
+  );
+}
 
 const AUDIENCES = [
   "Ihr Unternehmen",
@@ -141,9 +137,16 @@ export default function Landing({ variant }: { variant: VariantKey }) {
             <br />
             die <RotatingWord words={AUDIENCES} /> begeistern.
           </h1>
-          <p className={s.sub}>
-            <LivePill>Live in vier Wochen</LivePill> — zum Festpreis.
-          </p>
+          {/* Drei Versprechen statt einer Subline: Tempo, Qualität, Risiko.
+              Klickbar — jeder Chip springt zu der Sektion, die ihn einlöst. */}
+          <nav className={s.pillars} aria-label="Unsere drei Versprechen">
+            {PILLARS.map((p) => (
+              <a key={p.href} href={p.href} className={s.pillar}>
+                <i className={`${s.pDot} ${s[`pDot_${p.dot}`]}`} aria-hidden />
+                {p.text}
+              </a>
+            ))}
+          </nav>
           <div className={s.heroCtas}>
             <DialogCta className={s.ctaBtn}>Preiseinschätzung erhalten</DialogCta>
           </div>
@@ -151,9 +154,6 @@ export default function Landing({ variant }: { variant: VariantKey }) {
             In 10 Sekunden <span aria-hidden>·</span> kostenlos &amp;
             unverbindlich <span aria-hidden>·</span> ohne E-Mail-Adresse
           </p>
-          <a href="#methode" className={s.heroHook}>
-            {v.hookQ} <b>{v.hookB}</b> <span aria-hidden>↓</span>
-          </a>
         </header>
 
         {/* ---------- Showcases ---------- */}
@@ -168,6 +168,7 @@ export default function Landing({ variant }: { variant: VariantKey }) {
 
         {/* ---------- Methode: große Aussage + variantenspezifische Grafik ---------- */}
         <section id="methode" className={s.promise} aria-label="Die 2+AI-Methode">
+          <PillarEcho n={1} />
           <span className={s.kicker}>Die 2+AI-Methode</span>
           <h2 className={s.promiseLine}>
             In vier Wochen <LivePill />
@@ -185,7 +186,8 @@ export default function Landing({ variant }: { variant: VariantKey }) {
           </div>
 
           {/* ---------- Zeitplan mit echten Daten ---------- */}
-          <div className={s.timelineHead}>
+          <div id="zeitplan" className={s.timelineHead}>
+            <PillarEcho n={0} />
             <span className={s.kicker}>Der Zeitplan</span>
             <h3 className={s.h3}>Start: nächster Montag. Kein Witz.</h3>
           </div>
@@ -206,7 +208,7 @@ export default function Landing({ variant }: { variant: VariantKey }) {
         </section>
 
         {/* ---------- Leistungen als Bento ---------- */}
-        <Benefits />
+        <Benefits echo={<PillarEcho n={2} />} />
 
         {/* ---------- Einwände, ehrlich beantwortet ---------- */}
         <FAQ />
