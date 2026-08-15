@@ -1552,31 +1552,10 @@ button, input, textarea, select {
   .dock-bar textarea { transition: none; }
 }
 
-/* Getipptes Placeholder mit Schreibmarke — Overlay statt ::placeholder,
-   damit die Marke mitwandert. */
-.dock-type {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
+/* Die Frage steht fest in der Leiste — kein wechselndes Banner mehr. */
+.dock-bar textarea::placeholder {
   color: var(--text-muted);
-  font-size: 1.05rem;
-  white-space: nowrap;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.dock-caret {
-  flex-shrink: 0;
-  width: 2px;
-  height: 1.15em;
-  margin-left: 2px;
-  background: var(--accent);
-  animation: caretBlink 1.05s steps(2, start) infinite;
-}
-
-@keyframes caretBlink {
-  50% { opacity: 0; }
+  opacity: 1;
 }
 
 .dock-send {

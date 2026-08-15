@@ -4,6 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 /** Öffnet den Projekt-Dialog (ChatDock hört auf dieses Ereignis). */
+/** Weckt nur die Dialogleiste, ohne das Gespräch zu öffnen: Der Cursor
+ *  springt hinein, die Vorschläge steigen auf — als hätte man selbst
+ *  hineingeklickt. */
+export function focusDock() {
+  window.dispatchEvent(new CustomEvent("vw:focus-dock"));
+}
+
 export function openDialog(text?: string) {
   window.dispatchEvent(new CustomEvent("vw:dialog", { detail: { text: text ?? "" } }));
 }

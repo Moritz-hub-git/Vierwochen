@@ -20,21 +20,6 @@ import type { DialogInput, DialogResult, DialogTurn, Sketch, UiMessage } from ".
  * Produktbeweis gerahmt, denn dieser Dialog ist selbst Individualsoftware.
  */
 
-/** Ziel-Banner: läuft zweimal durch, bevor die Beispiel-Fälle rotieren. */
-const BANNER = [
-  "Welches Ziel wollen Sie erreichen?",
-  "In 60 Sekunden: Lösungsskizze, Zeitplan & Preisschätzung.",
-];
-
-/** Beispiel-Fälle: werden getippt, gehalten, gelöscht — Inspiration im Takt. */
-const EXAMPLES = [
-  "Unser Angebotsprozess lebt in drei Excel-Listen …",
-  "Bestellungen kommen als PDF ins Sammelpostfach …",
-  "Der Monatsbericht entsteht per Copy-Paste aus fünf Systemen …",
-  "Wir tippen jeden Lieferschein zweimal ab …",
-  "Die Urlaubsplanung läuft über eine Wandtafel …",
-];
-
 /** Einstiegsbeispiele im geöffneten Dialog: Wer nicht formulieren muss, fängt eher an. */
 const STARTERS = [
   "Wir pflegen Artikel in mehreren Excel-Listen und tippen alles doppelt ein.",
@@ -68,6 +53,14 @@ const DOCK_HINTS = [
   },
 ];
 
+/**
+ * Die Frage in der Leiste. Sie fragt nach dem Bestand, nicht nach einer
+ * Vision: Was heute Zeit kostet, weiß jeder sofort — ein Ziel muss man
+ * erst formulieren. Genau diese Angabe braucht der Dialog später auch,
+ * um Aufwand und Nutzen zu rechnen.
+ */
+const DOCK_QUESTION = "Was kostet Sie gerade am meisten Zeit?";
+
 const MAX_CHARS = 1500;
 
 function SparkIcon({ size = 16 }: { size?: number }) {
@@ -84,64 +77,6 @@ function Avatar() {
       <SparkIcon size={15} />
     </span>
   );
-}
-
-/** Getipptes Placeholder: Banner zweimal, danach Beispiele im Loop. */
-function useTypewriter(active: boolean) {
-  const [text, setText] = useState("");
-  const [reduced, setReduced] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    const onChange = () => setReduced(mq.matches);
-    mq.addEventListener?.("change", onChange);
-    return () => mq.removeEventListener?.("change", onChange);
-  }, []);
-
-  useEffect(() => {
-    if (!active || reduced) return;
-    const sequence = [...BANNER, ...BANNER];
-    let seqIdx = 0;
-    let charIdx = 0;
-    let deleting = false;
-    let timer: ReturnType<typeof setTimeout>;
-
-    const current = () =>
-      seqIdx < sequence.length
-        ? sequence[seqIdx]
-        : EXAMPLES[(seqIdx - sequence.length) % EXAMPLES.length];
-
-    const tick = () => {
-      const full = current();
-      if (!deleting) {
-        charIdx += 1;
-        setText(full.slice(0, charIdx));
-        if (charIdx >= full.length) {
-          deleting = true;
-          timer = setTimeout(tick, seqIdx < sequence.length ? 2100 : 2400);
-        } else {
-          timer = setTimeout(tick, 32);
-        }
-      } else {
-        charIdx -= 2;
-        setText(full.slice(0, Math.max(0, charIdx)));
-        if (charIdx <= 0) {
-          deleting = false;
-          charIdx = 0;
-          seqIdx += 1;
-          timer = setTimeout(tick, 350);
-        } else {
-          timer = setTimeout(tick, 14);
-        }
-      }
-    };
-
-    timer = setTimeout(tick, 500);
-    return () => clearTimeout(timer);
-  }, [active, reduced]);
-
-  return { text: reduced ? BANNER[0] : text, reduced };
 }
 
 export default function ChatDock() {
@@ -173,8 +108,6 @@ export default function ChatDock() {
   // Formular überlappen. Der Dialog bleibt über den Kopfzeilen-Knopf erreichbar.
   const pathname = usePathname();
   const dockSuppressed = pathname === "/termin" || pathname === "/it";
-
-  const { text: typed } = useTypewriter(!open && !dockSuppressed);
 
   if (!dialogIdRef.current && typeof window !== "undefined") {
     dialogIdRef.current =
@@ -427,6 +360,16 @@ export default function ChatDock() {
     return () => window.removeEventListener("vw:dialog", handler);
   }, [openPanel]);
 
+  // Einstiegsknöpfe wecken nur die Leiste — geschrieben wird selbst.
+  useEffect(() => {
+    const handler = () => {
+      dockInputRef.current?.focus();
+      setDockFocused(true);
+    };
+    window.addEventListener("vw:focus-dock", handler);
+    return () => window.removeEventListener("vw:focus-dock", handler);
+  }, []);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -520,16 +463,10 @@ export default function ChatDock() {
                   ? messages.length === 0
                     ? "Ihr Ziel oder Problem in ein, zwei Sätzen …"
                     : "Ihre Antwort …"
-                  : ""
+                  : DOCK_QUESTION
               }
               aria-label={open ? "Ihre Antwort" : "Beschreiben Sie Ihr Ziel oder Ihr Problem"}
             />
-            {!open && !dockDraft && !dockFocused && (
-              <span className="dock-type" aria-hidden>
-                {typed}
-                <i className="dock-caret" />
-              </span>
-            )}
           </span>
           <button type="submit" className="dock-send" aria-label={open ? "Antwort senden" : "Einschätzung starten"}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
