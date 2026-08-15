@@ -7,6 +7,8 @@ import Timeline from "./Timeline";
 import Benefits from "./Benefits";
 import { Cockpit, Schichtplan, Portal, Rechner, Protokoll, Lager } from "./Mockups";
 import { WegeVisual, FormelVisual, KernVisual, BentoVisual, PlanVisual } from "./MethodVisuals";
+import { AfterWege, AfterFormel, AfterKern, AfterBento, AfterPlan } from "./AfterVisuals";
+import FAQ from "./FAQ";
 import s from "./styles.module.css";
 
 /**
@@ -21,32 +23,37 @@ export type VariantKey = "wege" | "formel" | "kern" | "bento" | "plan";
 
 const VARIANTS: Record<
   VariantKey,
-  { hookQ: string; hookB: string; Visual: React.ComponentType }
+  { hookQ: string; hookB: string; Visual: React.ComponentType; After: React.ComponentType }
 > = {
   wege: {
     hookQ: "Sechs Übergaben oder eine.",
     hookB: "Sehen Sie, wo bei anderen die Monate bleiben",
     Visual: WegeVisual,
+    After: AfterWege,
   },
   formel: {
     hookQ: "Wie das gehen soll?",
     hookB: "Die Rechnung: 1 + 1 + AI",
     Visual: FormelVisual,
+    After: AfterFormel,
   },
   kern: {
     hookQ: "Kein Zauber —",
     hookB: "Businessverständnis und Code in einem Kopf",
     Visual: KernVisual,
+    After: AfterKern,
   },
   bento: {
     hookQ: "Neugierig, wie das funktioniert?",
     hookB: "Die Methode auf einen Blick",
     Visual: BentoVisual,
+    After: AfterBento,
   },
   plan: {
     hookQ: "Vier Wochen, Tag für Tag:",
     hookB: "der Bauplan mit echten Daten",
     Visual: PlanVisual,
+    After: AfterPlan,
   },
 };
 
@@ -167,9 +174,10 @@ export default function Landing({ variant }: { variant: VariantKey }) {
           </h2>
           <p className={s.promiseSub}>
             AI macht möglich, was es so noch nicht gab: bauen, iterieren und
-            veröffentlichen in Tagen — in Senior-Qualität. Und weil hier
-            derselbe Kopf Ihr Geschäft versteht <em>und</em> den Code
-            schreibt, geht zwischen Idee und Umsetzung nichts verloren.
+            veröffentlichen in Tagen. Und weil hier derselbe Kopf Ihr Geschäft
+            versteht <em>und</em> den Code schreibt, geht zwischen Idee und
+            Umsetzung nichts verloren — das Ergebnis ist nicht ungefähr
+            richtig, sondern passgenau.
           </p>
 
           <div className={s.methodVisual}>
@@ -184,8 +192,24 @@ export default function Landing({ variant }: { variant: VariantKey }) {
           <Timeline />
         </section>
 
+        {/* ---------- Und danach? Die zwei unterschätzten Argumente ---------- */}
+        <section className={s.afterSection} aria-label="Nach den vier Wochen">
+          <div className={s.sectionHead}>
+            <span className={s.kicker}>Und danach?</span>
+            <h2 className={s.h2}>Die vier Wochen sind der Anfang</h2>
+            <p className={s.sectionLead}>
+              Software ist nie fertig. Entscheidend ist, was eine Änderung
+              <em> danach</em> kostet.
+            </p>
+          </div>
+          <v.After />
+        </section>
+
         {/* ---------- Leistungen als Bento ---------- */}
         <Benefits />
+
+        {/* ---------- Einwände, ehrlich beantwortet ---------- */}
+        <FAQ />
 
         {/* ---------- Abschluss ---------- */}
         <section className={s.cta}>

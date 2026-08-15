@@ -1145,3 +1145,134 @@
   color: rgba(255, 255, 255, 0.72);
   max-width: 60ch;
 }
+
+/* ============================================================
+   „Und danach?" + FAQ
+   ============================================================ */
+
+.afterSection { padding: clamp(3.5rem, 7vw, 5.5rem) 0 0; }
+
+.afterGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+  align-items: stretch;
+}
+
+@media (max-width: 900px) { .afterGrid { grid-template-columns: 1fr; } }
+
+.afterCard {
+  background: #fff;
+  border-radius: 26px;
+  padding: 1.5rem 1.4rem;
+  box-shadow: 0 10px 28px rgba(38, 34, 120, 0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.afterCardDark {
+  background: #181a33;
+  color: #fff;
+  box-shadow: 0 18px 44px rgba(24, 26, 51, 0.35);
+}
+
+.afterCardDark .wayNote { color: rgba(255, 255, 255, 0.72); }
+
+.afterLabel {
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+/* Kleinere Gleichungs-Zeilen für die Danach-Rechnungen */
+.eqSmall {
+  font-size: clamp(1.1rem, 2.4vw, 1.6rem);
+  margin-bottom: 0.9rem;
+}
+
+.afterNote {
+  margin: 1.2rem auto 0;
+  max-width: 56ch;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #3c3f5e;
+}
+
+/* Zweier-Bento für die Danach-Kacheln */
+.after2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  text-align: left;
+}
+
+@media (max-width: 720px) { .after2 { grid-template-columns: 1fr; } }
+
+/* Ergebnis-Zeilen im Wege-Vergleich: die Passgenauigkeit als Schlusssatz */
+.wayResult {
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed rgba(24, 26, 51, 0.18);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #6a6d8c;
+}
+
+.wayResultNew {
+  border-top-color: rgba(255, 255, 255, 0.25);
+  color: #d8f26e;
+}
+
+/* ---------- FAQ ---------- */
+
+.faqSection { padding: clamp(3.5rem, 7vw, 5.5rem) 0 0; }
+
+.faq {
+  max-width: 780px;
+  margin: 0 auto;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.faqItem {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 22px rgba(38, 34, 120, 0.07);
+  overflow: hidden;
+}
+
+.faqItem summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.05rem 1.3rem;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  list-style: none;
+  transition: color 0.2s ease;
+}
+
+.faqItem summary::-webkit-details-marker { display: none; }
+.faqItem summary:hover { color: #4f46e5; }
+
+.faqItem summary svg {
+  flex-shrink: 0;
+  color: #6a6d8c;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.faqItem[open] summary svg { transform: rotate(180deg); color: #4f46e5; }
+
+.faqItem p {
+  margin: 0;
+  padding: 0 1.3rem 1.15rem;
+  font-size: 0.94rem;
+  line-height: 1.65;
+  color: #3c3f5e;
+}

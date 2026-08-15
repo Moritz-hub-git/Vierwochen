@@ -132,6 +132,10 @@ export default function Benefits() {
       <div className={s.sectionHead}>
         <span className={s.kicker}>Was Sie bekommen</span>
         <h2 className={s.h2}>Alles, was dazugehört</h2>
+        <p className={s.sectionLead}>
+          Qualität behaupten kann jeder. Wir hängen Haftung dran — genau
+          deshalb können Sie sie glauben:
+        </p>
       </div>
       <div className={s.benefits}>
         {ITEMS.map((b) => (

@@ -52,6 +52,7 @@ export function WegeVisual() {
           Fünf Übergaben. An jeder geht Wissen verloren — und niemand trägt
           das Ganze.
         </p>
+        <span className={s.wayResult}>Ergebnis: ungefähr das, was mal besprochen wurde</span>
       </div>
 
       <div className={s.wayNew}>
@@ -67,7 +68,7 @@ export function WegeVisual() {
           <span className={s.builderCard}>
             <b>Einer, der beides kann</b>
             <i>versteht Ihr Geschäft · schreibt den Code</i>
-            <em className={s.aiBadge}>+ AI ×100</em>
+            <em className={s.aiBadge}>+ AI</em>
           </span>
           <span className={s.chainArrow} aria-hidden>
             →
@@ -78,8 +79,8 @@ export function WegeVisual() {
         </div>
         <p className={s.wayNote}>
           Keine Übergabe: Wer mit Ihnen spricht, verantwortet auch den Code.
-          Das Ergebnis bleibt näher an dem, was Sie brauchen.
         </p>
+        <span className={`${s.wayResult} ${s.wayResultNew}`}>Ergebnis: das, was Sie gemeint haben</span>
       </div>
     </div>
   );
@@ -143,8 +144,8 @@ export function KernVisual() {
         {/* AI-Orbit */}
         <ellipse cx="320" cy="205" rx="292" ry="168" fill="none" stroke="#4f46e5" strokeWidth="1.6" strokeDasharray="3 7" opacity="0.5" />
         <g transform="translate(320 22)">
-          <rect x="-56" y="-14" width="112" height="30" rx="15" fill="#181a33" />
-          <text x="0" y="6" textAnchor="middle" fontSize="14" fontWeight="700" fill="#d8f26e" fontFamily="inherit">✦ AI ×100</text>
+          <rect x="-84" y="-14" width="168" height="30" rx="15" fill="#181a33" />
+          <text x="0" y="6" textAnchor="middle" fontSize="14" fontWeight="700" fill="#d8f26e" fontFamily="inherit">✦ AI — hundert Hände</text>
         </g>
 
         {/* Venn */}
@@ -210,9 +211,9 @@ export function BentoVisual() {
         <p>Wer die Anforderung hört, schreibt den Code — nichts geht verloren.</p>
       </div>
       <div className={`${s.mTile} ${s.mTileInk}`}>
-        <span className={s.mBig}>×100</span>
-        <b>Geschwindigkeit</b>
-        <p>AI tippt, testet, wiederholt — in Stunden statt Wochen.</p>
+        <span className={s.mBig}>Stunden</span>
+        <b>statt Wochen</b>
+        <p>AI tippt, testet, wiederholt — das ist der Takt einer Iteration.</p>
       </div>
       <div className={`${s.mTile} ${s.mTileIndigo}`}>
         <span className={s.mBig}>6×</span>
