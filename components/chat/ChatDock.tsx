@@ -41,30 +41,15 @@ const STARTERS = [
   "Unser Monatsreporting entsteht per Copy-Paste aus mehreren Systemen.",
 ];
 
-/** Vorschläge, die beim Anklicken der Dialogleiste aufsteigen. Der Chip
- *  bleibt kurz genug zum Überfliegen, übergeben wird der ganze Satz —
- *  damit der Berater sofort etwas Greifbares zu lesen hat. */
+/** Vorschläge, die beim Anklicken der Dialogleiste aufsteigen. Ein Klick
+ *  schreibt den Satz ins Feld — ergänzen und abschicken macht der Nutzer
+ *  selbst. Deshalb sind es ganze Sätze, keine Stichworte. */
 const DOCK_HINTS = [
-  {
-    label: "Daten in Excel-Listen",
-    text: "Wir pflegen unsere Daten in mehreren Excel-Listen und tippen vieles doppelt ein.",
-  },
-  {
-    label: "Bestellungen im Postfach",
-    text: "Bestellungen kommen als PDF ins Sammelpostfach und gehen dort unter.",
-  },
-  {
-    label: "Planung per Zuruf",
-    text: "Unsere Einsatz- und Schichtplanung läuft über Zuruf, Zettel und Anrufe.",
-  },
-  {
-    label: "Angebote dauern zu lang",
-    text: "Ein Angebot zu kalkulieren dauert bei uns Tage, weil alles Handarbeit ist.",
-  },
-  {
-    label: "Kunden fragen Status ab",
-    text: "Kunden rufen bei uns an, um den Stand ihrer Bestellung zu erfahren.",
-  },
+  "Unsere Daten liegen in mehreren Excel-Listen.",
+  "Bestellungen gehen im Sammelpostfach unter.",
+  "Die Schichtplanung läuft über Zuruf und Zettel.",
+  "Ein Angebot zu kalkulieren dauert bei uns Tage.",
+  "Kunden rufen an, um den Bestellstatus zu erfahren.",
 ];
 
 const MAX_CHARS = 1500;
@@ -169,11 +154,13 @@ export default function ChatDock() {
   const [draft, setDraft] = useState("");
   const [dockDraft, setDockDraft] = useState("");
   const [dockFocused, setDockFocused] = useState(false);
+  const [sending, setSending] = useState(false);
   const [busyLabelIdx, setBusyLabelIdx] = useState(0);
 
   const dialogIdRef = useRef<string>("");
   const endRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const dockInputRef = useRef<HTMLInputElement>(null);
   const messagesRef = useRef<UiMessage[]>([]);
   const sketchRef = useRef<Sketch | null>(null);
   messagesRef.current = messages;
@@ -316,16 +303,75 @@ export default function ChatDock() {
     [busy]
   );
 
+  /**
+   * Übergang in den Chatmodus: Die Navigation bleibt oben stehen, alles
+   * darunter blendet weich weg und gibt den Verlauf frei. Ausgeblendet wird
+   * per Klasse auf den Geschwistern der Navigation — so trägt der Übergang
+   * jede Seitenstruktur, ohne dass die Seiten etwas davon wissen müssen.
+   */
+  const fadePageOut = useCallback(() => {
+    const nav = document.querySelector("nav, header");
+    const root = nav?.parentElement ?? document.body;
+    const targets = Array.from(root.children).filter(
+      (el) =>
+        el !== nav &&
+        !el.classList.contains("dock") &&
+        !el.classList.contains("panel") &&
+        el.tagName !== "SCRIPT" &&
+        el.tagName !== "STYLE"
+    );
+    // Erst die Überblendregel setzen, im nächsten Bild den Zielzustand —
+    // sonst wäre der Wechsel ein Sprung statt einer Blende.
+    targets.forEach((el) => el.classList.add("vw-fadeable"));
+    requestAnimationFrame(() =>
+      targets.forEach((el) => el.classList.add("vw-faded"))
+    );
+    if (nav) {
+      document.documentElement.style.setProperty(
+        "--chat-top",
+        `${Math.round(nav.getBoundingClientRect().height)}px`
+      );
+      nav.classList.add("vw-nav-pinned");
+    }
+    document.documentElement.setAttribute("data-chat", "on");
+  }, []);
+
+  const restorePage = useCallback(() => {
+    document.documentElement.removeAttribute("data-chat");
+    document.documentElement.style.removeProperty("--chat-top");
+    document
+      .querySelectorAll(".vw-nav-pinned")
+      .forEach((el) => el.classList.remove("vw-nav-pinned"));
+    const faded = Array.from(document.querySelectorAll(".vw-faded"));
+    faded.forEach((el) => el.classList.remove("vw-faded"));
+    window.setTimeout(
+      () => faded.forEach((el) => el.classList.remove("vw-fadeable")),
+      700
+    );
+  }, []);
+
   const openPanel = useCallback(
     (initialText?: string) => {
-      setOpen(true);
-      track("dialog_opened", { dialogId: dialogIdRef.current });
       const text = (initialText ?? "").trim();
-      if (text) void send(text);
-      setTimeout(() => textareaRef.current?.focus(), 350);
+      track("dialog_opened", { dialogId: dialogIdRef.current });
+      // Die Leiste sinkt nach unten weg, während die Seite verblasst; erst
+      // danach steigt der Verlauf auf. Nacheinander, nicht gleichzeitig.
+      setSending(true);
+      fadePageOut();
+      window.setTimeout(() => {
+        setOpen(true);
+        setSending(false);
+        if (text) void send(text);
+        window.setTimeout(() => textareaRef.current?.focus(), 300);
+      }, 430);
     },
-    [send]
+    [send, fadePageOut]
   );
+
+  // Beim Verlassen des Chats kommt die Seite genauso weich zurück.
+  useEffect(() => {
+    if (!open) restorePage();
+  }, [open, restorePage]);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -394,27 +440,30 @@ export default function ChatDock() {
           darüber aufblendet — ein Kreuzblenden statt eines harten Sprungs. */}
       {!dockSuppressed && (
       <div
-        className={`dock${open ? " is-hidden" : ""}${dockFocused && !dockDraft ? " has-hints" : ""}`}
+        className={`dock${open ? " is-hidden" : ""}${sending ? " is-sending" : ""}${dockFocused && !dockDraft ? " has-hints" : ""}`}
         aria-hidden={open}
       >
         <div className="dock-stack">
-          {/* Beim Anklicken der Leiste steigen Beispiele auf: Wer nicht weiß,
-              wie er anfangen soll, wählt eines aus und ist im Gespräch.
-              onMouseDown/preventDefault hält den Fokus im Feld — sonst
-              verschwänden die Vorschläge, bevor der Klick ankommt. */}
+          {/* Beim Anklicken der Leiste poppen Beispiele auf. Ein Klick schreibt
+              den Satz ins Feld — abgeschickt wird erst mit Enter, damit man
+              vorher noch ergänzen kann. onMouseDown/preventDefault hält den
+              Fokus im Feld, sonst verschwänden die Vorschläge vor dem Klick. */}
           {dockFocused && !dockDraft && (
-            <div className="dock-hints" role="group" aria-label="Beispiele zum Auswählen">
+            <div className="dock-hints" role="group" aria-label="Beispiele zum Übernehmen">
               {DOCK_HINTS.map((hint, i) => (
                 <button
-                  key={hint.label}
+                  key={hint}
                   type="button"
                   className="dock-hint"
-                  style={{ animationDelay: `${i * 55}ms` }}
+                  style={{ animationDelay: `${i * 65}ms` }}
                   tabIndex={open ? -1 : undefined}
                   onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => openPanel(hint.text)}
+                  onClick={() => {
+                    setDockDraft(hint);
+                    dockInputRef.current?.focus();
+                  }}
                 >
-                  {hint.label}
+                  {hint}
                 </button>
               ))}
             </div>
@@ -425,6 +474,7 @@ export default function ChatDock() {
           </span>
           <span className="dock-inputwrap">
             <input
+              ref={dockInputRef}
               type="text"
               value={dockDraft}
               maxLength={MAX_CHARS}
@@ -459,7 +509,7 @@ export default function ChatDock() {
               <Avatar />
               <span className="panel-person-text">
                 <strong>KI-Projektberater</strong>
-                <span>vierwochen.de · KI auf Basis echter Projektdaten — Moritz liest jede Skizze</span>
+                <span>KI auf Basis echter Projektdaten — Moritz liest jede Skizze</span>
               </span>
             </div>
             <button type="button" className="icon-btn" onClick={() => setOpen(false)} aria-label="Dialog minimieren">
@@ -580,7 +630,13 @@ export default function ChatDock() {
             <div ref={endRef} />
           </div>
 
-          <form className="composer" onSubmit={submitComposer}>
+          {/* Während der Berater arbeitet, sinkt die Eingabezeile weg: Der
+              Blick bleibt bei der entstehenden Antwort, nicht bei einem
+              gesperrten Feld. Sie kommt zurück, sobald der Text steht. */}
+          <form
+            className={`composer${busy || revealing ? " is-away" : ""}`}
+            onSubmit={submitComposer}
+          >
             <textarea
               ref={textareaRef}
               rows={1}

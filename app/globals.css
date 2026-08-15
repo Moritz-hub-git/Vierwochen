@@ -1343,21 +1343,36 @@ button, input, textarea, select {
 
 .dock.is-hidden .dock-bar { pointer-events: none; }
 
-/* Wenn die Vorschläge offen sind, legt sich ein weicher Verlauf über den
-   Seitenfuß — die Bubbles stehen dann auf ruhigem Grund statt mitten im Text. */
+/* Wenn die Vorschläge offen sind, legt sich ein Verlauf über den Seitenfuß —
+   kräftig genug, dass die Bubbles auf ruhigem Grund stehen, und langsam
+   genug, dass es sich wie ein Abtauchen anfühlt statt wie ein Schalter. */
 .dock::before {
   content: "";
   position: absolute;
   inset-inline: 0;
   bottom: 0;
-  height: 320px;
-  background: linear-gradient(to top, var(--bg) 25%, color-mix(in srgb, var(--bg) 60%, transparent) 65%, transparent);
+  height: 520px;
+  background: linear-gradient(
+    to top,
+    var(--bg) 48%,
+    color-mix(in srgb, var(--bg) 94%, transparent) 66%,
+    color-mix(in srgb, var(--bg) 55%, transparent) 82%,
+    transparent
+  );
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.35s ease;
+  transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dock.has-hints::before { opacity: 1; }
+
+/* Beim Abschicken sinkt die Leiste nach unten weg, bevor der Verlauf aufsteigt. */
+.dock.is-sending {
+  opacity: 0;
+  transform: translateY(34px);
+}
+
+.dock.is-sending .dock-bar { pointer-events: none; }
 
 /* Leiste und Vorschläge stehen übereinander in einer Spalte, damit die
    Bubbles beim Fokus über der Leiste aufsteigen können. */
@@ -1369,11 +1384,14 @@ button, input, textarea, select {
   pointer-events: none;
 }
 
+/* Von der Leiste aufsteigender Stapel: erster Vorschlag unten, direkt über
+   der Eingabe — column-reverse dreht die Reihenfolge, damit die Staffelung
+   von unten nach oben läuft. */
 .dock-hints {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.45rem;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 0.5rem;
   pointer-events: auto;
 }
 
@@ -1381,38 +1399,51 @@ button, input, textarea, select {
    und großer Text dahinter würde sie sonst unruhig wirken lassen. */
 .dock-hint {
   font: inherit;
-  font-size: 0.88rem;
-  font-weight: 600;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.45;
+  text-align: left;
+  max-width: min(560px, 100%);
   color: var(--text-soft);
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 0.5rem 0.95rem;
+  border-radius: 18px;
+  padding: 0.62rem 1.05rem;
   cursor: pointer;
   box-shadow: var(--shadow-md);
-  animation: hintRise 0.44s cubic-bezier(0.16, 1, 0.3, 1) both;
-  transition: transform 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+  animation: hintPop 0.52s cubic-bezier(0.22, 1, 0.3, 1) both;
+  transition:
+    transform 0.2s cubic-bezier(0.34, 1.5, 0.64, 1),
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .dock-hint:hover {
-  transform: translateY(-2px);
-  color: var(--accent);
+  transform: translateY(-3px) scale(1.015);
+  color: var(--text);
   border-color: var(--accent);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
 }
 
-@keyframes hintRise {
-  from { opacity: 0; transform: translateY(14px) scale(0.9); }
-  to { opacity: 1; transform: none; }
+.dock-hint:active { transform: translateY(-1px) scale(0.99); }
+
+/* Aufpoppen mit kurzem Überschwingen: von unten heran, minimal zu groß,
+   dann auf Maß — dazu Schärfe aus dem Unscharfen. */
+@keyframes hintPop {
+  0% { opacity: 0; transform: translateY(18px) scale(0.88); filter: blur(5px); }
+  62% { opacity: 1; transform: translateY(-3px) scale(1.025); filter: blur(0); }
+  100% { opacity: 1; transform: none; filter: blur(0); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .dock-hint { animation: none; }
+  .dock-hint:hover { transform: none; }
 }
 
 /* Auf schmalen Geräten würden fünf Bubbles den halben Bildschirm füllen. */
 @media (max-width: 560px) {
-  .dock-hint { font-size: 0.82rem; padding: 0.42rem 0.8rem; }
+  .dock-hint { font-size: 0.84rem; padding: 0.55rem 0.9rem; }
   .dock-hint:nth-child(n + 4) { display: none; }
 }
 
@@ -1442,10 +1473,20 @@ button, input, textarea, select {
   .dock-bar { animation: none; }
 }
 
+/* Beim Anfassen hebt sich die Leiste an und legt einen tieferen Schatten
+   unter sich — spürbare Tiefe statt nur eines farbigen Rands. */
 .dock-bar:focus-within {
   animation: none;
   border-color: var(--accent);
-  box-shadow: var(--shadow-lg), var(--glow);
+  transform: translateY(-3px);
+  box-shadow:
+    0 30px 60px -18px rgba(15, 20, 30, 0.34),
+    0 12px 24px -10px rgba(15, 20, 30, 0.22),
+    var(--glow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dock-bar:focus-within { transform: none; }
 }
 
 /* display:flex statt inline — sonst sitzt das SVG auf der Textbaseline und
@@ -1522,6 +1563,38 @@ button, input, textarea, select {
 
 /* ---------- Dialog-Panel: Vollbild ---------- */
 
+/* ---------- Übergang Seite → Chatmodus ----------
+   Die Navigation bleibt oben stehen und wird festgesetzt; alles darunter
+   blendet weich weg und gibt den Verlauf frei. Die Klassen setzt das Dock
+   auf die Geschwister der Navigation, damit jede Seitenstruktur trägt. */
+
+.vw-fadeable {
+  transition:
+    opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+    filter 0.55s ease;
+}
+
+.vw-faded {
+  opacity: 0;
+  transform: translateY(-16px) scale(0.992);
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+.vw-nav-pinned {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 95;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vw-fadeable { transition: opacity 0.2s ease; }
+  .vw-faded { transform: none; filter: none; }
+}
+
 .panel {
   /* Eine Spalte für Kopf, Strom und Eingabe. Breiter als eine reine
      Lesespalte, damit der Bildschirm nicht leer wirkt — aber nie randlos:
@@ -1530,20 +1603,24 @@ button, input, textarea, select {
   --chat-pad: max(1.15rem, calc((100% - var(--chat-col)) / 2));
   position: fixed;
   z-index: 90;
-  inset: 0;
+  /* Beginnt unter der stehengebliebenen Navigation. Ohne Hintergrund, damit
+     der Seitengrund durchträgt — der Wechsel wirkt als Moduswechsel
+     derselben Seite, nicht als aufgelegtes Fenster. */
+  top: var(--chat-top, 0px);
+  inset-inline: 0;
+  bottom: 0;
   width: 100%;
-  height: 100dvh;
-  background: var(--bg);
+  background: transparent;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: panelIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: panelIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.12s backwards;
 }
 
 /* Ruhige, lange Kurve wie auf hochwertigen Markenseiten: Das Panel wächst
    kaum merklich heran, statt hereinzuspringen. */
 @keyframes panelIn {
-  from { transform: scale(0.985); opacity: 0; }
+  from { transform: translateY(10px) scale(0.99); opacity: 0; }
   to { transform: none; opacity: 1; }
 }
 
@@ -1575,6 +1652,8 @@ button, input, textarea, select {
   padding-inline: var(--chat-pad);
 }
 
+/* Schließt direkt an die stehengebliebene Navigation an: durchscheinend
+   statt hart weiß, damit die Kante zwischen beiden nicht abreißt. */
 .panel-head {
   display: flex;
   align-items: center;
@@ -1582,7 +1661,9 @@ button, input, textarea, select {
   gap: 1rem;
   padding-block: 0.9rem;
   border-bottom: 1px solid var(--border);
-  background: var(--surface);
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   flex-shrink: 0;
 }
 
@@ -2471,6 +2552,22 @@ button, input, textarea, select {
   border-top: 1px solid var(--border);
   background: var(--surface);
   flex-shrink: 0;
+  transition:
+    opacity 0.38s ease,
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Solange der Berater arbeitet, sinkt die Eingabezeile weg — der Blick
+   bleibt bei der entstehenden Antwort. Sie kommt zurück, sobald sie steht. */
+.composer.is-away {
+  opacity: 0;
+  transform: translateY(100%);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .composer { transition: opacity 0.2s ease; }
+  .composer.is-away { transform: none; }
 }
 
 .composer textarea {
