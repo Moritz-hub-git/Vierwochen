@@ -1343,12 +1343,85 @@ button, input, textarea, select {
 
 .dock.is-hidden .dock-bar { pointer-events: none; }
 
+/* Wenn die Vorschläge offen sind, legt sich ein weicher Verlauf über den
+   Seitenfuß — die Bubbles stehen dann auf ruhigem Grund statt mitten im Text. */
+.dock::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 320px;
+  background: linear-gradient(to top, var(--bg) 25%, color-mix(in srgb, var(--bg) 60%, transparent) 65%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.dock.has-hints::before { opacity: 1; }
+
+/* Leiste und Vorschläge stehen übereinander in einer Spalte, damit die
+   Bubbles beim Fokus über der Leiste aufsteigen können. */
+.dock-stack {
+  width: min(760px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  pointer-events: none;
+}
+
+.dock-hints {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.45rem;
+  pointer-events: auto;
+}
+
+/* Deckend, nicht durchscheinend: Die Bubbles liegen über dem Seiteninhalt,
+   und großer Text dahinter würde sie sonst unruhig wirken lassen. */
+.dock-hint {
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-soft);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.5rem 0.95rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  animation: hintRise 0.44s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: transform 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.dock-hint:hover {
+  transform: translateY(-2px);
+  color: var(--accent);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+}
+
+@keyframes hintRise {
+  from { opacity: 0; transform: translateY(14px) scale(0.9); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dock-hint { animation: none; }
+}
+
+/* Auf schmalen Geräten würden fünf Bubbles den halben Bildschirm füllen. */
+@media (max-width: 560px) {
+  .dock-hint { font-size: 0.82rem; padding: 0.42rem 0.8rem; }
+  .dock-hint:nth-child(n + 4) { display: none; }
+}
+
 .dock-bar {
   pointer-events: auto;
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  width: min(760px, 100%);
+  width: 100%;
   background: color-mix(in srgb, var(--surface) 94%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);

@@ -8,7 +8,7 @@ import { Cockpit, Schichtplan, Portal, Rechner, Protokoll, Lager } from "./Mocku
 import s from "./styles.module.css";
 
 /**
- * Variante „fixfertig." — digitale Produkte, in vier Wochen live.
+ * Variante „neoapp.studio" — digitale Produkte, in vier Wochen live.
  *
  * Aufbau: Hauptzeile mit wechselndem Adressaten → das Versprechen
  * („In vier Wochen live.") samt Name der Methode → große Showcases
@@ -17,7 +17,7 @@ import s from "./styles.module.css";
  */
 
 export const metadata: Metadata = {
-  title: "fixfertig. — Digitale Produkte, in vier Wochen live",
+  title: "neoapp.studio — Digitale Produkte, in vier Wochen live",
 };
 
 const AUDIENCES = [
@@ -97,7 +97,7 @@ export default function FixfertigPage() {
 
       <nav className={s.nav}>
         <Link href="/v" className={s.mark}>
-          fix<i>fertig</i>.
+          neoapp<i>.studio</i>
         </Link>
         <div className={s.navLinks}>
           <a href="#showcases">Arbeiten</a>

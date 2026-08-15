@@ -41,6 +41,32 @@ const STARTERS = [
   "Unser Monatsreporting entsteht per Copy-Paste aus mehreren Systemen.",
 ];
 
+/** Vorschläge, die beim Anklicken der Dialogleiste aufsteigen. Der Chip
+ *  bleibt kurz genug zum Überfliegen, übergeben wird der ganze Satz —
+ *  damit der Berater sofort etwas Greifbares zu lesen hat. */
+const DOCK_HINTS = [
+  {
+    label: "Daten in Excel-Listen",
+    text: "Wir pflegen unsere Daten in mehreren Excel-Listen und tippen vieles doppelt ein.",
+  },
+  {
+    label: "Bestellungen im Postfach",
+    text: "Bestellungen kommen als PDF ins Sammelpostfach und gehen dort unter.",
+  },
+  {
+    label: "Planung per Zuruf",
+    text: "Unsere Einsatz- und Schichtplanung läuft über Zuruf, Zettel und Anrufe.",
+  },
+  {
+    label: "Angebote dauern zu lang",
+    text: "Ein Angebot zu kalkulieren dauert bei uns Tage, weil alles Handarbeit ist.",
+  },
+  {
+    label: "Kunden fragen Status ab",
+    text: "Kunden rufen bei uns an, um den Stand ihrer Bestellung zu erfahren.",
+  },
+];
+
 const MAX_CHARS = 1500;
 const MAX_QUESTIONS = 3;
 
@@ -367,7 +393,32 @@ export default function ChatDock() {
       {/* Das Dock bleibt eingehängt und blendet weich aus, während das Panel
           darüber aufblendet — ein Kreuzblenden statt eines harten Sprungs. */}
       {!dockSuppressed && (
-      <div className={`dock${open ? " is-hidden" : ""}`} aria-hidden={open}>
+      <div
+        className={`dock${open ? " is-hidden" : ""}${dockFocused && !dockDraft ? " has-hints" : ""}`}
+        aria-hidden={open}
+      >
+        <div className="dock-stack">
+          {/* Beim Anklicken der Leiste steigen Beispiele auf: Wer nicht weiß,
+              wie er anfangen soll, wählt eines aus und ist im Gespräch.
+              onMouseDown/preventDefault hält den Fokus im Feld — sonst
+              verschwänden die Vorschläge, bevor der Klick ankommt. */}
+          {dockFocused && !dockDraft && (
+            <div className="dock-hints" role="group" aria-label="Beispiele zum Auswählen">
+              {DOCK_HINTS.map((hint, i) => (
+                <button
+                  key={hint.label}
+                  type="button"
+                  className="dock-hint"
+                  style={{ animationDelay: `${i * 55}ms` }}
+                  tabIndex={open ? -1 : undefined}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => openPanel(hint.text)}
+                >
+                  {hint.label}
+                </button>
+              ))}
+            </div>
+          )}
         <form className="dock-bar" onSubmit={submitDock}>
           <span className="spark" aria-hidden>
             <SparkIcon size={20} />
@@ -397,6 +448,7 @@ export default function ChatDock() {
             </svg>
           </button>
         </form>
+        </div>
       </div>
       )}
 

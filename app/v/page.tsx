@@ -33,10 +33,10 @@ const VARIANTS = [
   },
   {
     href: "/v/fixfertig",
-    name: "fixfertig.",
-    tone: "Die Energie",
-    idea: "Bold Pop: Bento-Kacheln, große Zahlen, kurzer Text, verspielte Bewegung. Indigo, Coral, Lime.",
-    colors: ["#edeffb", "#4f46e5", "#ff6b5e"],
+    name: "neoapp.studio",
+    tone: "Das Produktstudio",
+    idea: "Hauptzeile mit wechselndem Adressaten, „In vier Wochen live“ samt 2+AI-Methode, Showcase-Karussell. Manrope, Indigo, Coral, Lime.",
+    colors: ["#f3f4fd", "#4f46e5", "#ff6b5e"],
   },
   {
     href: "/v/kalkuel",
