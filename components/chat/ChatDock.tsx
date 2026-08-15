@@ -4,6 +4,7 @@ import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { track } from "@/lib/track";
 import Booking from "./Booking";
+import StreamedText from "./StreamedText";
 import { Chips, MultiChips, Stepper } from "./Controls";
 import EmailGate from "./EmailGate";
 import SolutionCard from "./SolutionCard";
@@ -68,19 +69,6 @@ const DOCK_HINTS = [
 ];
 
 const MAX_CHARS = 1500;
-const MAX_QUESTIONS = 3;
-
-// Fortschritt startet mit Guthaben (Endowed Progress) und ist dynamisch:
-// Er nähert sich mit jeder beantworteten Frage, voll erst beim Ergebnis.
-const PROGRESS_BASELINE = 0.15;
-const PROGRESS_CAP = 0.9;
-
-// Laborillusion: benannte Arbeitsschritte statt stummer Punkte.
-const BUSY_LABELS = [
-  "Liest Ihre Angabe …",
-  "Gleicht mit typischen Fällen ab …",
-  "Skizze wird ergänzt …",
-];
 
 function SparkIcon({ size = 16 }: { size?: number }) {
   return (
@@ -169,11 +157,12 @@ export default function ChatDock() {
   const [dockDraft, setDockDraft] = useState("");
   const [dockFocused, setDockFocused] = useState(false);
   const [sending, setSending] = useState(false);
-  const [busyLabelIdx, setBusyLabelIdx] = useState(0);
+  // Index des Zuges, der gerade herausgeschrieben wird (nur der neueste).
+  const [animateIdx, setAnimateIdx] = useState<number | null>(null);
 
   const dialogIdRef = useRef<string>("");
   const endRef = useRef<HTMLDivElement>(null);
-  const dockInputRef = useRef<HTMLInputElement>(null);
+  const dockInputRef = useRef<HTMLTextAreaElement>(null);
   const messagesRef = useRef<UiMessage[]>([]);
   const sketchRef = useRef<Sketch | null>(null);
   messagesRef.current = messages;
@@ -194,23 +183,25 @@ export default function ChatDock() {
         : `d-${Date.now()}-${Math.floor(Math.random() * 1e9)}`;
   }
 
-  useEffect(() => {
+  const scrollToEnd = useCallback(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages, busy, revealing, result]);
+  }, []);
 
   useEffect(() => {
-    if (!busy) {
-      setBusyLabelIdx(0);
-      return;
-    }
-    const timer = setInterval(
-      () => setBusyLabelIdx((i) => Math.min(i + 1, BUSY_LABELS.length - 1)),
-      900
-    );
-    return () => clearInterval(timer);
-  }, [busy]);
+    scrollToEnd();
+  }, [messages, busy, revealing, result, scrollToEnd]);
 
-  const askedCount = messages.filter((m) => m.role === "assistant" && !m.error).length;
+  /** Die Leiste wächst mit dem Text und schrumpft wieder — ohne Sprung. */
+  const fitDockHeight = useCallback(() => {
+    const el = dockInputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 168)}px`;
+  }, []);
+
+  useEffect(() => {
+    fitDockHeight();
+  }, [dockDraft, fitDockHeight]);
 
   const send = useCallback(
     async (text: string) => {
@@ -247,6 +238,8 @@ export default function ChatDock() {
           const grew = turn.sketch && turn.sketch.steps.length > 0;
           const isResult = turn.phase === "result" && Boolean(turn.result);
           const pushTurn = () => {
+            // Der neue Zug bekommt den nächsten Index — nur er wird geschrieben.
+            setAnimateIdx(messagesRef.current.length);
             setMessages((prev) => [
               ...prev,
               {
@@ -422,27 +415,6 @@ export default function ChatDock() {
     .filter(Boolean)
     .join(" — ");
 
-  // Fortschritt: startet mit Guthaben, wächst je Frage, voll beim Ergebnis.
-  const progress =
-    phase === "result"
-      ? 1
-      : PROGRESS_BASELINE +
-        Math.min(PROGRESS_CAP - PROGRESS_BASELINE, (askedCount / MAX_QUESTIONS) * (PROGRESS_CAP - PROGRESS_BASELINE));
-
-  const remaining = Math.max(1, MAX_QUESTIONS - askedCount);
-  const goalStatus =
-    phase === "result"
-      ? "Geschafft — Ihre Skizze ist da"
-      : messages.length === 0
-        ? "Startklar"
-        : `noch ~${remaining} kurze ${remaining === 1 ? "Frage" : "Fragen"}`;
-
-  // Die Skizze bleibt bis zum Schluss verborgen. Damit der Nutzer trotzdem
-  // sieht, dass seine Antworten etwas bewirken, zählt die Zielzeile die
-  // erfassten Punkte mit — ein Satz Spannung statt einer Karte.
-  const capturedPoints = sketch
-    ? sketch.steps.length + sketch.value.length + sketch.assumptions.length
-    : 0;
 
   const suggestedAgenda = sketch?.open?.[0] ?? "";
 
@@ -484,14 +456,23 @@ export default function ChatDock() {
             <SparkIcon size={20} />
           </span>
           <span className="dock-inputwrap">
-            <input
+            {/* Textfeld statt einzeiliger Eingabe: Es beginnt flach und wächst
+                mit dem Umbruch mit. Eingabe schickt ab, Umschalt+Eingabe
+                setzt eine neue Zeile. */}
+            <textarea
               ref={dockInputRef}
-              type="text"
+              rows={1}
               value={dockDraft}
               maxLength={MAX_CHARS}
               onChange={(e) => setDockDraft(e.target.value)}
               onFocus={() => setDockFocused(true)}
               onBlur={() => setDockFocused(false)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  submitDock(e);
+                }
+              }}
               placeholder={
                 open
                   ? messages.length === 0
@@ -520,20 +501,10 @@ export default function ChatDock() {
 
       {open && (
         <section className="panel" aria-label="Projekt-Dialog">
-          {/* Statt einer Kopfleiste nur ein Haarstrich unter der Navigation:
-              Er wächst mit dem Gespräch und trägt den Fortschritt, ohne dass
-              ein zweiter Rahmen entsteht. Die Meta-Zeile darunter bleibt so
-              zurückhaltend, dass sie als Fußnote der Seite liest. */}
-          <div className="chat-progress" aria-hidden>
-            <span style={{ transform: `scaleX(${progress})` }} />
-          </div>
+          {/* Fortschrittslinie und Zählerzeile sind vorerst raus (Wunsch
+              2026-08-15): Erst soll die Wirkung ohne sie beurteilt werden.
+              Der Rückweg bleibt als einziges Bedienelement stehen. */}
           <div className="chat-meta">
-            <span className={`chat-status${phase === "result" ? " done" : ""}`}>
-              {goalStatus}
-              {capturedPoints > 0 && phase !== "result" && (
-                <i aria-live="polite"> · {capturedPoints} Punkte erfasst</i>
-              )}
-            </span>
             <button
               type="button"
               className="chat-close"
@@ -548,6 +519,19 @@ export default function ChatDock() {
             {/* Keine Begrüßungsnachricht (Rücksprache 2026-08-14): Das Gespräch
                 beginnt mit dem, was der Nutzer selbst geschrieben hat. Die
                 KI-Offenlegung (EU-KI-VO Art. 50) trägt der Panel-Kopf. */}
+            {/* Begrüßung: steht als erstes im Verlauf und sagt, was jetzt
+                passiert. Sie ist bewusst KEINE Nachricht im Sinne der
+                Historie — sie geht nicht an das Modell zurück. */}
+            <div className="chat-greeting">
+              <strong>
+                <span aria-hidden>👋</span> Willkommen!
+              </strong>
+              <span>
+                Lassen Sie uns Ihre Lösung skizzieren — ein paar kurze Fragen,
+                dann steht Ihr Zeitplan mit Datum und eine Preisschätzung.
+              </span>
+            </div>
+
             {messages.length === 0 && !busy && (
               <div className="starters">
                 <span className="starters-label">Zum Start: ein typischer Fall — oder schreiben Sie unten einfach los.</span>
@@ -574,8 +558,15 @@ export default function ChatDock() {
                   <div className="msg user">{m.display}</div>
                 ) : (
                   /* Die Antwort ist Text auf der Seite, keine Sprechblase —
-                     das hält den Dialog als Teil der Seite statt als Fenster. */
-                  <div className={`msg assistant${m.error ? " error" : ""}`}>{m.display}</div>
+                     das hält den Dialog als Teil der Seite statt als Fenster.
+                     Der jeweils neueste Zug wird herausgeschrieben. */
+                  <div className={`msg assistant${m.error ? " error" : ""}`}>
+                    <StreamedText
+                      text={m.display}
+                      animate={i === animateIdx && !m.error}
+                      onTick={scrollToEnd}
+                    />
+                  </div>
                 )}
                 {/* Die Skizze erscheint bewusst NUR am Ende (Rücksprache
                     2026-08-14): Im Verlauf lenkte die mitwachsende Karte vom
@@ -587,10 +578,11 @@ export default function ChatDock() {
               </Fragment>
             ))}
 
+            {/* Denkanzeige: ein einzelner pulsierender Punkt, wie man ihn
+                aus gängigen Chat-Oberflächen kennt — kein Kasten, kein Text. */}
             {busy && (
-              <div className="typing" aria-label="Antwort wird erstellt">
-                <span className="typing-dots"><i /><i /><i /></span>
-                <span className="typing-label">{BUSY_LABELS[busyLabelIdx]}</span>
+              <div className="thinking" aria-label="Antwort wird erstellt">
+                <span className="thinking-dot" />
               </div>
             )}
 

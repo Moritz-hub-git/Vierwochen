@@ -1472,10 +1472,16 @@ button, input, textarea, select {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-strong);
-  border-radius: 999px;
-  padding: 0.55rem 0.55rem 0.55rem 1.35rem;
+  /* Flach im Ruhezustand; die Rundung folgt der Höhe, sobald das Feld
+     mehrzeilig wird — aus der Pille wird dann weich eine Karte. */
+  border-radius: 26px;
+  padding: 0.4rem 0.4rem 0.4rem 1.2rem;
   box-shadow: var(--shadow-lg), 0 0 0 1px color-mix(in srgb, var(--accent) 12%, transparent);
-  transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+  transition:
+    box-shadow 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.25s ease,
+    border-radius 0.3s ease;
   animation: dockBreath 4.5s ease-in-out infinite;
 }
 
@@ -1518,18 +1524,33 @@ button, input, textarea, select {
   flex: 1;
   min-width: 0;
   display: flex;
+  align-items: center;
 }
 
-.dock-bar input {
+/* Mehrzeiliges Feld, das mit dem Text wächst: Startet flach bei einer Zeile
+   und legt beim Umbruch weich zu. Die Höhe setzt das Skript; hier steht nur,
+   wie sie sich verändern darf. */
+.dock-bar textarea {
   flex: 1;
   min-width: 0;
   border: 0;
   background: transparent;
+  font: inherit;
   font-size: 1.05rem;
-  padding-block: 0.65rem;
+  line-height: 1.5;
+  padding-block: 0.5rem;
+  resize: none;
+  overflow-y: auto;
+  max-height: 168px;
+  transition: height 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  scrollbar-width: thin;
 }
 
-.dock-bar input:focus { outline: none; }
+.dock-bar textarea:focus { outline: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dock-bar textarea { transition: none; }
+}
 
 /* Getipptes Placeholder mit Schreibmarke — Overlay statt ::placeholder,
    damit die Marke mitwandert. */
@@ -1682,7 +1703,7 @@ button, input, textarea, select {
 .chat-meta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 1rem;
   padding: 0.75rem var(--chat-pad);
   font-size: 0.78rem;
@@ -1855,40 +1876,103 @@ button, input, textarea, select {
   overflow-wrap: anywhere;
 }
 
+/* Frage und Antwort tragen dieselbe Schriftgröße — nur Ausrichtung und
+   Hintergrund unterscheiden sie, nicht das Gewicht der Stimme. */
+.msg.user,
+.msg.assistant {
+  font-size: clamp(1rem, 1.35vw, 1.12rem);
+  line-height: 1.65;
+}
+
 /* Die eigene Nachricht ist eine Blase und sitzt rechts — sie ist gesagt. */
 .msg.user {
   align-self: flex-end;
-  max-width: min(80%, 32rem);
-  padding: 0.85rem 1.15rem;
+  max-width: min(80%, 34rem);
+  padding: 0.85rem 1.2rem;
   border-radius: 20px;
   border-bottom-right-radius: 7px;
-  font-size: 0.95rem;
   background: var(--accent);
   color: var(--on-accent);
 }
 
-/* Die Antwort ist kein Kasten, sondern Text auf der Seite: links, etwas
-   größer als die eigene Nachricht, in ruhiger Lesebreite. */
+/* Die Antwort ist kein Kasten, sondern Text auf der Seite. */
 .msg.assistant {
   align-self: flex-start;
   max-width: 46rem;
-  font-size: clamp(1.05rem, 1.5vw, 1.22rem);
-  line-height: 1.68;
   color: var(--text);
   letter-spacing: -0.005em;
 }
 
-.msg.error {
-  color: var(--danger);
-  font-size: 1rem;
+.msg.error { color: var(--danger); }
+
+/* Schreibmarke am Ende des entstehenden Textes. */
+.stream-caret {
+  display: inline-block;
+  width: 0.5em;
+  height: 1.02em;
+  margin-left: 0.06em;
+  vertical-align: -0.16em;
+  border-radius: 2px;
+  background: var(--accent);
+  animation: caretBlink 1s steps(1, end) infinite;
 }
 
-.typing {
+@keyframes caretBlink {
+  0%, 55% { opacity: 1; }
+  56%, 100% { opacity: 0; }
+}
+
+/* Denkanzeige: ein einzelner Punkt, der atmet. */
+.thinking {
   align-self: flex-start;
   display: flex;
   align-items: center;
-  gap: 0.7rem;
+  min-height: 1.6rem;
+}
+
+.thinking-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--text);
+  animation: thinkPulse 1.25s ease-in-out infinite;
+}
+
+@keyframes thinkPulse {
+  0%, 100% { opacity: 0.22; transform: scale(0.82); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thinking-dot { animation: none; opacity: 0.6; }
+  .stream-caret { animation: none; }
+}
+
+/* Begrüßung: erster Eintrag im Verlauf, ruhig gesetzt. */
+.chat-greeting {
+  align-self: flex-start;
+  max-width: 46rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  animation: riseIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.chat-greeting strong {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: clamp(1.35rem, 2.4vw, 1.8rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.chat-greeting span {
+  font-size: clamp(1rem, 1.35vw, 1.12rem);
+  line-height: 1.6;
   color: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-greeting { animation: none; }
 }
 
 .typing-dots {
