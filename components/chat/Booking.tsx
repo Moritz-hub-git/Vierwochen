@@ -320,7 +320,7 @@ export default function Booking({
                 </span>
                 <span className="advisor-text">
                   <strong>Moritz Schumacher</strong>
-                  <span className="advisor-role">Gründer — baut Ihre Software selbst</span>
+                  <span className="advisor-role">Ihr fester Ansprechpartner im Projekt</span>
                 </span>
                 <span className="advisor-picked" aria-hidden>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -491,9 +491,12 @@ export default function Booking({
                 {busy ? "Wird gebucht …" : "Termin buchen"}
               </button>
 
-              {/* Ehrliche Knappheit an der Entscheidung, nicht nur auf der Startseite (§2.5). */}
+              {/* Ehrliche Knappheit an der Entscheidung, nicht nur auf der Startseite (§2.5).
+                  Bewusst ohne „einer baut alles selbst" (Rücksprache 2026-08-16):
+                  Der Grund für die Knappheit ist die feste Zuteilung eines
+                  Teams je Projekt, nicht die Kapazität einer Einzelperson. */}
               <p className="booking-scarcity">
-                Moritz baut jedes Projekt selbst — deshalb starten pro Monat höchstens zwei neue Projekte.
+                Jedes Projekt bekommt ein festes Team für die vollen vier Wochen — deshalb starten pro Monat höchstens zwei neue.
               </p>
             </div>
           )}
