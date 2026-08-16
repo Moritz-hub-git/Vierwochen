@@ -122,7 +122,7 @@ const ITEMS: {
     icon: "code",
     tone: "lime",
     title: "Senior-Qualität",
-    text: "AI schreibt, ein erfahrener Kopf verantwortet jede Zeile.",
+    text: "AI schreibt, erfahrene Entwickler verantworten jede Zeile.",
   },
 ];
 

@@ -45,7 +45,7 @@ export function AfterWege() {
           </span>
         </div>
         <p className={s.wayNote}>
-          Der Kopf, der Ihr System gebaut hat, plus AI — nichts muss neu
+          Das Team, das Ihr System gebaut hat, plus AI — nichts muss neu
           verstanden werden. Darum lohnt Software jetzt auch für Probleme, die
           früher „zu klein" dafür waren.
         </p>
@@ -84,7 +84,7 @@ export function AfterKern() {
   return (
     <div className={s.vennPoints}>
       <p>
-        <b>Danach bleibt es schnell.</b> Der Kopf, der Ihr System gebaut hat,
+        <b>Danach bleibt es schnell.</b> Das Team, das Ihr System gebaut hat,
         kennt es — und Ihr Geschäft. Eine Anpassung ist ein Anruf und meist
         ein Tag, kein Ticket und drei Wochen. Auf Wunsch inklusive Betrieb.
       </p>
@@ -106,8 +106,8 @@ export function AfterBento() {
         <span className={s.mBig}>1 Anruf</span>
         <b>statt Ticket &amp; drei Wochen</b>
         <p>
-          Änderungen bleiben nach dem Go-live so schnell wie der Anfang — der
-          Kopf, der gebaut hat, plus AI, nichts muss neu verstanden werden.
+          Änderungen bleiben nach dem Go-live so schnell wie der Anfang — das
+          Team, das gebaut hat, plus AI, nichts muss neu verstanden werden.
         </p>
       </div>
       <div className={s.mTile}>

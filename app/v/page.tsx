@@ -23,8 +23,8 @@ const VARIANTS = [
   },
   {
     href: "/v/kern",
-    name: "Ein Kopf",
-    idea: "Venn-Diagramm: „Ihr Geschäft“ und „Der Code“ überschneiden sich in einem Kopf, AI als Orbit-Ring darum. Die konzeptionell klarste Darstellung des Schnittstellen-Arguments.",
+    name: "Ein Team",
+    idea: "Venn-Diagramm: „Ihr Geschäft“ und „Der Code“ überschneiden sich in einem Team, AI als Orbit-Ring darum. Die konzeptionell klarste Darstellung des Schnittstellen-Arguments.",
   },
   {
     href: "/v/bento",

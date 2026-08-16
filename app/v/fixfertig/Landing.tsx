@@ -207,9 +207,9 @@ export default function Landing({ variant }: { variant: VariantKey }) {
           </h2>
           <p className={s.promiseSub}>
             AI hat das Bauen schnell gemacht. Der Engpass ist heute, zu
-            wissen, <em>was</em> man baut — hier entscheidet das einer, der
-            Ihr Geschäft versteht, aus vielen Produkten weiß, was wirklich
-            benutzt wird, und den Code selbst schreibt. Ohne Verlust,
+            wissen, <em>was</em> man baut — hier entscheiden das die Leute, die
+            Ihr Geschäft verstehen, aus vielen Produkten wissen, was wirklich
+            benutzt wird, und den Code auch selbst schreiben. Ohne Verlust,
             passgenau.
           </p>
 

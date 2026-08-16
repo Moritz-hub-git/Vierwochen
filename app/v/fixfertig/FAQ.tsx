@@ -1,20 +1,20 @@
 import s from "./styles.module.css";
 
 /**
- * Die berechtigten Fragen — bewusst die unbequemen zuerst (Bus-Faktor,
- * „warum soll ein Kopf besser sein"). Wer den Einwand selbst ausspricht
+ * Die berechtigten Fragen — bewusst die unbequemen zuerst (Ausfallrisiko,
+ * „warum ohne großes Team"). Wer den Einwand selbst ausspricht
  * und ehrlich beantwortet, wirkt souveräner als jede Behauptung.
  * Natives <details>: kein JavaScript, tastaturbedienbar, indexierbar.
  */
 
 const FAQS = [
   {
-    q: "Alles hängt an einer Person — was, wenn die ausfällt?",
-    a: "Deshalb bauen wir auf einem verbreiteten Standard-Stack, dokumentieren alles, und der Code gehört vom ersten Tag Ihnen. Jeder gute Entwickler kann übernehmen — Sie sind an niemanden gekettet. Die zwölf Monate Garantie gelten unabhängig davon.",
+    q: "Was, wenn jemand bei Ihnen ausfällt?",
+    a: "Am Projekt arbeitet nie nur eine Person allein, und wir bauen auf einem verbreiteten Standard-Stack, dokumentieren alles, und der Code gehört vom ersten Tag Ihnen. Jeder gute Entwickler kann übernehmen — Sie sind an niemanden gekettet. Die zwölf Monate Garantie gelten unabhängig davon.",
   },
   {
-    q: "Warum soll ein Kopf besser sein als ein ganzes Team?",
-    a: "„Besser“ behaupten wir nicht — passgenauer. Zwischen Ihrem Problem und dem Code liegt keine einzige Übersetzung, also kommt das an, was Sie gemeint haben. Und für die Qualität verlassen Sie sich nicht auf unser Wort: Festpreis, Abnahme nach vereinbarten Kriterien, Garantie — wir haften dafür.",
+    q: "Warum geht das schneller als bei einer großen Agentur?",
+    a: "„Besser“ behaupten wir nicht — passgenauer. Bei uns sprechen Sie mit den Leuten, die auch bauen: keine Übersetzung von Ihnen über Projektleitung und Anforderungsdokument bis zum Entwicklerteam, bei der die Hälfte der Absicht verloren geht. Und für die Qualität verlassen Sie sich nicht auf unser Wort: Festpreis, Abnahme nach vereinbarten Kriterien, Garantie — wir haften dafür.",
   },
   {
     q: "Woher wissen Sie, was wir wirklich brauchen?",
@@ -26,11 +26,11 @@ const FAQS = [
   },
   {
     q: "Was passiert nach den vier Wochen?",
-    a: "Der Teil, den die meisten unterschätzen: Änderungen bleiben schnell. Der Kopf, der Ihr System gebaut hat und Ihr Geschäft kennt, plus AI — eine Anpassung ist ein Anruf und meist ein Tag, kein Ticket und drei Wochen. Auf Wunsch übernehmen wir Betrieb und Wartung gleich mit.",
+    a: "Der Teil, den die meisten unterschätzen: Änderungen bleiben schnell. Das Team, das Ihr System gebaut hat und Ihr Geschäft kennt, plus AI — eine Anpassung ist ein Anruf und meist ein Tag, kein Ticket und drei Wochen. Auf Wunsch übernehmen wir Betrieb und Wartung gleich mit.",
   },
   {
     q: "Ist AI-geschriebener Code sicher und wartbar?",
-    a: "AI schreibt schnell, aber sie entscheidet nichts. Architektur, Prüfung und Verantwortung liegen bei einem erfahrenen Entwickler — Standard-Stack, Tests, Dokumentation, gebaut, damit auch andere jederzeit damit arbeiten können.",
+    a: "AI schreibt schnell, aber sie entscheidet nichts. Architektur, Prüfung und Verantwortung liegen bei erfahrenen Entwicklern — Standard-Stack, Tests, Dokumentation, gebaut, damit auch andere jederzeit damit arbeiten können.",
   },
   {
     q: "Für wen ist das nichts?",

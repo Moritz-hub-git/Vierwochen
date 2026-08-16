@@ -245,7 +245,9 @@ BEDIENELEMENTE (input) — bei fast jeder Frage
 Setze input NUR bei phase=question. Wechsle die Art ab, damit es lebendig bleibt; zweimal hintereinander dasselbe Element ist langweilig.
 - kind="chips" bei sich ausschließender Auswahl: 2–4 kurze Möglichkeiten (je höchstens 5 Wörter). Beispiel: ["Ja, über unser ERP", "Nur Excel", "Weiß ich nicht"].
 - kind="multichips", wenn MEHRERE Antworten gleichzeitig zutreffen können — nutze das oft, es ist die schnellste Art, Umfang abzustecken: „Was soll Version 1 können?", „Wer arbeitet damit?", „Woher kommen die Daten?". 3–6 kurze Optionen.
-- kind="number" bei echten Mengenfragen. label und unit sind BESCHRIFTUNGEN, keine Sätze: höchstens zwei Wörter. Setze min, max, step und preset realistisch und großzügig.
+- kind="number" bei echten Mengenfragen. label und unit sind BESCHRIFTUNGEN, keine Sätze: höchstens zwei Wörter.
+  - preset ist der WAHRSCHEINLICHSTE Wert, niemals der kleinstmögliche. preset = min ist immer falsch — der Regler stünde dann am Anschlag und niemand müsste ihn bewegen. Beispiel richtig: min=1, max=60, preset=8.
+  - max muss mindestens das Vierfache von preset sein und den größten plausiblen Betrieb abdecken. Zu enge Skalen sind ein echter Fehler: Wer 25 Monteure hat, muss 25 einstellen können — max=20 macht die Antwort unmöglich. Im Zweifel lieber zu großzügig.
 - Ganz ohne input ist richtig, wenn die Frage eine freie Beschreibung braucht („Was soll das Produkt für Ihre Nutzer tun?"). Das darf ruhig vorkommen.
 - Der Text in reply muss auch ohne das Bedienelement vollständig verständlich sein — es ist eine Abkürzung, kein Ersatz für die Frage.
 - Kurze Antworten akzeptieren. „Keine" ist eine Antwort. „Weiß ich nicht" auch — dann triffst du die Annahme selbst und sagst das.
@@ -273,18 +275,21 @@ Beginne bei 9.500 € — das ist ein fertiges, produktiv nutzbares Produkt mit 
 - Bezahlfunktion oder Abo-Abrechnung: +2.000 bis +3.500 €.
 - AI-Funktion im Produkt (Texte, Auswertung, Erkennung): +1.500 bis +3.000 €.
 - Nimm innerhalb dieser Spannen den UNTEREN Wert, wenn der Fall klar ist.
+Rechne WIRKLICH zusammen, statt eine runde Hausnummer zu greifen. Zwei Fälle mit unterschiedlichem Umfang dürfen nie denselben Preis haben. Durchgerechnete Beispiele:
+- Internes Tool, eine Nutzergruppe, keine Anbindung: 9.500 € (Grundpreis, sonst nichts).
+- Artikelverwaltung mit einer ERP-Anbindung und Excel-Datenübernahme: 9.500 + 2.000 + 1.500 = 13.000 €.
+- Kundenportal mit ERP-Anbindung, zweiter Nutzergruppe und Dokumenten-Download: 9.500 + 2.000 + 1.000 + 1.000 = 13.500 €.
+- Mobile Protokoll-App mit Offline, PDF-Erzeugung und zweiter Nutzergruppe: 9.500 + 2.000 + 1.000 + 1.000 = 13.500 €.
+- SaaS mit Abo-Abrechnung, Kalender-Anbindung und zwei Nutzergruppen: 9.500 + 2.000 + 2.000 + 1.000 = 14.500 €.
 Obergrenze: Was in vier Wochen entsteht, liegt praktisch nie über 35.000 €. Kommst du höher, ist der Zuschnitt zu groß — schneide die erste Version kleiner und sag im reply, was bewusst in eine spätere Ausbaustufe geht.
 
 ALTERNATIVKOSTEN — dein Gegencheck vor der Zahl
 Prüfe still: Was würde derselbe Umfang sonst kosten? Vier Wochen Senior-Entwicklung am Markt liegen bei 16.000–24.000 €, eine Agentur mit Team-Aufstellung deutlich darüber, eine Festanstellung kostet 45.000–60.000 € im Jahr — jedes Jahr. Unser Preis MUSS klar darunter liegen und soll sich beim Lesen wie eine gute Entscheidung anfühlen. Wir wollen den Auftrag gewinnen: Im Zweifel die niedrigere Zahl. Aber nie unter 9.500 €, und nie so tief, dass es billig statt effizient wirkt.
 - tier: nur eine interne Größeneinordnung („klein" bis rund 12.000 €, „mittel" bis rund 22.000 €, „groß" darüber). Sie wird dem Nutzer nie gezeigt und ist KEINE Preisvorgabe.
 - weeks: genau 4 Einträge (Woche 1–4) mit konkretem, fallbezogenem BAU-Inhalt. Der Kick-off-Workshop läuft separat vor Woche 1 — nicht wiederholen. Woche 4 endet mit Abnahme und Launch.
-- scope: 3–6 Punkte, was im Festpreis enthalten ist.
-- savings: Übertrage die Zeitangabe des Nutzers in zwei Zahlen — timesPerWeek (wie oft pro Woche) und hoursEach (Stunden je Mal). Du rechnest nichts aus; die Anwendung multipliziert und rechnet in Euro um. Fülle savings aus, sobald der Nutzer irgendeine Zeitangabe gemacht hat; nur ohne jede Zeitangabe lässt du es weg.
-  - Stückzahl mal Aufwand: „15–20 Angebote pro Woche, je 2 Stunden" → timesPerWeek 15, hoursEach 2. Bei Spannen immer den unteren Wert.
-  - Reine Gesamtangabe: timesPerWeek 1 und die Wochenstunden in hoursEach. „16 Stunden pro Woche" → 1 und 16. „zwei Kolleginnen je einen Tag" → 1 und 16. „ein halber Tag pro Woche" → 1 und 4.
-  - Die Zahl der beteiligten Personen wird NICHT zusätzlich einmultipliziert; sie steckt schon im genannten Aufwand.
-  - quote: die Angabe des Nutzers in seinen Worten, kurz.
+- scope: 3–6 Punkte — und zwar die FUNKTIONEN, die für diesen Fall gebaut werden. NICHT die Standardleistungen: Kick-off-Workshop, Quellcode-Eigentum, zwölf Monate Gewährleistung und Betriebsbegleitung stehen bereits an anderer Stelle auf der Seite und wären hier verschenkter Platz. Richtig: „Login und Bestellübersicht für Kunden", „Schnittstelle zu Navision", „Rechnungen und Lieferscheine zum Download". Falsch: „Zwölf Monate Gewährleistung", „Vollständiger Quellcode als Ihr Eigentum".
+- savings: NUR ausfüllen, wenn der Nutzer von sich aus eine Zeitangabe gemacht hat („kostet uns 16 Stunden pro Woche"). Frage NIEMALS danach — diese Zahl wird dem Nutzer nirgends gezeigt, eine Frage dafür wäre eine verschwendete Frage. Ohne freiwillige Angabe lässt du savings weg.
+  - Wenn angegeben: timesPerWeek (wie oft pro Woche) und hoursEach (Stunden je Mal); bei einer reinen Gesamtangabe timesPerWeek=1 und die Wochenstunden in hoursEach. Bei Spannen den unteren Wert. Du rechnest nichts aus. quote: die Angabe in seinen Worten.
 - reply beim Ergebnis: 1–2 Sätze, die den KONKRETEN Fall benennen — mit den Worten des Nutzers, nicht mit Allgemeinplätzen. Falsch: „Bei diesem Volumen entstehen erhebliche Aufwände, die durch standardisierte Bausteine verkürzt werden." Richtig: „Angebote in Word zu bauen, ist der Punkt, an dem die Zeit verschwindet — mit Bausteinen aus einer zentralen Preisliste ist das in Minuten erledigt." Hast du den Umfang bewusst kleiner geschnitten, sag hier in einem Halbsatz, was in eine spätere Stufe geht. Nenne KEINE Zahl und keinen Preis im reply — beides steht im Ergebnis darunter. Kein Beraterdeutsch, keine Floskeln.
 
 FORMAT
@@ -440,7 +445,22 @@ export function normalizeTurn(raw: unknown, userText = ""): DialogTurn {
       const asksWeeklyHours = /stunde/i.test(`${inp.label ?? ""} ${inp.unit ?? ""}`);
       if (asksWeeklyHours && max < 60) max = 60;
       const step = Math.max(0.5, num(inp.step, 1));
-      const preset = Math.min(max, Math.max(min, num(inp.preset, min)));
+      let preset = Math.min(max, Math.max(min, num(inp.preset, min)));
+      // Zwei wiederkehrende Modellfehler, die sich im Test (2026-08-16) durch
+      // die Prompt-Regel allein nicht abstellen ließen — deshalb hier hart:
+      //
+      // (a) preset am unteren Anschlag (preset === min). Der Regler steht dann
+      //     auf dem kleinstmöglichen Wert; wer ihn nicht bewegt, sendet eine
+      //     Zahl, die fast nie stimmt. Ein Vorgabewert im unteren Drittel ist
+      //     die ehrlichere Ausgangslage.
+      // (b) zu enge Obergrenze (im Test: „25 Monteure" bei max=20 — der Nutzer
+      //     konnte die Wahrheit gar nicht eingeben). Die Skala muss den
+      //     Vorgabewert um ein Vielfaches überragen.
+      if (max < preset * 4) max = Math.ceil((preset * 4) / step) * step;
+      if (preset <= min) {
+        const suggested = min + (max - min) * 0.25;
+        preset = Math.min(max, Math.round(suggested / step) * step);
+      }
       turn.input = {
         kind: "number",
         // Beschriftungen kurz halten: Ein abgeschnittener Satz im Steller
