@@ -1378,24 +1378,31 @@ html[data-input="mouse"] :focus {
   );
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1), height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Bleibt bestehen, solange das Feld aktiv ist — auch wenn die Vorschläge
    beim Tippen schon weg sind (Rücksprache 2026-08-15: verschwand vorher
-   sofort beim ersten Zeichen, das wirkte wie ein Flackern). Erst wenn das
-   Feld wieder verlassen wird, blendet der Fade zurück aus. */
-.dock.is-focused::before { opacity: 1; }
-
-/* Beim Abschicken sinkt die Leiste nach unten weg, bevor der Verlauf aufsteigt.
-   Dasselbe gilt, während der Berater arbeitet — sie kommt zurück, sobald die
-   Antwort steht. */
-.dock.is-sending {
-  opacity: 0;
-  transform: translateY(34px);
+   sofort beim ersten Zeichen, das wirkte wie ein Flackern) — UND während
+   des Absendens und des ganzen Öffnens (Rücksprache 2026-08-16: vorher
+   verschwand der Fade beim Absenden kurz komplett und blendete beim
+   Öffnen des Chats neu ein, das wirkte wie ein Aussetzer). Der bereits
+   sichtbare Fade wächst stattdessen nahtlos in den Chat-Verlauf hinein.
+   Erst wenn das Feld ohne Absenden wieder verlassen wird, blendet er aus. */
+.dock.is-focused::before,
+.dock.is-sending::before,
+.dock.in-chat::before {
+  opacity: 1;
 }
 
-.dock.is-sending .dock-bar { pointer-events: none; }
+/* Beim Abschicken sinkt NUR die Eingabeleiste selbst nach unten weg — nicht
+   mehr der ganze Dock-Container samt Fade (siehe oben). Dasselbe gilt,
+   während der Berater arbeitet — sie kommt zurück, sobald die Antwort steht. */
+.dock.is-sending .dock-bar {
+  opacity: 0;
+  transform: translateY(34px);
+  pointer-events: none;
+}
 
 /* Im Gespräch ist dieselbe Leiste die Antwortzeile: kein Pulsieren mehr,
    und ein ruhiger Verlauf darunter, damit der Text weich darunter
@@ -1403,7 +1410,6 @@ html[data-input="mouse"] :focus {
 .dock.in-chat .dock-bar { animation: none; }
 
 .dock.in-chat::before {
-  opacity: 1;
   height: 200px;
   background: linear-gradient(to top, var(--bg) 42%, transparent);
 }
@@ -1514,7 +1520,8 @@ html[data-input="mouse"] :focus {
   transition:
     box-shadow 0.25s ease,
     border-color 0.25s ease,
-    transform 0.25s ease,
+    transform 0.3s ease,
+    opacity 0.3s ease,
     border-radius 0.3s ease,
     background-color 0.25s ease;
 }

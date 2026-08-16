@@ -440,8 +440,11 @@ export default function ChatDock() {
           {/* Beim Anklicken der Leiste poppen Beispiele auf. Ein Klick schreibt
               den Satz ins Feld — abgeschickt wird erst mit Enter, damit man
               vorher noch ergänzen kann. onMouseDown/preventDefault hält den
-              Fokus im Feld, sonst verschwänden die Vorschläge vor dem Klick. */}
-          {!open && dockFocused && !dockDraft && (
+              Fokus im Feld, sonst verschwänden die Vorschläge vor dem Klick.
+              !sending verhindert, dass sie beim Absenden kurz nochmal
+              aufblitzen — submitDock leert das Feld, bevor der Chat öffnet,
+              was sonst genau die Bedingung für ihr Erscheinen erfüllt. */}
+          {!open && !sending && dockFocused && !dockDraft && (
             <div className="dock-hints" role="group" aria-label="Beispiele zum Übernehmen">
               {/* Nur fünf zeigen, nicht alle acht — sonst stapeln sich die
                   Bubbles über den ganzen Bildschirm und verdecken den Knopf
