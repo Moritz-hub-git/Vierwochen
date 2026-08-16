@@ -188,10 +188,14 @@ export default function Landing({ variant }: { variant: VariantKey }) {
         <section id="showcases" className={s.showcases}>
           <div className={`${s.sectionHead} ${s.sectionHeadTight}`}>
             <span className={s.kicker}>Arbeiten</span>
-            <h2 className={s.h2}>Was in vier Wochen entsteht</h2>
-            <p className={s.sectionLead}>Zum Durchziehen — Beispiele aus dem Mittelstand.</p>
+            <h2 className={s.h2}>Was in vier Wochen entstehen kann</h2>
           </div>
-          <Showcases items={SHOWCASES} />
+          {/* Bricht bewusst aus der Lesespalte aus — die Karten laufen bis
+              an den Bildschirmrand, damit spürbar wird, dass es mehr zu
+              sehen gibt, als in den ersten Blick passt. */}
+          <div className={s.showcasesBleed}>
+            <Showcases items={SHOWCASES} />
+          </div>
         </section>
 
         {/* ---------- Methode: große Aussage + variantenspezifische Grafik ---------- */}

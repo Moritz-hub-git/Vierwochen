@@ -61,7 +61,10 @@
    Weiterscrollen, kein Pfeil nötig. */
 .hero {
   text-align: center;
-  padding: clamp(1.9rem, 4.8vw, 3.6rem) 0 clamp(1.3rem, 2.4vw, 1.9rem);
+  /* Unten deutlich mehr Luft zur nächsten Sektion (Rücksprache 2026-08-15) —
+     die Karten sollen als eigener Auftritt beginnen, nicht direkt am Hero
+     kleben. */
+  padding: clamp(1.9rem, 4.8vw, 3.6rem) 0 clamp(2.6rem, 5vw, 4rem);
 }
 
 /* Obergrenze bewusst niedrig: Die längste Fassung der Zeile lautet
@@ -344,25 +347,27 @@
   text-align: center;
 }
 
-/* Knappere Fassung eigens für die Showcases: Diese Kopfzeile steht im
-   ersten Bildschirm und darf nicht die ganze Höhe für sich beanspruchen —
-   die Karte darunter soll noch anschneiden. */
+/* Knappere Fassung eigens für die Showcases: Die Überschrift soll optisch
+   über den Karten hängen, nicht durch einen großen Abstand von ihnen
+   getrennt sein (Rücksprache 2026-08-15). */
 .sectionHeadTight {
-  margin-bottom: clamp(0.9rem, 2vw, 1.3rem);
+  margin-bottom: clamp(0.5rem, 1.2vw, 0.85rem);
 }
 
 .sectionHeadTight .h2 {
   font-size: clamp(1.5rem, 3.4vw, 2.1rem);
 }
 
+/* Normale Schrift statt Versalien (Rücksprache 2026-08-15) — dafür Farbe
+   und Gewicht kräftig genug, dass die Zeile trotzdem als Mini-Überschrift
+   erkennbar bleibt. */
 .kicker {
   display: block;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0;
   color: #4f46e5;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.6rem;
 }
 
 .h2 {
@@ -383,45 +388,27 @@
 
 /* ---------- Showcases ---------- */
 
-/* Knapp oben: Die Sektion folgt jetzt direkt dem Hero, und die erste Karte
-   soll im ersten Bildschirm bereits anschneiden. */
-.showcases { padding: clamp(0.7rem, 2vw, 1.3rem) 0 0; }
+.showcases { padding: clamp(2rem, 4vw, 3.2rem) 0 0; }
+
+/* Bricht aus der 1180px-Lesespalte aus (Rücksprache 2026-08-15): Die Karten
+   laufen bis an den tatsächlichen Bildschirmrand, nicht nur bis an den Rand
+   der Spalte. .page trägt overflow-x:hidden, das fängt den 100vw-Trick ab. */
+.showcasesBleed {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  margin-left: -50vw;
+}
 
 /* ---------- Karussell ---------- */
 
 .carousel { position: relative; }
 
-.carouselNav {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.6rem;
-  margin-bottom: 0.7rem;
-}
-
-.navBtn {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border: 0;
-  background: #fff;
-  color: #181a33;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  box-shadow: 0 8px 22px rgba(38, 34, 120, 0.1);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease, color 0.18s ease;
-}
-
-.navBtn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  color: #4f46e5;
-  box-shadow: 0 14px 30px rgba(38, 34, 120, 0.16);
-}
-
-.navBtn:disabled { opacity: 0.32; cursor: default; }
-
 /* Der Streifen läuft bis an den Bildschirmrand, damit die nächste Karte
-   angeschnitten sichtbar bleibt — das lädt zum Weiterziehen ein. */
+   angeschnitten sichtbar bleibt — das lädt zum Weiterziehen ein. Kein
+   eigener Innenabstand mehr zum Ausgleich der Lesespalte (das übernimmt
+   jetzt .showcasesBleed), nur noch der Rand-Puffer für die erste/letzte
+   Karte. */
 .track {
   display: flex;
   gap: 1.5rem;
@@ -429,28 +416,29 @@
   overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
   padding: 0.5rem clamp(1rem, 4vw, 2rem) 2rem;
-  margin-inline: calc(clamp(1rem, 4vw, 2rem) * -1);
   scroll-padding-left: clamp(1rem, 4vw, 2rem);
   scrollbar-width: none;
 }
 
 .track::-webkit-scrollbar { display: none; }
 
+/* Kein eigener Kartenhintergrund mehr (Rücksprache 2026-08-15): Die
+   „Karten" sind kein Kasten auf der Seite, sondern Inhalt, der direkt auf
+   dem allgemeinen Seitenhintergrund liegt und über den ganzen Bildschirm
+   scrollt — das Mockup-Fenster (.frame) bringt seinen eigenen Rahmen schon
+   mit. */
 .card {
   flex: 0 0 clamp(280px, 78vw, 540px);
   scroll-snap-align: start;
-  background: #fff;
-  border-radius: 30px;
-  overflow: hidden;
-  box-shadow: 0 14px 40px rgba(38, 34, 120, 0.1);
-  transition: transform 0.24s ease, box-shadow 0.24s ease;
+  transition: transform 0.24s ease;
 }
 
-.card:hover { transform: translateY(-5px); box-shadow: 0 24px 56px rgba(38, 34, 120, 0.16); }
+.card:hover { transform: translateY(-5px); }
 
+/* Kein eigener Verlauf mehr (Rücksprache 2026-08-15): Die Platzhalter sollen
+   auf dem allgemeinen Seitenhintergrund sitzen, bis echte Bilder folgen. */
 .cardVisual {
   position: relative;
-  background: linear-gradient(150deg, #e8eafc, #f7f8ff);
   padding: clamp(1rem, 2.5vw, 1.8rem);
 }
 
