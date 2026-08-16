@@ -1925,9 +1925,14 @@ html[data-input="mouse"] :focus {
 
 /* Die eigene Nachricht sitzt rechts, in einer zurückhaltenden Fläche statt
    in kräftigem Akzent: Sie ist gesagt und muss nicht mehr um Aufmerksamkeit
-   werben — die Antwort daneben soll führen. Rundum gleich gerundet. */
+   werben — die Antwort daneben soll führen. Rundum gleich gerundet.
+   width:fit-content bricht den Stretch-Standard der Stream-Spalte auf
+   (.stream > * setzt width:100% — ohne eigenes width hier würde selbst
+   eine kurze Antwort wie „12 Stunden" bis max-width aufgeblasen, statt
+   sich um den Text zu legen). */
 .msg.user {
   align-self: flex-end;
+  width: fit-content;
   max-width: min(80%, 34rem);
   padding: 0.85rem 1.25rem;
   border-radius: 22px;
