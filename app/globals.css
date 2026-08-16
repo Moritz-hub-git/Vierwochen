@@ -80,6 +80,15 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: calc(var(--header-h) + var(--safe-t) + 16px);
+  /* Der Hintergrund liegt bewusst AUCH hier und nicht nur auf <body>.
+     Über die CSS-Propagation bekäme der Seitengrund die Farbe zwar ohnehin
+     von <body> — aber das Wurzelelement selbst meldet dann `transparent`.
+     Safari liest für die Fläche rund um die schwebende Adresszeile die
+     Hintergrundfarbe des Wurzelelements; findet es dort nichts, nimmt es
+     seinen eigenen hellen Grundton, und unten steht wieder ein Balken.
+     Beide Elemente tragen dieselbe Farbe, sichtbar ändert sich nichts. */
+  background: var(--bg);
+  transition: background-color 0.35s ease;
 }
 
 /* Solange der Dialog offen ist, ist die ausgeblendete Seite dahinter nicht
