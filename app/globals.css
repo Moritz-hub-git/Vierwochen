@@ -34,6 +34,17 @@
      Leisten) — nicht mitten im unteren Drittel. Hero-Polster unten rechnet
      mit derselben Variablen, damit nichts verdeckt wird. */
   --dock-gap: clamp(0.9rem, 3vh, 2rem);
+  /* Die sicheren Ränder des Geräts: Notch, Home-Indikator und der Streifen,
+     in dem die schwebende Safari-Adresszeile sitzt. Sie liefern überhaupt
+     erst Werte, seit die Seite randlos läuft (`viewport-fit: cover`, siehe
+     app/layout.tsx) — vorher endete die Seite über dem Streifen und Safari
+     füllte ihn selbst, was unten wie ein weißer Balken aussah. Als Variablen,
+     damit jedes calc() dieselbe Schreibweise nutzt und der Fallback 0px nur
+     an einer Stelle steht. */
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
   color-scheme: light;
 }
 
@@ -68,7 +79,7 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: calc(var(--header-h) + 16px);
+  scroll-padding-top: calc(var(--header-h) + var(--safe-t) + 16px);
 }
 
 /* Solange der Dialog offen ist, ist die ausgeblendete Seite dahinter nicht
@@ -131,6 +142,10 @@ html[data-input="mouse"] :focus {
 .container {
   width: min(1120px, 100% - 2.5rem);
   margin-inline: auto;
+  /* Quer gehaltenes Handy: Auf der Notch-Seite ragt sonst Text unter die
+     abgerundete Ecke. Der Innenabstand schiebt ihn heraus, die Spaltenbreite
+     bleibt dieselbe. */
+  padding-inline: var(--safe-l) var(--safe-r);
 }
 
 .section {
@@ -196,7 +211,10 @@ html[data-input="mouse"] :focus {
   inset-inline: 0;
   top: 0;
   z-index: 60;
-  height: var(--header-h);
+  /* Die Leiste wächst um den oberen sicheren Rand, statt darunter zu
+     rutschen — der Balken selbst bleibt gleich hoch. */
+  height: calc(var(--header-h) + var(--safe-t));
+  padding-top: var(--safe-t);
   display: flex;
   align-items: center;
   transition: background-color 0.3s ease, box-shadow 0.3s ease, backdrop-filter 0.3s ease;
@@ -318,7 +336,7 @@ html[data-input="mouse"] :focus {
 
 .hero {
   position: relative;
-  padding-top: calc(var(--header-h) + clamp(3.5rem, 9vw, 7rem));
+  padding-top: calc(var(--header-h) + var(--safe-t) + clamp(3.5rem, 9vw, 7rem));
   /* Unten genug Luft, damit die schwebende Dialogleiste nichts verdeckt. */
   padding-bottom: calc(clamp(4rem, 8vw, 6.5rem) + var(--dock-gap) + 40px);
   overflow: hidden;
@@ -807,7 +825,7 @@ html[data-input="mouse"] :focus {
   .risk-grid { grid-template-columns: 1.6fr 1fr; }
   /* Die Vertragskarte bleibt beim Scrollen durch die Zweifel im Blick:
      Jeder aufgeklappte Einwand hat seine Zusage direkt daneben. */
-  .contract-card { position: sticky; top: calc(var(--header-h) + 20px); }
+  .contract-card { position: sticky; top: calc(var(--header-h) + var(--safe-t) + 20px); }
 }
 
 .contract-card {
@@ -1304,8 +1322,9 @@ html[data-input="mouse"] :focus {
 
 .footer {
   border-top: 1px solid var(--border);
-  /* Unten Platz für die höher schwebende Dialogleiste lassen. */
-  padding: 2.5rem 0 calc(3rem + clamp(1.6rem, 10vh, 7rem) + 72px);
+  /* Unten Platz für die höher schwebende Dialogleiste lassen — und für den
+     Streifen, in dem auf dem Handy die Systemleiste sitzt. */
+  padding: 2.5rem 0 calc(3rem + clamp(1.6rem, 10vh, 7rem) + 72px + var(--safe-b));
   font-size: 0.9rem;
   color: var(--text-muted);
 }
@@ -1345,7 +1364,11 @@ html[data-input="mouse"] :focus {
   z-index: 70;
   display: flex;
   justify-content: center;
-  padding: 0 1rem calc(var(--dock-gap) + env(safe-area-inset-bottom, 0px));
+  padding:
+    0
+    calc(1rem + var(--safe-r))
+    calc(var(--dock-gap) + var(--safe-b))
+    calc(1rem + var(--safe-l));
   pointer-events: none;
   transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1649,6 +1672,7 @@ html[data-input="mouse"] :focus {
      Die Ergebniskarte braucht die Breite, der Fließtext nicht. */
   --chat-col: 1120px;
   --chat-pad: max(1.15rem, calc((100% - var(--chat-col)) / 2));
+  padding-inline: var(--safe-l) var(--safe-r);
   position: fixed;
   z-index: 90;
   /* Beginnt unter der stehengebliebenen Navigation. Ohne Hintergrund, damit
@@ -1869,7 +1893,7 @@ html[data-input="mouse"] :focus {
      wichtig, auf einem MacBook möchte ich alles Relevante sehen") — und
      unten reichlich Luft, damit die Buchung nicht unter der schwebenden
      Leiste verschwindet. */
-  padding: 1.7rem var(--chat-pad) calc(var(--dock-gap) + 7.5rem);
+  padding: 1.7rem var(--chat-pad) calc(var(--dock-gap) + 7.5rem + var(--safe-b));
   display: flex;
   flex-direction: column;
   gap: 1.3rem;
@@ -2717,7 +2741,7 @@ html[data-input="mouse"] :focus {
   display: flex;
   gap: 0.5rem;
   /* Innenabstand seitlich kommt aus der gemeinsamen Spaltenregel beim Panel. */
-  padding-block: 0.9rem calc(0.9rem + env(safe-area-inset-bottom, 0px));
+  padding-block: 0.9rem calc(0.9rem + var(--safe-b));
   border-top: 1px solid var(--border);
   background: var(--surface);
   flex-shrink: 0;
@@ -3202,7 +3226,7 @@ html[data-input="mouse"] :focus {
 /* ---------- Rechtsseiten ---------- */
 
 .legal {
-  padding-top: calc(var(--header-h) + 3rem);
+  padding-top: calc(var(--header-h) + var(--safe-t) + 3rem);
   padding-bottom: 5rem;
   max-width: 760px;
 }
@@ -3239,7 +3263,11 @@ html[data-input="mouse"] :focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  padding:
+    calc(1.5rem + var(--safe-t))
+    calc(1.5rem + var(--safe-r))
+    calc(1.5rem + var(--safe-b))
+    calc(1.5rem + var(--safe-l));
 }
 
 .access-card {
