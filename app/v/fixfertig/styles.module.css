@@ -10,11 +10,17 @@
     #f3f4fd;
   color: #181a33;
   font-family: var(--font-body), system-ui, sans-serif;
-  padding-bottom: 16vh;
+  /* Der Grund reicht bis an die Gerätekante; der Inhalt hält Abstand zum
+     Streifen, in dem auf dem Handy die Systemleiste sitzt. */
+  padding-bottom: calc(16vh + var(--safe-b));
   overflow-x: hidden;
 }
 
-.wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2rem); }
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-inline: calc(clamp(1rem, 4vw, 2rem) + var(--safe-l)) calc(clamp(1rem, 4vw, 2rem) + var(--safe-r));
+}
 
 /* ---------- Navigation ---------- */
 
@@ -25,7 +31,8 @@
   gap: 1rem;
   max-width: 1180px;
   margin: 0 auto;
-  padding: 1.3rem clamp(1rem, 4vw, 2rem);
+  padding: calc(1.3rem + var(--safe-t)) calc(clamp(1rem, 4vw, 2rem) + var(--safe-r)) 1.3rem
+    calc(clamp(1rem, 4vw, 2rem) + var(--safe-l));
 }
 
 .mark {
