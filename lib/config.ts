@@ -7,12 +7,80 @@
  * - Limits der Kostenbremse (§8) sind bewusst konservativ gewählt.
  */
 
+/**
+ * Marke — EINE Konstante, die alles speist (Rücksprache 2026-09-08).
+ *
+ * Entscheidung: „vierwochen" statt „neoapp.studio". Gründe aus dem
+ * Vollreview: (1) „neoapp" ist in der eigenen Kategorie nicht besitzbar —
+ * die neoapps GmbH ist seit 20+ Jahren Software-Dienstleister in DACH
+ * (Markenrisiko, Klasse 42); (2) „vierwochen" ist der Benefit selbst und
+ * damit distinktiv; (3) Domain, Mail und Kalender laufen bereits auf
+ * vierwochen.de. Wer die Marke wechseln will, ändert hier — und nur hier.
+ */
 export const SITE = {
   name: "vierwochen",
+  /** Wortmarke in der Navigation: Text vor und nach dem Akzentzeichen. */
+  markA: "vier",
+  markB: "wochen",
   domain: "vierwochen.de",
-  claim: "In vier Wochen zum Ziel.",
+  url: "https://vierwochen.de",
+  claim: "Ihre Software. In vier Wochen live.",
   owner: "Moritz Schumacher",
+  /** Ansprechpartner — sichtbar auf der Landing, nicht erst im Formular. */
+  founder: {
+    name: "Moritz Schumacher",
+    initials: "MS",
+    /** Herkunft, belegbar (PROMPT.md §10) — keine Firmennamen, keine Interna. */
+    role: "Vorstandsreferent und Programm-Manager in einem börsennotierten Industrieunternehmen, zuletzt verantwortlich dafür, KI-Anwendungsfälle zu finden und produktiv zu stellen.",
+    facts: [
+      "Reporting-Aufwand in einem SDAX-Unternehmen von über 32 auf rund 6 Stunden pro Zyklus gesenkt",
+      "Rund 30 KI-Anwendungsfälle mit Fachbereichen identifiziert, zwei im Produktivbetrieb",
+      "Drei eigene iOS-Apps im App Store — inklusive Backend, Datenbank, KI-Anbindung und Betrieb",
+    ],
+    /** PLATZHALTER — vom Gründer zu setzen. Leer = Link wird nicht gerendert. */
+    linkedin: "",
+    /** PLATZHALTER — echtes Foto unter /public/moritz.jpg ablegen und hier eintragen. */
+    photo: "",
+  },
+  /** Kontakt — PLATZHALTER, bis das Impressum vollständig ist. Leer = nicht gerendert. */
+  email: "hallo@vierwochen.de",
+  phone: "",
 } as const;
+
+/**
+ * Preise (Rücksprache 2026-09-08, Vollreview: fünf unabhängige Gutachten).
+ *
+ * Boden 12.500 € statt 9.500 €: Mit Kick-off-Workshop, zweiter Rate nur bei
+ * Abnahme, 24 Monaten Gewährleistung und Begleitung bis zum Betrieb lag
+ * 9.500 € unter den Vollkosten jedes bezahlten zweiten Kopfes — der Preis
+ * hätte das erklärte Ziel (nicht allein bleiben) rechnerisch ausgeschlossen.
+ * Decke 35.000 €: mehr entsteht nicht in vier Wochen; darüber wird der
+ * Umfang kleiner geschnitten, nicht der Preis erhöht.
+ */
+export const PRICE = {
+  floor: 12500,
+  ceiling: 35000,
+  /** Netto, zzgl. USt. — steht an jeder Preisstelle. */
+  vatNote: "netto zzgl. USt.",
+} as const;
+
+/**
+ * Betrieb als Standard, nicht als Fußnote: die einzige Einnahme im Modell,
+ * die ohne neue Verkaufsarbeit wiederkommt. Monatlich kündbar.
+ */
+export const RETAINER = {
+  basic: { name: "Betrieb", monthly: 290, includes: "Hosting, Updates, Monitoring, Sicherheits-Patches" },
+  plus: { name: "Betrieb + Weiterentwicklung", monthly: 990, includes: "wie Betrieb, plus ein Änderungstag pro Monat" },
+  notice: "monatlich kündbar",
+} as const;
+
+/** Gewährleistung: beim Werkvertrag gesetzlich 24 Monate (§ 634a BGB) — das
+ *  ist mehr, als die Seite vorher mit „12 Monate Garantie" versprach. */
+export const WARRANTY_MONTHS = 24;
+
+/** Die eine Risiko-Umkehr-Zusage — überall wortgleich (Seite, Karte, AGB). */
+export const ACCEPTANCE_PROMISE = "Besteht die Abnahme nicht, entfällt die zweite Rate.";
+
 
 /** Preisstufen — unverbindliche Ersteinschätzung, kein Angebot. Netto zzgl. USt. */
 export const PRICING_TIERS = [
@@ -68,8 +136,12 @@ export const LIMITS = {
   maxUserTurns: 8,
   /** Modellaufrufe je IP und Minute (Prozessspeicher, erste Verteidigungslinie). */
   perMinute: 8,
-  /** Modellaufrufe je IP und Tag (Firestore, überlebt Instanzwechsel). */
-  perDay: 60,
+  /** Modellaufrufe je IP und Tag (Firestore, überlebt Instanzwechsel).
+   *  400 statt 60: Ein Unternehmen sitzt hinter wenigen Egress-IPs — 60
+   *  Aufrufe waren 12 Dialoge für einen ganzen Konzernbereich. Die echte
+   *  Kostenbremse ist das Dialog-Limit (maxUserTurns) und der Preis je
+   *  Aufruf (~0,003 €). */
+  perDay: 400,
   /** Antwortbudget des Modells — großzügig, damit die wachsende Skizze nie abgeschnitten wird (§5). */
   maxOutputTokens: 16384,
 } as const;
@@ -115,9 +187,16 @@ export const FREEMAIL_DOMAINS = new Set([
 /** Terminbuchung (PROMPT.md §7). */
 export const BOOKING = {
   timeZone: "Europe/Berlin",
-  /** Beginn/Ende des Buchungsfensters in lokaler Zeit (Stunden). */
-  dayStartHour: 9,
-  dayEndHour: 17,
+  /** Buchbare Stunden in lokaler Zeit — realistisch für jemanden, der
+   *  tagsüber angestellt ist (Rücksprache 2026-09-08): früh, mittags, abends.
+   *  Slots außerhalb dieser Fenster werden nicht angeboten. */
+  dayStartHour: 8,
+  dayEndHour: 19,
+  hourWindows: [
+    [8, 9],
+    [12, 13],
+    [17, 19],
+  ],
   /** Slotlänge in Minuten; Beginn zur vollen und halben Stunde. */
   slotMinutes: 30,
   /** Vorlauf in Stunden. */
@@ -127,6 +206,13 @@ export const BOOKING = {
   /** Dauer des Gesprächs in Minuten (entspricht Slotlänge). */
   durationMinutes: 30,
 } as const;
+
+/**
+ * EIN Schalter für die Sichtbarkeit: SITE_LIVE=1 hebt noindex auf — in
+ * metadata (app/layout.tsx), robots.ts und dem X-Robots-Header
+ * (next.config.ts) zugleich. Vorher steckte noindex an vier Stellen.
+ */
+export const IS_LIVE = process.env.SITE_LIVE === "1";
 
 export function env(name: string): string | undefined {
   const v = process.env[name];

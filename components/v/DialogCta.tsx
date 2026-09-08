@@ -1,6 +1,13 @@
 "use client";
 
-import { focusDock, openDialog } from "@/components/Header";
+/* Entkoppelt von components/Header (alte Marke, kann entfallen): Die
+   Ereignisse sind der Vertrag mit der Dialogleiste (ChatDock). */
+function focusDock() {
+  window.dispatchEvent(new CustomEvent("vw:focus-dock"));
+}
+function openDialog(text?: string) {
+  window.dispatchEvent(new CustomEvent("vw:dialog", { detail: { text: text ?? "" } }));
+}
 
 /**
  * Knopf zum Dialog — in zwei Stärken:

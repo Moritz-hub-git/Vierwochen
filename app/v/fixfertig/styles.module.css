@@ -38,12 +38,12 @@
 
 /* Derselbe Verlauf wie „live." im Versprechen — die Marke trägt ihn
    dauerhaft, damit beide dieselbe Handschrift haben. */
+/* Einfarbige Wortmarke „vier.wochen" mit Akzentpunkt — kein Verlauf mehr
+   (Vollreview: Gradient-Text ist der meistkopierte KI-Startup-Look und im
+   Briefing §3 ausdrücklich unerwünscht). */
 .mark i {
   font-style: normal;
-  background: linear-gradient(100deg, #4f46e5, #ff6b5e);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: #4f46e5;
 }
 
 .navLinks { display: flex; gap: 1.5rem; align-items: center; font-size: 0.92rem; font-weight: 600; }
@@ -1420,3 +1420,103 @@ a.pillar:hover {
 }
 
 .priceBreak b { color: #181a33; font-weight: 800; white-space: nowrap; }
+
+
+/* ---------- Nach dem Vollreview 2026-09-08 ---------- */
+
+/* Icons für die neuen Zusagen-Chips */
+.pIcon_check { color: #15803d; }
+.pIcon_head { color: #4f46e5; }
+
+/* Unterzeile im Hero: die eine Risiko-Umkehr-Zusage, ruhig gesetzt. */
+.sub { margin-top: 1rem; }
+
+/* Wer baut — schon im Hero, als ruhige Zeile mit Initialen/Foto. */
+.founderStrip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 1.4rem;
+  padding: 0.45rem 1rem 0.45rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(24, 26, 51, 0.08);
+  color: #3c3f5e;
+  font-size: 0.92rem;
+  text-decoration: none;
+  text-align: left;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.founderStrip:hover { border-color: #4f46e5; transform: translateY(-1px); }
+.founderStrip b { color: #181a33; font-weight: 800; }
+.founderMore { display: block; font-size: 0.8rem; color: #4f46e5; font-weight: 700; margin-top: 0.1rem; }
+
+.avatar {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #181a33;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+}
+.avatarLarge { width: 96px; height: 96px; font-size: 1.6rem; }
+
+/* Alternative zum Chat — sichtbar, aber leise (Audit CA-H3). */
+.heroAlt { margin: 0.9rem 0 0; font-size: 0.86rem; color: #6a6d8c; }
+.heroAlt a { color: #4f46e5; font-weight: 700; text-decoration: none; }
+.heroAlt a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.heroAlt span { margin: 0 0.4rem; color: #b6b9d8; }
+
+.timelineSub { margin: 0.5rem auto 0; max-width: 46ch; color: #3c3f5e; font-size: 0.98rem; line-height: 1.6; }
+
+/* Preiszeile statt Streichpreis: die zwei Zahlen, die der Kunde braucht. */
+.priceLine {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.35rem 0.55rem;
+  margin: 1.2rem 0 0;
+  font-size: 0.95rem;
+  color: #6a6d8c;
+}
+.priceLine b { color: #181a33; font-weight: 800; font-size: 1.05rem; white-space: nowrap; }
+.priceLine > span[aria-hidden] { color: #b6b9d8; margin: 0 0.3rem; }
+
+/* Wer baut — die Sektion. Ein Gesicht, drei Fakten, ehrliche Grenzen. */
+.who { padding: clamp(3.5rem, 7vw, 5.5rem) 0 0; }
+.whoCard {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: clamp(1.2rem, 3vw, 2.2rem);
+  align-items: start;
+  max-width: 62ch;
+  margin: 0 auto;
+  padding: clamp(1.4rem, 3vw, 2.2rem);
+  background: #fff;
+  border-radius: 28px;
+  box-shadow: 0 14px 40px rgba(38, 34, 120, 0.08);
+}
+.whoText { min-width: 0; }
+.whoName { margin: 0.1rem 0 0.35rem; font-size: clamp(1.4rem, 2.6vw, 1.8rem); font-weight: 800; letter-spacing: -0.03em; }
+.whoRole { margin: 0 0 0.9rem; color: #3c3f5e; line-height: 1.6; }
+.whoFacts { margin: 0 0 1rem; padding-left: 1.1rem; color: #181a33; line-height: 1.6; }
+.whoFacts li { margin-bottom: 0.3rem; }
+.whoHonest { margin: 0 0 0.8rem; color: #3c3f5e; line-height: 1.65; }
+.whoLimits { margin: 0; color: #3c3f5e; line-height: 1.65; }
+.whoLimits b { color: #181a33; }
+.whoLink { display: inline-block; margin-top: 0.9rem; color: #4f46e5; font-weight: 700; text-decoration: none; }
+.whoLink:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+@media (max-width: 560px) {
+  .whoCard { grid-template-columns: 1fr; }
+  .avatarLarge { width: 72px; height: 72px; font-size: 1.3rem; }
+  .founderStrip { font-size: 0.86rem; }
+}

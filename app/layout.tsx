@@ -4,6 +4,7 @@ import "./globals.css";
 import RevealObserver from "@/components/RevealObserver";
 import Track from "@/components/Track";
 import InputModality from "@/components/InputModality";
+import { ACCEPTANCE_PROMISE, IS_LIVE, PRICE, SITE } from "@/lib/config";
 
 // Schriften liegen im Repository — der Build lädt nichts aus dem Netz.
 const manrope = localFont({
@@ -51,18 +52,24 @@ const mono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "vierwochen — In vier Wochen zur Software, die Ihr Betrieb wirklich braucht",
-  description:
-    "Individualsoftware für den Mittelstand: in vier Wochen, zum Festpreis, integriert in Ihre IT. Läuft es nicht, kostet es nichts.",
-  // Solange die Seite nicht offiziell live ist: nicht indexieren (PROMPT.md §11).
-  robots: { index: false, follow: false },
+  metadataBase: new URL(SITE.url),
+  title: {
+    default: `${SITE.name} — ${SITE.claim}`,
+    template: `%s — ${SITE.name}`,
+  },
+  description: `Individualsoftware zum Festpreis ab ${PRICE.floor.toLocaleString("de-DE")} €, in vier Wochen live. ${ACCEPTANCE_PROMISE} Code gehört Ihnen.`,
+  openGraph: {
+    type: "website",
+    locale: "de_DE",
+    siteName: SITE.name,
+    title: `${SITE.name} — ${SITE.claim}`,
+    description: `Festpreis ab ${PRICE.floor.toLocaleString("de-DE")} €. ${ACCEPTANCE_PROMISE}`,
+  },
+  robots: IS_LIVE ? { index: true, follow: true } : { index: false, follow: false },
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f4f7f6" },
-    { media: "(prefers-color-scheme: dark)", color: "#0c1311" },
-  ],
+  themeColor: "#f3f4fd",
   width: "device-width",
   initialScale: 1,
 };

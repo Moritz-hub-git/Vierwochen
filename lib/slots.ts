@@ -136,6 +136,9 @@ export function candidateSlots(now: Date = new Date()): SlotDay[] {
     if (cursor.weekday >= 1 && cursor.weekday <= 5) {
       const slots: Slot[] = [];
       for (let h = BOOKING.dayStartHour; h < BOOKING.dayEndHour; h++) {
+        // Nur Stunden innerhalb der bedienbaren Fenster (früh, mittags,
+        // abends) — siehe BOOKING.hourWindows in lib/config.ts.
+        if (!BOOKING.hourWindows.some(([from, to]) => h >= from && h < to)) continue;
         for (const m of [0, 30]) {
           const start = berlinToUtc(cursor.year, cursor.month, cursor.day, h, m);
           if (start.getTime() < earliest.getTime()) continue;
