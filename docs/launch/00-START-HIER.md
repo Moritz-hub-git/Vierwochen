@@ -31,7 +31,7 @@ Jede davon ist eine einzige Konstante in `lib/config.ts`. Wenn du eine ändern w
 | **Betrieb** | „optional", unbepreist | **290 €/Monat Betrieb, 990 €/Monat Betrieb + Weiterentwicklung**, monatlich kündbar (`RETAINER`) | Die einzige wiederkehrende Einnahme. Steht jetzt auf der Karte und auf der Startseite. |
 | **Gewährleistung** | 12 Monate | **24 Monate** (`WARRANTY_MONTHS`) | Zwei Jahre sind die gesetzliche Regelfrist beim Werkvertrag (§634a BGB). 24 Monate zu versprechen kostet dich nichts zusätzlich und liest sich wie ein Versprechen statt wie eine Verkürzung. |
 | **Abnahme-Zusage** | Landing „zweite Rate entfällt" vs. AGB „100 % Erstattung" | **Ein Satz, überall wortgleich**: „Besteht die Abnahme nicht, entfällt die zweite Rate." (`ACCEPTANCE_PROMISE`) | Ein Widerspruch zwischen Landing und AGB ist ein Abmahngrund und ein Vertrauensverlust bei jedem IT-Leiter, der beides liest. |
-| **Referenzen** | Erfundene Branchen-Showcases mit Mitarbeiterzahlen | **Ein echtes Projekt (diese Website) + sechs ehrlich als „Beispiel" markierte Zuschnitte** | Erfundene Referenzen sind das Ende, sobald jemand nachfragt. Die Seite sagt jetzt selbst: „keine Kundenreferenzen, die kommen, sobald die ersten Kunden freigeben." |
+| **Referenzen** | Erfundene Branchen-Showcases mit Mitarbeiterzahlen | **Ein echtes Projekt (diese Website) + sieben ehrlich als „Beispiel" markierte Zuschnitte** | Erfundene Referenzen sind das Ende, sobald jemand nachfragt. Die Seite sagt jetzt selbst: „keine Kundenreferenzen, die kommen, sobald die ersten Kunden freigeben." |
 | **KI-Transparenz** | Berater tat, als sei er ein Mensch | **„KI-Berater" steht über dem Dialog, Vertex/Google wird genannt, Moritz prüft jede Skizze** | EU-KI-VO Art. 50 (seit August 2026 Pflicht), DSGVO, und Persona „Thomas": „Ich will wissen, ob ich mit einer Maschine rede." |
 | **Zeitplan** | „Start Montag" ohne Datum | **Kick-off frühestens am Montag in zwei Wochen, Launch 25 Tage später**, echte Daten (`lib/timeline.ts`) | „Frühestens", weil zwischen Gespräch und Start Angebot und Unterschrift liegen. |
 | **Termine** | ganztägig | **8–9, 12–13, 17–19 Uhr** (`BOOKING.hourWindows`) | Du bist angestellt. Slots außerhalb der Kernarbeitszeit sind ehrlicher und schützen dich arbeitsrechtlich. |
@@ -41,13 +41,13 @@ Jede davon ist eine einzige Konstante in `lib/config.ts`. Wenn du eine ändern w
 
 ## 3. Was heute Nacht gebaut wurde
 
-Alles liegt auf dem Branch `claude/landing-page-modern-redesign-boi6yt`. **`main` (und damit Cloud Run) ist noch auf dem alten Stand** — ich pushe erst nach der Verifikationsrunde, siehe Abschnitt 4.
+Alles liegt auf dem Branch `claude/landing-page-modern-redesign-boi6yt` und ist nach der Verifikationsrunde (Abschnitt 4) nach `main` gepusht — Cloud Run baut daraus. Die Seite bleibt bis `SITE_LIVE=1` für Suchmaschinen gesperrt.
 
 **Eine Marke, eine Adresse.** Die Startseite `/` ist jetzt die Landing (vorher lag sie unter `/v/fixfertig`, `/` zeigte eine andere Seite unter anderem Namen). `/v/fixfertig` leitet um. Alle Unterseiten (`/termin`, `/it`, `/impressum`, `/datenschutz`, `/agb`, `/zugang`) tragen dieselbe Navigation und denselben Namen.
 
 **Startseite, komplett überarbeitet.**
 - H1 „Ihre Software. In vier Wochen live." Kein rotierendes Wort mehr (Persona: „wechselt schneller, als ich lese").
-- Drei Säulen: Festpreis ab 12.500 € · Bezahlt wird, was läuft · Ein Kopf + AI. Jede führt zu ihrem Abschnitt und wird dort wieder aufgegriffen.
+- Drei Säulen: Festpreis ab 12.500 € · Zweite Rate erst nach Abnahme · Ein Kopf + AI. Jede führt zu ihrem Abschnitt und wird dort wieder aufgegriffen.
 - Gründer-Zeile direkt unter den Säulen mit Avatar (Initialen, bis dein Foto da ist) und Link „Wer ist das?".
 - Neuer Abschnitt **„Wer baut das"** (`#wer`): Name, Rolle, drei belegbare Fakten, ein ehrlicher Absatz („Ich baue Ihr Projekt selbst, mit AI. Kein Team, keine Subunternehmer."), „Was ich nicht baue".
 - Beispiele-Karussell: erstes Element ist diese Website als echtes Projekt, alle anderen ehrlich als Beispiel markiert, ohne Mitarbeiterzahlen, im Präsens.
@@ -76,9 +76,35 @@ Alles liegt auf dem Branch `claude/landing-page-modern-redesign-boi6yt`. **`main
 
 ---
 
-## 4. Verifikationsrunde (läuft, Stand beim Schreiben)
+## 4. Verifikationsrunde: Ergebnis
 
-Dieselben sechs Personas und zwei Audits (UWG/Konsistenz, Layout/Barrierefreiheit) laufen gerade erneut über den Produktionsbuild. Ergebnis, Fixes und der Push nach `main` folgen in diesem Dokument unter „4a. Ergebnis", sobald sie durch sind. Bis dahin gilt: **Branch ist fertig gebaut und typgeprüft, `main` noch alt.**
+Dieselben sechs Personas sind ein zweites Mal über den fertigen Produktionsbuild gelaufen (Playwright, Dialog mit Testantworten statt echtem Modell). Die zwei Audits und die Synthese sind am Sitzungslimit gescheitert; die Synthese habe ich selbst gemacht.
+
+| Persona | Vertrauen vorher | nachher | Würde buchen |
+|---|---|---|---|
+| Thomas, Metallbau, iPad | 3 | 5 | nein — will ein Gesicht, eine Telefonnummer und etwas Nachprüfbares |
+| Lena, Gründerin, Gmail | 3 | 6 | ja (kostenloses Gespräch) |
+| Dr. Sabine, Konzern-QM | 3 | 6 | ja — Beauftragung erst mit Einkaufsunterlagen |
+| Markus, IT-Leiter | 2 | 5 | ja — „schulde dem GF eine Antwort" |
+| Wettbewerber-Agentur | 3 | 6 | nein — Belege nicht prüfbar |
+| Kerstin, Elektrobetrieb, iPhone | 3 | 6 | nein — will erst anrufen |
+
+**Was alle sechs gelobt haben und was bleibt:** die Ehrlichkeit („Ein Kopf + AI", „keine Kundenreferenzen — die kommen, sobald die ersten Kunden sie freigeben"), die Preisherleitung mit Summe, der Zeitplan mit echten Daten, die Abnahme-Zusage wortgleich auf Landing, Karte, /it und AGB, die Seite /it zum Weiterleiten.
+
+**Was sie gefunden haben und was heute Nacht noch behoben wurde:**
+
+- **Blocker, echt:** Im Gespräch lag das Panel über der Eingabeleiste. Feld und Pfeil waren per Maus und Touch nicht erreichbar, nur per Skript. Auf dem iPad hätte sich nie eine Tastatur geöffnet. Behoben und per Hit-Test auf 1440 und 390 verifiziert. Das war auf der alten Live-Seite genauso kaputt.
+- **Landing gegen AGB, drei Widersprüche:** Code „ab Tag 1 Ihr Eigentum" gegen „mit vollständiger Zahlung"; Gewährleistung „unabhängig davon" gegen den Ausschluss bei Fremdänderung; „Bezahlt wird, was läuft" gegen „erste Rate wird nicht erstattet". Jetzt: Code liegt ab Tag 1 in Ihrem Repository, gehört Ihnen mit der Abnahme, und bleibt bei gescheiterter Abnahme beim Kunden (neu in AGB §6, für den Anwalt markiert). Gewährleistung gilt auf den abgenommenen Stand, auch wenn ein anderer weiterbaut, solange der Mangel nicht daher stammt (§7 angepasst). Säule zwei heißt „Zweite Rate erst nach Abnahme", die 50/50-Staffel steht in Euro auf der Karte und im Preisabschnitt.
+- **„Wir" gegen „Einzelunternehmen":** FAQ, Methode und Leistungen sprechen jetzt in der Ich-Form; „Die 2+AI-Methode" heißt überall „Ein Kopf + AI".
+- **Karte nicht chef-tauglich:** Jetzt mit Zahlung 50/50 in Euro, Betrieb im ersten Jahr, „Was es Sie heute kostet" mit Amortisation (nur, wenn der Kunde selbst eine Zeitangabe gemacht hat), Erklärung des Grundprodukts, Knopf „Drucken oder als PDF speichern" (eine Seite, mit Absender und Datum), Link auf /it für Einkauf und IT.
+- **Leiste verdeckt Text beim Lesen** (alle Bildschirme unter 800 px Höhe): Sie taucht beim Scrollen nach unten ab und kommt beim Scrollen nach oben zurück. Auf Impressum, Datenschutz, AGB und Zugang gibt es sie nicht mehr.
+- **Zielgruppe:** siebtes Beispiel „Buchungsportal für Praxen" (erste Produktversion für Gründer) und eine FAQ dazu; in „Für wen ist das nichts?" der Satz „Viele Nutzer sind kein Problem — viele gleichzeitige Entwickler sind es."
+- **/it** um Login über Entra ID/Workspace, Schnittstellen statt Direktzugriff, konkreten Betrieb (Rückmeldung werktags am selben Tag, tägliche Backups, Cloud-Kosten 1:1) und einen Block „Für Ihren Einkauf" ergänzt. Dort stehen zwei neue Platzhalter für dich: Versicherer und Deckungssumme.
+- Kleinigkeiten: „meist 3 Fragen" statt „3 Fragen" (der Dialog erlaubt fünf), Fachwörter raus (Stack, Lock-in, Patches), „Senior-Qualität" durch „Eine Verantwortung" ersetzt, Betrieb „optional" statt „inklusive", Zeitplan „frühestens", Knappheit „ein neuer Start pro Monat".
+
+**Was offen bleibt und nur du lösen kannst** (die drei „nein"-Personas nennen genau das): Foto, LinkedIn-Link, die Namen deiner drei Apps mit App-Store-Link, eine Telefonnummer, und Versicherer plus Deckungssumme auf /it. Das sind die Punkte 2–6 und 8 in Abschnitt 5. Mit ihnen, sagen die Personas übereinstimmend, wären sie bei 7–8 von 10.
+
+**Nicht umgesetzt, bewusst:** Gesundheitsdaten-Absatz auf /it (Persona Lena) — das wäre ein Versprechen über Verschlüsselung und AVV-Vorlagen, das du erst mit dem Anwalt geben solltest. Preisposten in der Karte abwählbar machen — der Nachfrage-Dialog kann das bereits („ohne Schnittstelle", Karte rechnet neu), ein Klick-Chip wäre die Ausbaustufe.
 
 ---
 
@@ -93,7 +119,9 @@ Alles hier ist bewusst nicht von mir erledigt worden, weil es deine Identität, 
 - [ ] **LinkedIn-URL** in `SITE.founder.linkedin`. Persona „Lena" googelt sofort. Das Profil muss zur Seite passen: Vorstandsreferent, Programm-Manager, baut Software mit AI.
 - [ ] **Impressum**: Straße, PLZ/Ort, Rufnummer, USt-IdNr. (`app/(site)/impressum/page.tsx`, Platzhalter sind markiert). Datenschutz: Anschrift und Datum Livegang (`app/(site)/datenschutz/page.tsx`). AGB: Gerichtsstand (`app/(site)/agb/page.tsx`).
 - [ ] **Drei Fakten prüfen** in `SITE.founder.facts`: Sie müssen wörtlich stimmen und belegbar sein (Zeugnis, Profil, Projekt). Lieber eine Zahl weniger als eine, die du nicht belegen kannst.
-- [ ] **Telefonnummer** in `SITE.phone`, wenn du telefonisch erreichbar sein willst (Persona „Thomas": „Ich will einen Menschen anrufen"). Leer = wird nicht gerendert.
+- [ ] **Telefonnummer** in `SITE.phone`, wenn du telefonisch erreichbar sein willst (Personas „Thomas" und „Kerstin": „Ich rufe an, ich buche nicht"). Leer = wird nicht gerendert.
+- [ ] **Deine drei Apps mit Namen und App-Store-Link** im Abschnitt „Wer baut das" (`SITE.founder.facts` in `lib/config.ts`). Fünf von sechs Personas: „Das ist der einzige Beleg, den ich ohne Anruf prüfen kann."
+- [ ] **/it, Block „Für Ihren Einkauf"**: Versicherer und Deckungssumme eintragen, sobald die IT-Haftpflicht steht (`app/(site)/it/page.tsx`). Bis dahin stehen dort sichtbare Platzhalter.
 - [ ] **Cloud Run Umgebungsvariablen**: `SITE_LIVE=1` (erst wenn Impressum/Datenschutz vollständig), `ADMIN_PASSWORD`, `CLEANUP_TOKEN` (zufällig, 32+ Zeichen), `BOOKING_CALENDAR_ID`, `MAIL_SENDER`, `GOOGLE_CLOUD_PROJECT`. Optional: Cloud Scheduler täglich 03:00 auf `POST /api/admin/cleanup` mit `Authorization: Bearer <CLEANUP_TOKEN>`; ohne Scheduler läuft die Löschung trotzdem einmal täglich beim ersten Dialog des Tages.
 - [ ] **Domain**: `vierwochen.de` auf Cloud Run mappen (die Seite nennt sie in Metadaten, Sitemap und Mails). Wenn du eine andere Domain willst: nur `SITE.domain`/`SITE.url` ändern.
 - [ ] **/it lesen und unterschreiben können**: Die Seite verspricht Stack, Hosting-Region, Code-Übergabe. Alles, was dort steht, musst du im Projekt so leben.
@@ -165,7 +193,7 @@ Rohdaten des Reviews (fünf Strategien, sechs Personas, sechs Audits, 41 Verifik
 
 ## 9. Was ich bewusst nicht gemacht habe
 
-- **Kein Push nach `main` vor der Verifikation.** Du hast mir Push-Rechte gegeben. Ich nutze sie erst, wenn die zweite Persona-Runde keine Blocker mehr zeigt. Der Branch ist gebaut, typgeprüft, alle Seiten antworten.
+- **Push nach `main` erst nach der Verifikation.** Du hast mir Push-Rechte gegeben. Ich habe sie genutzt, nachdem die zweite Persona-Runde keinen Blocker mehr zeigte, der im Code liegt. Die Seite bleibt bis `SITE_LIVE=1` aus dem Suchindex.
 - **Keine Google-Ads-Kampagne angelegt, keine LinkedIn-Posts veröffentlicht.** Beides ist außenwirksam und trägt deinen Namen. Alles steht fertig in 03 und 04, du entscheidest.
 - **Kein Rechtsform-, Versicherungs- oder Anwaltsauftrag.** Kostet dein Geld, braucht deine Unterschrift. Vorlagen in 05.
 - **Keine fünf Landing-Varianten mehr gepflegt.** `/v` bleibt intern erreichbar, aber die Startseite ist eine. Weitere Design-Varianten wären jetzt Vermeidung von Verkaufsgesprächen.
