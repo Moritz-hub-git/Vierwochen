@@ -8,6 +8,8 @@ Du hast gesagt: „Mach nur Dinge, von denen Du wirklich überzeugt bist. Wenn d
 
 ## 1. Das Urteil in sieben Sätzen
 
+> Die Langfassung — fünf vollständige Gutachten, fünf unabhängige Stückkostenrechnungen, die unbequemen Wahrheiten im Wortlaut — steht in `08-gutachten-business.md`. Dieser Abschnitt ist die Zusammenfassung davon.
+
 1. **Die Idee ist nicht Müll.** „Individualsoftware in vier Wochen zum Festpreis mit Abnahme, gebaut von einem, der Fachbereich und Technik kann" ist ein echtes, verkaufbares Versprechen. Fünf unabhängige Gutachter (VC-Skeptiker, Agentur-Operator, Marken-Stratege, Growth, Gründer-Coach) und sechs Kundenpersonas haben es geprüft. Niemand hat gesagt: lass es.
 2. **Aber die Konfiguration von gestern Abend war nicht startfähig.** Alle fünf Gutachter und alle sechs Personas unabhängig voneinander: Die Team-Fassade („wir", „Studio", „2+AI-Methode") war der größte Vertrauenskiller, wettbewerbsrechtlich angreifbar und im Widerspruch zum Impressum. Der Preis von 9.500 € lag unter den Vollkosten jedes zweiten Kopfes und hat damit genau das verhindert, was du willst.
 3. **Das Modell skaliert nicht über Kanäle, sondern über Referenzen und einen zweiten Kopf auf Umsatzbeteiligung.** Bezahlte Werbung rechnet sich erst ab einem Durchschnittspreis, den du ohne Referenzen nicht durchsetzen kannst. Das ist die Reihenfolge, nicht eine Option.
@@ -186,8 +188,9 @@ Details, Wochenplan und Dashboard in Dokument 07. Hier die Kurzfassung.
 | 05 | `05-recht-nebentaetigkeit-rechtsform.md` | Nebentätigkeitsanzeige, UG, Versicherung, Website-Pflichten, EU-KI-VO. |
 | 06 | `06-produktkopf-2-partnermodell.md` | Rollenprofil, Umsatzbeteiligung 60/10/30, Suche, Auswahl, Vertragspunkte, Co-Founder-Alternative. |
 | 07 | `07-kill-go-dashboard-und-wochenplan.md` | Wochenplan 12 Wochen, Dashboard, Kill/Go im Detail. |
+| 08 | `08-gutachten-business.md` | **Das Business-Assessment im Volltext:** fünf Gutachten, fünf Stückkostenrechnungen, Risiken, unbequeme Wahrheiten, was Personas und Audits fanden. Die Begründung für alles andere. |
 
-Rohdaten des Reviews (fünf Strategien, sechs Personas, sechs Audits, 41 Verifikationen) liegen als `review.json` im Sitzungs-Scratchpad; die Kernaussagen sind in Abschnitt 1 und 2 und in den Dokumenten verarbeitet.
+Die Rohdaten des Reviews lagen als `review.json` (734 KB) nur im flüchtigen Sitzungsspeicher. Dokument 08 ist ihre dauerhafte Fassung: Gutachten und Stückkostenrechnungen vollständig, Personas und Audits verdichtet.
 
 ---
 
