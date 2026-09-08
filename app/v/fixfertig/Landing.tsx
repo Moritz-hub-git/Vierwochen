@@ -109,6 +109,7 @@ export function PillarEcho({ n }: { n: 0 | 1 | 2 }) {
 const SHOWCASES = [
   {
     visual: <SiteMock />,
+    badge: "Echtes Projekt",
     branch: "Echtes Projekt · diese Website",
     title: "Landing, KI-Dialog, Buchung",
     text: "Mit derselben Methode gebaut, die hier beschrieben wird: Seite, KI-Berater mit Preisherleitung, Terminbuchung mit Kalender — alles Individualsoftware, alles in Betrieb.",

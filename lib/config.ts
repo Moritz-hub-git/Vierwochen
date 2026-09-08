@@ -147,6 +147,21 @@ export const LIMITS = {
 } as const;
 
 /**
+ * Aufbewahrungsfristen — exakt die Zusagen aus /datenschutz. Wer hier etwas
+ * ändert, ändert die Datenschutzerklärung mit (und umgekehrt). Umgesetzt in
+ * lib/retention.ts, ausgelöst über /api/admin/cleanup und einmal täglich
+ * nebenläufig aus dem Dialog heraus.
+ */
+export const RETENTION = {
+  /** IP-Adressen in Dialogen, Buchungen, Leads und Tageszählern: 30 Tage. */
+  ipDays: 30,
+  /** Dialoge ohne Kontaktangabe (kein Lead, keine Buchung): 90 Tage. */
+  dialogDays: 90,
+  /** Ereignisse der Reichweitenmessung: 12 Monate. */
+  eventDays: 365,
+} as const;
+
+/**
  * Freemail-Domains: Das Ergebnis gibt es gegen eine geschäftliche Adresse (§5.5).
  * Liste bewusst auf verbreitete Privat-Anbieter im DACH-Raum begrenzt.
  *

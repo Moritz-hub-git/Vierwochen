@@ -17,6 +17,8 @@ import s from "./styles.module.css";
 
 export type Showcase = {
   visual: React.ReactNode;
+  /** Badge auf dem Bild — Standard "Beispiel"; das echte Projekt sagt es. */
+  badge?: string;
   branch: string;
   title: string;
   text: string;
@@ -29,7 +31,7 @@ export default function Showcases({ items }: { items: Showcase[] }) {
         {items.map((c) => (
           <article key={c.title} className={s.card}>
             <div className={s.cardVisual}>
-              <span className={s.placeholderTag}>Beispiel</span>
+              <span className={s.placeholderTag}>{c.badge ?? "Beispiel"}</span>
               {c.visual}
             </div>
             <div className={s.cardBody}>

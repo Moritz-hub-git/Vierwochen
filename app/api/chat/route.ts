@@ -20,6 +20,7 @@ import {
 } from "@/lib/dialog";
 import { safe } from "@/lib/firestore";
 import { checkDayLimit, checkMinuteLimit, clientIp } from "@/lib/ratelimit";
+import { scheduleOpportunisticRetention } from "@/lib/retention";
 import { generateStructured } from "@/lib/vertex";
 
 export const dynamic = "force-dynamic";
@@ -36,6 +37,8 @@ function bad(status: number, error: string) {
 
 export async function POST(req: Request) {
   const ip = clientIp(req);
+  // Einmal je Instanz und Tag: Löschfristen aus /datenschutz durchsetzen (wartet nicht).
+  scheduleOpportunisticRetention();
 
   let body: ChatRequest;
   try {

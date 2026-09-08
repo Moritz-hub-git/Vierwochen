@@ -1389,6 +1389,28 @@ html[data-input="mouse"] :focus {
    Öffnen des Chats neu ein, das wirkte wie ein Aussetzer). Der bereits
    sichtbare Fade wächst stattdessen nahtlos in den Chat-Verlauf hinein.
    Erst wenn das Feld ohne Absenden wieder verlassen wird, blendet er aus. */
+/* Ruhezustand: ein kleiner, immer sichtbarer Grund unter Leiste und
+   Hinweiszeile (Verifikation 2026-09-08: die H2 des nächsten Abschnitts
+   schien durch die Hinweiszeile hindurch). Er ist bewusst flach — nur so
+   hoch, dass Seitentext weich ausläuft, bevor er die Zeile erreicht. Beim
+   Fokus übernimmt der große Verlauf (::before), dann verschwindet er. */
+.dock::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 150px;
+  z-index: -1;
+  background: linear-gradient(to top, var(--bg) 52%, color-mix(in srgb, var(--bg) 70%, transparent) 76%, transparent);
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.dock.is-focused::after,
+.dock.is-sending::after,
+.dock.in-chat::after {
+  opacity: 0;
+}
+
 .dock.is-focused::before,
 .dock.is-sending::before,
 .dock.in-chat::before {
