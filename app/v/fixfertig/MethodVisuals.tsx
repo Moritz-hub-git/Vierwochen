@@ -2,13 +2,13 @@ import { Fragment } from "react";
 import s from "./styles.module.css";
 
 /**
- * Fünf grafische Darstellungen derselben Ein-Kopf-plus-AI-Methode — eine pro
+ * Fünf grafische Darstellungen derselben Methode — eine pro
  * Landing-Variante. Alle erzählen dieselben zwei Argumente:
  * 1. Weniger Köpfe, kürzerer Weg → schneller.
  * 2. Wer die Anforderung bespricht, schreibt auch den Code → an der
  *    Schnittstelle geht nichts verloren, das Ergebnis ist näher dran.
  *
- * Ehrlich im Singular (Vollreview 2026-09-08): ein Kopf baut und
+ * Ein Verantwortlicher steht für das Ergebnis (Rücksprache 2026-09-08) —
  * verantwortet, AI verstärkt. Kein „Team", kein Plural „Entwickler" —
  * das dreht die Fassung vom Vortag bewusst zurück.
  */
@@ -61,7 +61,7 @@ export function WegeVisual() {
 
       <div className={s.wayNew}>
         <div className={s.wayHead}>
-          <span>Ein Kopf + AI</span>
+          <span>Mit vierwochen</span>
           <b>4 Wochen</b>
         </div>
         <div className={s.chainNew}>
@@ -89,8 +89,8 @@ export function WegeVisual() {
       </div>
       <p className={s.waysFoot}>
         <b>Der neue Engpass:</b> AI hat das Bauen billig gemacht — teuer ist
-        nur noch, das Falsche zu bauen. Deshalb sage ich auch Nein. Beim
-        Festpreis kostet Unnötiges mich, nicht Sie.
+        nur noch, das Falsche zu bauen. Deshalb sagen wir auch Nein. Beim
+        Festpreis kostet Unnötiges uns, nicht Sie.
       </p>
     </div>
   );
@@ -260,8 +260,8 @@ export function BentoVisual() {
         <span className={s.mBig}>Nein.</span>
         <b>Auch das ist Beratung</b>
         <p>
-          Ich rate Funktionen ab, die niemand nutzen wird — beim Festpreis
-          kostet Unnötiges mich, nicht Sie.
+          Wir raten Funktionen ab, die niemand nutzen wird — beim Festpreis
+          kostet Unnötiges uns, nicht Sie.
         </p>
       </div>
     </div>
@@ -286,13 +286,13 @@ export function PlanVisual() {
         </div>
       </div>
       <div className={s.bpRow}>
-        <span className={`${s.bpLabel} ${s.bpLabelNew}`}>Ein Kopf + AI · 4 Wochen</span>
+        <span className={`${s.bpLabel} ${s.bpLabelNew}`}>vierwochen · 4 Wochen</span>
         <div className={s.bpNewPath}>
           <span className={s.bpNodeNew}>Sie</span>
           <span className={s.bpLine} aria-hidden />
           <span className={`${s.bpNodeNew} ${s.bpNodeCore}`}>
             Gespräch&nbsp;=&nbsp;Code
-            <i>✦ AI baut · ein Kopf verantwortet</i>
+            <i>✦ AI baut · einer verantwortet</i>
           </span>
           <span className={s.bpLine} aria-hidden />
           <span className={`${s.bpNodeNew} ${s.bpNodeLive}`}>

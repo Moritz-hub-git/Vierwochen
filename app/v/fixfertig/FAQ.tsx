@@ -7,8 +7,9 @@ import s from "./styles.module.css";
  * „warum nur ein Kopf", „wo sind die Referenzen"). Wer den Einwand selbst
  * ausspricht und ehrlich beantwortet, wirkt souveräner als jede Behauptung.
  *
- * Ehrlichkeitsregel (Vollreview 2026-09-08): ein Kopf + AI. Kein „Team",
- * kein Plural „Entwickler". Wo es um den Menschen geht, heißt er Moritz.
+ * Ehrlichkeitsregel: Firmenstimme („wir") ist richtig — verboten sind nur
+ * überprüfbare Behauptungen über Personal, die nicht stimmen („festes Team
+ * je Projekt"). Wo es um den Verantwortlichen geht, heißt er Moritz.
  * Zahlen und Zusagen kommen aus lib/config.ts, damit sie überall gleich sind.
  *
  * Natives <details>: kein JavaScript, tastaturbedienbar, indexierbar.
@@ -20,17 +21,17 @@ const floor = `${PRICE.floor.toLocaleString("de-DE")} €`;
 const FAQS: { q: string; a: React.ReactNode }[] = [
   {
     q: "Was, wenn jemand bei Ihnen ausfällt?",
-    a: `Hier baut ein Kopf — ${first}. Die Absicherung ist deshalb nicht personell, sondern mechanisch: verbreiteter Standard-Stack, alles dokumentiert, Code und Zugänge liegen ab Tag 1 bei Ihnen. Jeder gute Entwickler kann übernehmen — Sie sind an niemanden gekettet. Die ${WARRANTY_MONTHS} Monate Gewährleistung gelten auf den abgenommenen Stand, auch wenn später jemand anderes weiterbaut — solange der Fehler nicht daher kommt.`,
+    a: `Ihr Projekt hat einen Verantwortlichen: ${first}. Bei größeren Vorhaben arbeiten Partner mit, die er selbst ausgewählt hat. Die Absicherung ist deshalb nicht personell, sondern mechanisch: verbreiteter Standard-Stack, alles dokumentiert, Code und Zugänge liegen ab Tag 1 bei Ihnen. Jeder gute Entwickler kann übernehmen — Sie sind an niemanden gekettet. Die ${WARRANTY_MONTHS} Monate Gewährleistung gelten auf den abgenommenen Stand, auch wenn später jemand anderes weiterbaut — solange der Fehler nicht daher kommt.`,
   },
   {
     q: "Warum geht das schneller als bei einer großen Agentur?",
-    a: `Weil es keine Übergabekette gibt. Der Mensch, der Ihren Ablauf versteht, ist derselbe, der ihn baut — ${first}, mit AI als hundert Händen. Keine Übersetzung von Ihnen über Projektleitung und Anforderungsdokument bis zur Entwicklung, bei der die Hälfte der Absicht verloren geht. „Besser“ behaupte ich nicht — passgenauer. Und für die Qualität verlassen Sie sich nicht auf mein Wort: Festpreis, Abnahme nach vereinbarten Kriterien, ${WARRANTY_MONTHS} Monate Gewährleistung.`,
+    a: `Weil es keine Übergabekette gibt. Der Mensch, der Ihren Ablauf versteht, ist derselbe, der ihn baut — ${first}, mit AI als hundert Händen. Keine Übersetzung von Ihnen über Projektleitung und Anforderungsdokument bis zur Entwicklung, bei der die Hälfte der Absicht verloren geht. „Besser“ behaupten wir nicht — passgenauer. Und für die Qualität verlassen Sie sich nicht auf unser Wort: Festpreis, Abnahme nach vereinbarten Kriterien, ${WARRANTY_MONTHS} Monate Gewährleistung.`,
   },
   {
     q: "Haben Sie Referenzen?",
     a: (
       <>
-        Ehrlich: Mit dieser Methode bin ich neu am Markt — deshalb Festpreis,
+        Ehrlich: Mit dieser Methode sind wir neu am Markt — deshalb Festpreis,
         und die zweite Rate erst nach Abnahme. Belegbar ist die Herkunft von{" "}
         {SITE.founder.name}: {SITE.founder.facts.join(". ")}. Und diese Website
         samt KI-Dialog ist selbst mit der Methode gebaut — Sie benutzen gerade
@@ -40,11 +41,11 @@ const FAQS: { q: string; a: React.ReactNode }[] = [
   },
   {
     q: "Woher wissen Sie, was wir wirklich brauchen?",
-    a: "Sie kennen Ihren Betrieb — ich kenne die Muster aus vielen Produkten: welche Funktionen benutzt werden, welche Darstellungen funktionieren und was nur teuer aussieht. Deshalb rate ich auch ab. Der Festpreis hält mich dabei ehrlich: Unnötiges zu bauen kostet mich, nicht Sie.",
+    a: "Sie kennen Ihren Betrieb — wir kennen die Muster aus vielen Produkten: welche Funktionen benutzt werden, welche Darstellungen funktionieren und was nur teuer aussieht. Deshalb raten wir auch ab. Der Festpreis hält uns dabei ehrlich: Unnötiges zu bauen kostet uns, nicht Sie.",
   },
   {
     q: "Was, wenn das Ergebnis nicht passt?",
-    a: `${ACCEPTANCE_PROMISE} Die Abnahmekriterien lege ich in Woche 1 mit Ihnen fest — Sie messen mich an dem, was vereinbart ist, nicht an dem, was ich hineininterpretiert habe. Scheitert die Abnahme, behalten Sie den bis dahin gebauten Code.`,
+    a: `${ACCEPTANCE_PROMISE} Die Abnahmekriterien legen wir in Woche 1 gemeinsam fest — Sie messen uns an dem, was vereinbart ist, nicht an dem, was wir hineininterpretiert haben. Scheitert die Abnahme, behalten Sie den bis dahin gebauten Code.`,
   },
   {
     q: "Wann ist fertige Software die bessere Wahl?",
@@ -72,7 +73,7 @@ const FAQS: { q: string; a: React.ReactNode }[] = [
   },
   {
     q: "Für wen ist das nichts?",
-    a: "Für ERP-Ablösungen und Plattformen, an denen später zwanzig Leute gleichzeitig entwickeln. Viele Nutzer sind kein Problem — viele gleichzeitige Entwickler sind es. Ich baue fokussierte Werkzeuge, die einen Ablauf richtig lösen — das ist die Stärke der Methode, und ich sage ehrlich, wenn Ihr Vorhaben nicht dazu passt.",
+    a: "Für ERP-Ablösungen und Plattformen, an denen später zwanzig Leute gleichzeitig entwickeln. Viele Nutzer sind kein Problem — viele gleichzeitige Entwickler sind es. Wir bauen fokussierte Werkzeuge, die einen Ablauf richtig lösen — das ist die Stärke der Methode, und wir sagen ehrlich, wenn Ihr Vorhaben nicht dazu passt.",
   },
   {
     q: "Was kostet es?",

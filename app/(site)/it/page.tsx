@@ -13,7 +13,7 @@ import s from "@/components/v/brandnav.module.css";
  * IT-Sicherheit, Einkauf und Datenschutz überzeugen muss. Er braucht keinen
  * Verkaufstext, sondern eine Seite, die er kommentarlos weiterleiten kann.
  * Deshalb: nüchterne Aussagen, keine Superlative, ehrlich auch dort, wo es
- * unbequem ist — ein Kopf plus KI, KI-Dialog dieser Website über den
+ * unbequem ist — wer verantwortet, KI-Dialog dieser Website über den
  * globalen Endpunkt. Der Bus-Faktor wird nicht wegdiskutiert, sondern
  * mechanisch entschärft.
  */
@@ -52,16 +52,19 @@ export default function ItFaktenPage() {
         title="Wer baut"
         items={[
           <>
-            Ein Kopf plus KI: {SITE.founder.name} entwirft, baut und verantwortet
-            das Projekt selbst; KI-Werkzeuge übernehmen Tippen, Tests und
-            Routinearbeit — unter Aufsicht, nie allein. Es gibt kein Team im
-            Hintergrund, und diese Seite behauptet auch keines.
+            Verantwortlich für Entwurf, Bau und Abnahme ist {SITE.founder.name}
+            persönlich — er ist Ihr Ansprechpartner über die gesamte Laufzeit.
+            KI-Werkzeuge übernehmen Tippen, Tests und Routinearbeit, immer unter
+            seiner Prüfung; bei größeren Vorhaben arbeiten von ihm ausgewählte
+            Partner mit. Wer im konkreten Projekt mitarbeitet, nennen wir Ihnen
+            vor Vertragsschluss namentlich.
           </>,
           <>
-            Das ergibt einen Bus-Faktor von eins. Er wird nicht mit Worten,
-            sondern mechanisch entschärft: Code, Dokumentation und Zugänge liegen
-            ab Tag 1 bei Ihnen (siehe „Eigentum und Exit"). Fällt der Erbauer
-            aus, fehlt Ihnen eine Person — aber nichts, was Sie brauchen.
+            Personenabhängigkeit entschärfen wir nicht mit Worten, sondern
+            mechanisch: Code, Dokumentation und Zugänge liegen ab Tag 1 bei Ihnen
+            (siehe „Eigentum und Exit"), der Stack ist bewusst verbreitet. Fällt
+            jemand aus, fehlt Ihnen eine Person — aber nichts, was Sie brauchen,
+            um weiterzuarbeiten oder zu wechseln.
           </>,
         ]}
       />

@@ -11,9 +11,9 @@ Du hast gesagt: „Mach nur Dinge, von denen Du wirklich überzeugt bist. Wenn d
 > Die Langfassung — fünf vollständige Gutachten, fünf unabhängige Stückkostenrechnungen, die unbequemen Wahrheiten im Wortlaut — steht in `08-gutachten-business.md`. Dieser Abschnitt ist die Zusammenfassung davon.
 
 1. **Die Idee ist nicht Müll.** „Individualsoftware in vier Wochen zum Festpreis mit Abnahme, gebaut von einem, der Fachbereich und Technik kann" ist ein echtes, verkaufbares Versprechen. Fünf unabhängige Gutachter (VC-Skeptiker, Agentur-Operator, Marken-Stratege, Growth, Gründer-Coach) und sechs Kundenpersonas haben es geprüft. Niemand hat gesagt: lass es.
-2. **Aber die Konfiguration von gestern Abend war nicht startfähig.** Alle fünf Gutachter und alle sechs Personas unabhängig voneinander: Die Team-Fassade („wir", „Studio", „2+AI-Methode") war der größte Vertrauenskiller, wettbewerbsrechtlich angreifbar und im Widerspruch zum Impressum. Der Preis von 9.500 € lag unter den Vollkosten jedes zweiten Kopfes und hat damit genau das verhindert, was du willst.
+2. **Aber die Konfiguration von gestern Abend war nicht startfähig.** Alle fünf Gutachter und alle sechs Personas unabhängig voneinander: Behauptungen über Personal, die nicht stimmten („Jedes Projekt bekommt ein festes Team", „nie nur eine Person"), waren der größte Vertrauenskiller, wettbewerbsrechtlich angreifbar und im Widerspruch zum Impressum. Nicht die Firmenstimme war das Problem, sondern die konkrete Behauptung (Abschnitt 4b). Der Preis von 9.500 € lag unter den Vollkosten jedes bezahlten zweiten Kopfes und hat damit genau das verhindert, was du willst.
 3. **Das Modell skaliert nicht über Kanäle, sondern über Referenzen und einen zweiten Kopf auf Umsatzbeteiligung.** Bezahlte Werbung rechnet sich erst ab einem Durchschnittspreis, den du ohne Referenzen nicht durchsetzen kannst. Das ist die Reihenfolge, nicht eine Option.
-4. **Die Solo-Phase lässt sich nicht überspringen.** Drei gelieferte, referenzierbare Projekte sind die Eintrittskarte für den zweiten Kopf, für Empfehlungen und für einen Preis ab 12.500 €. Das sind, nebenberuflich, drei bis fünf Monate. Du kannst die Phase kurz halten, du kannst sie nicht streichen.
+4. **Die Referenzphase lässt sich nicht überspringen.** Drei gelieferte, vorzeigbare Projekte sind die Eintrittskarte für Empfehlungen, für einen Preis ab 12.500 € und für jeden, der bei dir mitarbeiten soll. Ob du sie allein oder mit Partnern lieferst, ist deine Entscheidung — geliefert sein müssen sie. Kapazität kannst du zukaufen, Referenzen nicht.
 5. **Deine Bedingung „nur, wenn es zügig skaliert" ist damit vereinbar, wenn du „zügig" als „innerhalb von sechs Monaten nicht mehr allein" definierst** und nicht als „ab Woche vier ein Team". Dokument 06 beschreibt, wie der zweite Kopf ohne Fixkosten kommt.
 6. **Ob es skaliert, weißt du in 12 Wochen mit drei Zahlen:** Gespräche aus warmem Netzwerk, Abschlussquote, und ob ein Kunde nach Abnahme bereit ist, mit Namen zu bürgen. Die Kill-/Go-Kriterien stehen in Abschnitt 6 und in Dokument 07.
 7. **Meine ehrliche Empfehlung:** Starte. Mit dem ehrlichen Auftritt, dem höheren Preis und den Verkaufsgesprächen, die du bisher vermieden hast. Wenn nach 12 Wochen die Zahlen unter den Schwellen liegen, hör auf, ohne dass es dich mehr als drei Monate Abende und rund 3.000 € gekostet hat.
@@ -27,7 +27,7 @@ Jede davon ist eine einzige Konstante in `lib/config.ts`. Wenn du eine ändern w
 | Entscheidung | Vorher | Jetzt | Warum |
 |---|---|---|---|
 | **Marke** | neoapp.studio (gestern), vierwochen (davor) | **vierwochen** (`SITE.name`) | „neoapp" ist nicht schützbar (neoapps GmbH existiert), „.studio" ist für Mittelstand fremd. „vierwochen" ist das Versprechen selbst, konkret und deutsch. Wordmark: vier·wochen. |
-| **Positionierung** | Team-Studio, „wir", „2+AI" | **Ein Kopf + AI, mit Namen und Gesicht** (`SITE.founder`) | Alle 11 Reviewer unabhängig: Die Fassade kostet Vertrauen, ist UWG-riskant (§5 Irreführung) und widerspricht dem Impressum. Kunden geben einer Einzelperson mit drei belegten Projekten eher 12.500 € als einem anonymen „Team". |
+| **Positionierung** | „Jedes Projekt bekommt ein festes Team", „nie nur eine Person" | **Unternehmen mit Firmenstimme („wir") und einem sichtbaren Verantwortlichen** (`SITE.founder`) | Nicht die Firmenstimme war das Problem, sondern drei überprüfbare Behauptungen über Personal, die dem Impressum widersprachen (§5 UWG). Die sind raus. Als Unternehmen aufzutreten ist richtig und bleibt — mit Gesicht, weil alle sechs Personas einen Verantwortlichen sehen wollten. Keine Aussage über Personalstärke, weder nach oben noch nach unten. |
 | **Preisboden** | 9.500 € | **12.500 €** (`PRICE.floor`), Decke 35.000 € | 9.500 € lag unter den Vollkosten eines zweiten Kopfes. 12.500 € ist noch klar unter Agentur (25–60k) und lässt eine Umsatzbeteiligung zu. Der Streichpreis-Anker („16.000–24.000 €") ist weg, er war dein eigener Break-even. |
 | **Preisherleitung** | Eine Zahl aus dem Modell | **Grundprodukt 12.500 € + benannte Bausteine = Summe**, serverseitig gerechnet | Persona „Lena": „Zeig mir die Rechnung, dann glaube ich sie." Bottom-up ist glaubwürdiger als jede Spanne. |
 | **Betrieb** | „optional", unbepreist | **290 €/Monat Betrieb, 990 €/Monat Betrieb + Weiterentwicklung**, monatlich kündbar (`RETAINER`) | Die einzige wiederkehrende Einnahme. Steht jetzt auf der Karte und auf der Startseite. |
@@ -49,9 +49,9 @@ Alles liegt auf dem Branch `claude/landing-page-modern-redesign-boi6yt` und ist 
 
 **Startseite, komplett überarbeitet.**
 - H1 „Ihre Software. In vier Wochen live." Kein rotierendes Wort mehr (Persona: „wechselt schneller, als ich lese").
-- Drei Säulen: Festpreis ab 12.500 € · Zweite Rate erst nach Abnahme · Ein Kopf + AI. Jede führt zu ihrem Abschnitt und wird dort wieder aufgegriffen.
+- Drei Säulen: Festpreis ab 12.500 € · Zweite Rate erst nach Abnahme · Ein fester Ansprechpartner. Jede führt zu ihrem Abschnitt und wird dort wieder aufgegriffen.
 - Gründer-Zeile direkt unter den Säulen mit Avatar (Initialen, bis dein Foto da ist) und Link „Wer ist das?".
-- Neuer Abschnitt **„Wer baut das"** (`#wer`): Name, Rolle, drei belegbare Fakten, ein ehrlicher Absatz („Ich baue Ihr Projekt selbst, mit AI. Kein Team, keine Subunternehmer."), „Was ich nicht baue".
+- Neuer Abschnitt **„Wer baut das"** (`#wer`): Name, Rolle, drei belegbare Fakten, ein Absatz über Verantwortung („Ihr Projekt hat einen Verantwortlichen … bei größeren Vorhaben mit Partnern, die ich selbst ausgewählt habe"), „Was wir nicht bauen".
 - Beispiele-Karussell: erstes Element ist diese Website als echtes Projekt, alle anderen ehrlich als Beispiel markiert, ohne Mitarbeiterzahlen, im Präsens.
 - Zeitplan mit echtem Kick-off-Datum. Preisabschnitt ohne Streichpreis, dafür mit Betrieb ab 290 €/Monat.
 - FAQ ehrlich: „Haben Sie Referenzen?" (Antwort: noch nicht, hier ist, was Sie stattdessen prüfen können), „Wann ist fertige Software die bessere Wahl?".
@@ -91,13 +91,13 @@ Dieselben sechs Personas sind ein zweites Mal über den fertigen Produktionsbuil
 | Wettbewerber-Agentur | 3 | 6 | nein — Belege nicht prüfbar |
 | Kerstin, Elektrobetrieb, iPhone | 3 | 6 | nein — will erst anrufen |
 
-**Was alle sechs gelobt haben und was bleibt:** die Ehrlichkeit („Ein Kopf + AI", „keine Kundenreferenzen — die kommen, sobald die ersten Kunden sie freigeben"), die Preisherleitung mit Summe, der Zeitplan mit echten Daten, die Abnahme-Zusage wortgleich auf Landing, Karte, /it und AGB, die Seite /it zum Weiterleiten.
+**Was alle sechs gelobt haben und was bleibt:** die Ehrlichkeit („keine Kundenreferenzen — die kommen, sobald die ersten Kunden sie freigeben"), die Preisherleitung mit Summe, der Zeitplan mit echten Daten, die Abnahme-Zusage wortgleich auf Landing, Karte, /it und AGB, die Seite /it zum Weiterleiten.
 
 **Was sie gefunden haben und was heute Nacht noch behoben wurde:**
 
 - **Blocker, echt:** Im Gespräch lag das Panel über der Eingabeleiste. Feld und Pfeil waren per Maus und Touch nicht erreichbar, nur per Skript. Auf dem iPad hätte sich nie eine Tastatur geöffnet. Behoben und per Hit-Test auf 1440 und 390 verifiziert. Das war auf der alten Live-Seite genauso kaputt.
 - **Landing gegen AGB, drei Widersprüche:** Code „ab Tag 1 Ihr Eigentum" gegen „mit vollständiger Zahlung"; Gewährleistung „unabhängig davon" gegen den Ausschluss bei Fremdänderung; „Bezahlt wird, was läuft" gegen „erste Rate wird nicht erstattet". Jetzt: Code liegt ab Tag 1 in Ihrem Repository, gehört Ihnen mit der Abnahme, und bleibt bei gescheiterter Abnahme beim Kunden (neu in AGB §6, für den Anwalt markiert). Gewährleistung gilt auf den abgenommenen Stand, auch wenn ein anderer weiterbaut, solange der Mangel nicht daher stammt (§7 angepasst). Säule zwei heißt „Zweite Rate erst nach Abnahme", die 50/50-Staffel steht in Euro auf der Karte und im Preisabschnitt.
-- **„Wir" gegen „Einzelunternehmen":** FAQ, Methode und Leistungen sprechen jetzt in der Ich-Form; „Die 2+AI-Methode" heißt überall „Ein Kopf + AI".
+- **„Wir" gegen „Einzelunternehmen":** „Die 2+AI-Methode" heißt jetzt „Verstehen und bauen in einer Hand". Die Firmenstimme („wir") ist geblieben — sie war nie das Problem, siehe Abschnitt 4b.
 - **Karte nicht chef-tauglich:** Jetzt mit Zahlung 50/50 in Euro, Betrieb im ersten Jahr, „Was es Sie heute kostet" mit Amortisation (nur, wenn der Kunde selbst eine Zeitangabe gemacht hat), Erklärung des Grundprodukts, Knopf „Drucken oder als PDF speichern" (eine Seite, mit Absender und Datum), Link auf /it für Einkauf und IT.
 - **Leiste verdeckt Text beim Lesen** (alle Bildschirme unter 800 px Höhe): Sie taucht beim Scrollen nach unten ab und kommt beim Scrollen nach oben zurück. Auf Impressum, Datenschutz, AGB und Zugang gibt es sie nicht mehr.
 - **Zielgruppe:** siebtes Beispiel „Buchungsportal für Praxen" (erste Produktversion für Gründer) und eine FAQ dazu; in „Für wen ist das nichts?" der Satz „Viele Nutzer sind kein Problem — viele gleichzeitige Entwickler sind es."
@@ -107,6 +107,31 @@ Dieselben sechs Personas sind ein zweites Mal über den fertigen Produktionsbuil
 **Was offen bleibt und nur du lösen kannst** (die drei „nein"-Personas nennen genau das): Foto, LinkedIn-Link, die Namen deiner drei Apps mit App-Store-Link, eine Telefonnummer, und Versicherer plus Deckungssumme auf /it. Das sind die Punkte 2–6 und 8 in Abschnitt 5. Mit ihnen, sagen die Personas übereinstimmend, wären sie bei 7–8 von 10.
 
 **Nicht umgesetzt, bewusst:** Gesundheitsdaten-Absatz auf /it (Persona Lena) — das wäre ein Versprechen über Verschlüsselung und AVV-Vorlagen, das du erst mit dem Anwalt geben solltest. Preisposten in der Karte abwählbar machen — der Nachfrage-Dialog kann das bereits („ohne Schnittstelle", Karte rechnet neu), ein Klick-Chip wäre die Ausbaustufe.
+
+---
+
+## 4b. Korrektur am Morgen danach: Auftritt als Unternehmen
+
+Du hast zu Recht widersprochen: Ich hatte hineingeschrieben, dass du dauerhaft allein arbeitest und nur begrenzt Projekte annehmen kannst. Beides hast du nie gesagt. Was tatsächlich passiert war:
+
+**Die Projektbegrenzung stammte von deiner alten Seite, wurde von mir aber verschärft.** Im Buchungsformular stand vorher: „Jedes Projekt bekommt ein festes Team für die vollen vier Wochen — deshalb starten pro Monat höchstens zwei neue." Ich habe daraus „höchstens ein neues pro Monat" gemacht, weil die Gutachter mit deiner Anstellung argumentierten. Das war meine Entscheidung, nicht deine.
+
+**„Ein Kopf + AI" als Hero-Säule und Methodenname war mein Fehler.** Aus einem Zustand wurde eine Identität — und damit hätte die Seite genau das verbaut, was du vorhast. Die Gutachter haben das nie gefordert; sie haben drei überprüfbare Behauptungen über Personal angegriffen, die dem Impressum widersprachen.
+
+**Die Unterscheidung, die ich hätte machen müssen:**
+
+| Legitim, bleibt | Nicht haltbar, ist raus |
+|---|---|
+| Als Unternehmen auftreten, Firmenstimme „wir", eigene Marke, UG | „Jedes Projekt bekommt ein festes Team" — eine Aussage über Personal, die nicht stimmte |
+| Einen sichtbaren Verantwortlichen nennen (alle sechs Personas wollten das) | „Am Projekt arbeitet nie nur eine Person allein" |
+| Partner projektweise dazuholen und das auch sagen | Die Prompt-Regel, eine Einzelperson aktiv zu verschleiern |
+| Echte Verfügbarkeit nennen („nächster möglicher Start: …") | Selbstgesetzte Obergrenze („höchstens X Projekte pro Monat") |
+
+**Was daraufhin geändert wurde:** dritte Hero-Säule „Ein fester Ansprechpartner" statt „Ein Kopf + AI" (stimmt heute und mit fünf Leuten); der Methodenabschnitt heißt „Verstehen und bauen in einer Hand"; Firmenstimme in FAQ, Leistungen und Methode wiederhergestellt; im Abschnitt „Wer baut das" steht jetzt Verantwortung statt Handarbeit, samt Satz zu Partnern bei größeren Vorhaben; die Kapazitätsgrenze im Buchungsformular ist durch das nächste mögliche Startdatum ersetzt; die Seite für die IT nennt den Verantwortlichen und sagt zu, die Mitarbeitenden eines Projekts vor Vertragsschluss namentlich zu benennen; der Systemprompt antwortet auf Teamfragen ehrlich ohne Zahlenangabe und darf keine Kapazitätsgrenze erfinden.
+
+**Die eine Regel, die bleibt:** Kein Satz behauptet ein bestimmtes Team, das es zum Zeitpunkt der Aussage nicht gibt. Sobald jemand mitarbeitet, darf und soll er genannt werden — dann ist es keine Behauptung mehr, sondern eine Tatsache.
+
+**Was das für die Skalierung heißt:** Die Rechnung der Gutachter galt einem *angestellten* Kopf zum damaligen Preis von 9.500 €. Mit Partnern auf Umsatzbeteiligung und ab 12.500 € rechnet sich zusätzliche Kapazität pro Projekt — das ist Dokument 06. Der Engpass, den alle fünf gefunden haben, ist der Verkauf, nicht die Kapazität. Genau deshalb gehört gar keine Kapazitätsaussage auf die Seite.
 
 ---
 

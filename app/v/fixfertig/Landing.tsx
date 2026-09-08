@@ -47,7 +47,7 @@ const euro = (n: number) => n.toLocaleString("de-DE") + " €";
 const PILLARS = [
   { icon: "pay", text: `Festpreis ab ${euro(PRICE.floor)}`, href: "#danach" },
   { icon: "check", text: "Zweite Rate erst nach Abnahme", href: "#garantie" },
-  { icon: "head", text: "Ein Kopf + AI", href: "#methode" },
+  { icon: "head", text: "Ein fester Ansprechpartner", href: "#methode" },
 ] as const;
 
 type PillarKind = (typeof PILLARS)[number]["icon"];
@@ -256,7 +256,7 @@ export default function Landing({ variant }: { variant: VariantKey }) {
           <a href="#wer" className={s.founderStrip}>
             <Avatar />
             <span>
-              <b>{SITE.founder.name}</b> baut Ihr Projekt persönlich — mit AI.
+              <b>{SITE.founder.name}</b> verantwortet Ihr Projekt persönlich — von der ersten Frage bis zur Abnahme.
               <span className={s.founderMore}>Wer ist das? ↓</span>
             </span>
           </a>
@@ -296,9 +296,9 @@ export default function Landing({ variant }: { variant: VariantKey }) {
         </section>
 
         {/* ---------- Methode ---------- */}
-        <section id="methode" className={s.promise} aria-label="Ein Kopf + AI: die Methode">
+        <section id="methode" className={s.promise} aria-label="Verstehen und bauen in einer Hand: die Methode">
           <PillarEcho n={2} />
-          <span className={s.kicker}>Ein Kopf + AI — die Methode</span>
+          <span className={s.kicker}>Verstehen und bauen in einer Hand</span>
           <h2 className={s.promiseLine}>
             In vier Wochen <LivePill />
           </h2>
@@ -369,19 +369,23 @@ export default function Landing({ variant }: { variant: VariantKey }) {
                 ))}
               </ul>
               <p className={s.whoHonest}>
-                Ich baue jedes Projekt selbst, mit AI als Bausystem. Damit
-                Sie nicht an mich gekettet sind: gängige Technik, die jeder
-                Entwickler kennt, alles dokumentiert, Code und Zugänge gehören
-                Ihnen ab Tag 1 — jeder gute Entwickler kann übernehmen. Die{" "}
-                {WARRANTY_MONTHS} Monate Gewährleistung gelten auf den abgenommenen
-                Stand — auch wenn später jemand anderes weiterbaut, solange der
-                Fehler nicht daher kommt.
+                Ihr Projekt hat einen Verantwortlichen, und das bin ich: Ich
+                führe das Gespräch, ich schneide den Umfang zu, ich stehe für das
+                Ergebnis gerade — gebaut wird mit AI als Bausystem, bei größeren
+                Vorhaben mit Partnern, die ich selbst ausgewählt habe. Was sich
+                nie ändert: eine Nummer, eine Verantwortung, keine
+                Übergabekette. Damit Sie trotzdem nicht an uns gekettet sind:
+                gängige Technik, die jeder Entwickler kennt, alles dokumentiert,
+                Code und Zugänge gehören Ihnen ab Tag 1. Die {WARRANTY_MONTHS}{" "}
+                Monate Gewährleistung gelten auf den abgenommenen Stand — auch
+                wenn später jemand anderes weiterbaut, solange der Fehler nicht
+                daher kommt.
               </p>
               <p className={s.whoLimits}>
-                <b>Was ich nicht baue:</b> sicherheitskritische Steuerungen,
-                Medizinprodukte mit Zulassung, komplette ERP-Ablösungen. Und
-                ich sage es, wenn fertige Software im Abo für Sie die bessere
-                Wahl ist.
+                <b>Was wir nicht bauen:</b> sicherheitskritische Steuerungen,
+                Medizinprodukte mit Zulassung, komplette ERP-Ablösungen. Und wir
+                sagen es, wenn fertige Software im Abo für Sie die bessere Wahl
+                ist.
               </p>
               {SITE.founder.linkedin && (
                 <a className={s.whoLink} href={SITE.founder.linkedin} rel="me noopener" target="_blank">

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { SITE } from "@/lib/config";
+import { planDates } from "@/lib/timeline";
 import { captureAttribution, sessionId, track } from "@/lib/track";
 
 /**
@@ -527,11 +528,14 @@ export default function Booking({
                 Details: <a href="/datenschutz" target="_blank" rel="noopener">Datenschutz</a>.
               </p>
 
-              {/* Ehrliche Knappheit an der Entscheidung (§2.5): Der Grund ist
-                  die Kapazität EINER Person — kein „festes Team", das es nicht
-                  gibt (Vollreview 2026-09-08). Deshalb als Zitat in Ich-Form. */}
+              {/* Knappheit ohne erfundene Obergrenze (Rücksprache 2026-09-08):
+                  Kapazität lässt sich mit Partnern erweitern, ein Startdatum
+                  nicht. Deshalb steht hier der nächste mögliche Kick-off aus
+                  lib/timeline.ts statt einer selbstgesetzten Projektgrenze. */}
               <p className="booking-scarcity">
-                <strong>{SITE.founder.name}:</strong> „Ich begleite jedes Projekt persönlich durch alle vier Wochen — deshalb starte ich höchstens ein neues pro Monat."
+                <strong>Nächster möglicher Start:</strong>{" "}
+                {new Intl.DateTimeFormat("de-DE", { weekday: "long", day: "numeric", month: "long" }).format(planDates().kickoff)}
+                {" "}— danach vier Wochen bis live.
               </p>
             </div>
           )}

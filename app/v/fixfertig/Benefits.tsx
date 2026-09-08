@@ -8,7 +8,8 @@ import s from "./styles.module.css";
  * Bildschirmdichte scharf und erbt die Farben des Skins).
  *
  * Zusagen kommen aus lib/config.ts (Gewährleistung, Abnahme, Betrieb),
- * damit Seite, Karte und AGB dasselbe versprechen. Ein Kopf, kein Plural.
+ * damit Seite, Karte und AGB dasselbe versprechen. Firmenstimme („wir"),
+ * aber keine Behauptung über Personalstärke.
  */
 
 const first = SITE.founder.name.split(" ")[0];
@@ -143,7 +144,7 @@ export default function Benefits({ echo }: { echo?: React.ReactNode }) {
           Zweite Rate erst nach Abnahme: 50 % bei Auftrag, 50 % nach
           bestandener Abnahme gegen vereinbarte Kriterien. Scheitert die
           Abnahme, behalten Sie den bis dahin gebauten Code und Ihr
-          Repository. Qualität behaupten kann jeder — ich hänge Abnahme und
+          Repository. Qualität behaupten kann jeder — wir hängen Abnahme und{" "}
           {WARRANTY_MONTHS} Monate Gewährleistung dran:
         </p>
       </div>
