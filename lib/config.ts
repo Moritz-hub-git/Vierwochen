@@ -82,36 +82,9 @@ export const WARRANTY_MONTHS = 24;
 export const ACCEPTANCE_PROMISE = "Besteht die Abnahme nicht, entfällt die zweite Rate.";
 
 
-/** Preisstufen — unverbindliche Ersteinschätzung, kein Angebot. Netto zzgl. USt. */
-export const PRICING_TIERS = [
-  {
-    id: "system",
-    name: "System",
-    range: "28.000 – 48.000 €",
-    min: 28000,
-    max: 48000,
-    description:
-      "Mehrere verbundene Prozesse, Schnittstellen zu Bestandssystemen, Rollen und Rechte, Betrieb in Ihrer Umgebung.",
-  },
-  {
-    id: "werkzeug",
-    name: "Werkzeug",
-    range: "14.000 – 24.000 €",
-    min: 14000,
-    max: 24000,
-    description:
-      "Ein Kernprozess als vollwertige Anwendung: Datenbank, Oberfläche, Anbindung an ein Bestandssystem.",
-  },
-  {
-    id: "pilot",
-    name: "Pilot",
-    range: "ab 9.500 €",
-    min: 9500,
-    max: 13000,
-    description:
-      "Ein klar umrissener Prozess, produktiv nutzbar. Der schnellste Weg, das Arbeitsmodell zu prüfen.",
-  },
-] as const;
+/* Die alten Preisstufen (System/Werkzeug/Pilot ab 9.500 €) sind gestrichen:
+   Der Preis entsteht seit dem Vollreview bottom-up aus PRICE.floor plus
+   Bausteinen (lib/dialog.ts, Abschnitt „So rechnest du den Preis"). */
 
 /**
  * Grundlage des Kostenankers (PROMPT.md §2.4). Bewusst im Code und nicht im

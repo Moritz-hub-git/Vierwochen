@@ -200,7 +200,7 @@ export const RESPONSE_SCHEMA = {
 /**
  * Preis-Korridor der Schätzung (Rücksprache 2026-08-16).
  * Untergrenze = der auf der Seite beworbene Einstiegspreis; alles darunter
- * würde dem Versprechen „Festpreis ab 9.500 €" widersprechen. Obergrenze =
+ * würde dem Versprechen „Festpreis ab 12.500 €" (PRICE.floor) widersprechen. Obergrenze =
  * was in vier Wochen realistisch entsteht; darüber muss der Umfang kleiner
  * geschnitten werden, statt den Preis zu erhöhen.
  */
