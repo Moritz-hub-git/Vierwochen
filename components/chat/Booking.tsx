@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { SITE } from "@/lib/config";
 import { captureAttribution, sessionId, track } from "@/lib/track";
 
 /**
@@ -145,6 +146,20 @@ export default function Booking({
     if (scanTimerRef.current) clearTimeout(scanTimerRef.current);
   }, []);
 
+  // Scroll-Hinweis der Tages-Leiste: aus, sobald alles sichtbar ist.
+  const daysRef = useRef<HTMLDivElement | null>(null);
+  const [daysAtEnd, setDaysAtEnd] = useState(true);
+  const checkDaysEnd = (el: HTMLElement) =>
+    setDaysAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 4);
+  useEffect(() => {
+    const el = daysRef.current;
+    if (!el) return;
+    checkDaysEnd(el);
+    const ro = new ResizeObserver(() => checkDaysEnd(el));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [days]);
+
   /** Nach gültiger E-Mail: kurz „lesen", dann Name und Firma einsetzen. */
   const autofillFrom = (value: string) => {
     if (touchedRef.current.name && touchedRef.current.company) return;
@@ -253,28 +268,38 @@ export default function Booking({
       {!days && !loadError && <p>Termine werden geladen …</p>}
 
       {days && days.length === 0 && (
-        <p>Aktuell sind keine Termine frei. Schreiben Sie mir: <a href="mailto:kontakt@vierwochen.de">kontakt@vierwochen.de</a></p>
+        <p>Aktuell sind keine Termine frei. Schreiben Sie Moritz direkt: <a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
       )}
 
       {days && days.length > 0 && (
         <>
-          {/* Schritt 1: Termin wählen — kostenlos, keine Dateneingabe. */}
-          <div className="slot-days" role="tablist" aria-label="Tag wählen">
-            {days.map((day, i) => (
-              <button
-                key={day.date}
-                type="button"
-                role="tab"
-                aria-selected={i === activeDay}
-                className={`slot-day${i === activeDay ? " active" : ""}`}
-                onClick={() => {
-                  setActiveDay(i);
-                  setSlot(null);
-                }}
-              >
-                {day.label}
-              </button>
-            ))}
+          {/* Schritt 1: Termin wählen — kostenlos, keine Dateneingabe.
+              Der Wrapper zeigt rechts einen Scroll-Hinweis, bis das Ende
+              der Leiste erreicht ist (Mobil: sonst wirken es wie 4 Tage). */}
+          <div className={`slot-days-wrap${daysAtEnd ? " at-end" : ""}`}>
+            <div
+              className="slot-days"
+              role="tablist"
+              aria-label="Tag wählen"
+              ref={daysRef}
+              onScroll={(e) => checkDaysEnd(e.currentTarget)}
+            >
+              {days.map((day, i) => (
+                <button
+                  key={day.date}
+                  type="button"
+                  role="tab"
+                  aria-selected={i === activeDay}
+                  className={`slot-day${i === activeDay ? " active" : ""}`}
+                  onClick={() => {
+                    setActiveDay(i);
+                    setSlot(null);
+                  }}
+                >
+                  {day.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="slot-times">
@@ -308,19 +333,23 @@ export default function Booking({
                 </span>
               </div>
 
-              {/* Zur gewählten Zeit gehört ein Gesprächspartner — heute
-                  immer derselbe, aber als Auswahl gerahmt statt als
-                  Fließtext, damit die Struktur trägt, sobald es mehr als
-                  einen gibt. Das Foto ist ein PLATZHALTER — bitte durch ein
-                  echtes Foto ersetzen. */}
+              {/* Zur gewählten Zeit gehört ein Gesprächspartner — ein Kopf
+                  plus AI, und genau das steht hier. Foto nur, wenn ein echtes
+                  hinterlegt ist (SITE.founder.photo); sonst Initialen. Ein
+                  gemaltes Platzhaltergesicht wirkte in den Persona-Tests wie
+                  eine Stockfoto-Agentur — also weg damit. */}
               <div className="advisor advisor-chosen" role="group" aria-label="Gesprächspartner">
-                <span className="advisor-photo">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/berater-platzhalter.svg" alt="" width={48} height={48} />
-                </span>
+                {SITE.founder.photo ? (
+                  <span className="advisor-photo">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={SITE.founder.photo} alt="" width={48} height={48} />
+                  </span>
+                ) : (
+                  <span className="advisor-photo advisor-initials" aria-hidden>{SITE.founder.initials}</span>
+                )}
                 <span className="advisor-text">
-                  <strong>Moritz Schumacher</strong>
-                  <span className="advisor-role">Ihr fester Ansprechpartner im Projekt</span>
+                  <strong>{SITE.founder.name}</strong>
+                  <span className="advisor-role">baut Ihr Projekt persönlich — mit AI</span>
                 </span>
                 <span className="advisor-picked" aria-hidden>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -330,7 +359,7 @@ export default function Booking({
               </div>
 
               <div className="field">
-                <label htmlFor="booking-email">Geschäftliche E-Mail</label>
+                <label htmlFor="booking-email">Ihre E-Mail</label>
                 <input
                   id="booking-email"
                   type="email"
@@ -491,12 +520,18 @@ export default function Booking({
                 {busy ? "Wird gebucht …" : "Termin buchen"}
               </button>
 
-              {/* Ehrliche Knappheit an der Entscheidung, nicht nur auf der Startseite (§2.5).
-                  Bewusst ohne „einer baut alles selbst" (Rücksprache 2026-08-16):
-                  Der Grund für die Knappheit ist die feste Zuteilung eines
-                  Teams je Projekt, nicht die Kapazität einer Einzelperson. */}
+              {/* Einwilligung sichtbar am Knopf, nicht nur im Datenschutztext:
+                  Wer absendet, soll wissen, was mit den Angaben passiert. */}
+              <p className="booking-consent">
+                Mit dem Absenden stimmen Sie der Speicherung Ihrer Angaben für die Terminorganisation zu.
+                Details: <a href="/datenschutz" target="_blank" rel="noopener">Datenschutz</a>.
+              </p>
+
+              {/* Ehrliche Knappheit an der Entscheidung (§2.5): Der Grund ist
+                  die Kapazität EINER Person — kein „festes Team", das es nicht
+                  gibt (Vollreview 2026-09-08). Deshalb als Zitat in Ich-Form. */}
               <p className="booking-scarcity">
-                Jedes Projekt bekommt ein festes Team für die vollen vier Wochen — deshalb starten pro Monat höchstens zwei neue.
+                <strong>{SITE.founder.name}:</strong> „Ich begleite jedes Projekt persönlich durch alle vier Wochen — deshalb starte ich höchstens zwei neue pro Monat."
               </p>
             </div>
           )}

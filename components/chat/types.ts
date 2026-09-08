@@ -17,6 +17,8 @@ export interface DialogResult {
   tier: string;
   /** Ein gerundeter Betrag („unverbindliche Preisschätzung"), keine Spanne. */
   price: number;
+  /** Herleitung: Grundprodukt + Bausteine; die Summe rechnet der Server. */
+  priceItems: { label: string; euro: number }[];
   scope: string[];
   weeks: { week: number; label: string }[];
   savings?: { personDaysPerWeek: number; quote: string; annualEuro: number; basis: string };
@@ -35,7 +37,8 @@ export interface DialogInput {
 
 export interface DialogTurn {
   reply: string;
-  phase: "question" | "result" | "reject";
+  /** followup: Nachgespräch nach dem Ergebnis — kann ein aktualisiertes result mitbringen. */
+  phase: "question" | "result" | "followup" | "reject";
   sketch: Sketch;
   result?: DialogResult;
   input?: DialogInput;

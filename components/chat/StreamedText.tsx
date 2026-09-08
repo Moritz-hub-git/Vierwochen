@@ -10,12 +10,17 @@ import { useEffect, useRef, useState } from "react";
  * Pro Bild wächst der Text um einen Bruchteil, wodurch er gleichmäßig
  * fließt, statt in Wortsprüngen zu stocken. Nur der jeweils neueste Zug
  * wird geschrieben — ältere stehen sofort vollständig da.
+ *
+ * Barrierefreiheit: Der vollständige Text steht sofort in einem
+ * unsichtbaren Span (Screenreader lesen ihn einmal am Stück); der sichtbare
+ * Text streamt daneben und ist für Hilfstechnik ausgeblendet — sonst würde
+ * jede Buchstabenänderung als neue Meldung angesagt.
  */
 
-/** Zeichen pro Sekunde — schnell genug zum Mitlesen, ruhig genug zum Sehen.
- *  War 105: Das wirkte wie hingeworfen statt wie geschrieben (Rücksprache
- *  2026-08-15). 58 liegt näher an echter Lesegeschwindigkeit. */
-const SPEED = 58;
+/** Zeichen pro Sekunde. 58 wirkte im Vollreview zu langsam — wer die
+ *  Antwort schon erfasst hat, wartet sonst auf das Ende des Schreibens.
+ *  90 liegt über der Lesegeschwindigkeit, bleibt aber sichtbar „entstehend". */
+const SPEED = 90;
 
 export default function StreamedText({
   text,
@@ -75,5 +80,14 @@ export default function StreamedText({
     return () => cancelAnimationFrame(frame);
   }, [text, animate]);
 
-  return <>{text.slice(0, Math.floor(count))}</>;
+  const shown = Math.floor(count);
+  // Fertig (oder nie animiert): schlicht der Text, ohne Doppelung.
+  if (!animate || shown >= text.length) return <>{text}</>;
+
+  return (
+    <>
+      <span className="chat-sr-only">{text}</span>
+      <span aria-hidden="true">{text.slice(0, shown)}</span>
+    </>
+  );
 }

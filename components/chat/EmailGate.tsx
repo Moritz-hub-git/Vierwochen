@@ -24,7 +24,9 @@ export default function EmailGate({
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState(false);
+  // done: null = noch nicht; true = Mail ist raus; false = Moritz reicht sie
+  // persönlich nach (kein Versand konfiguriert oder Dialog ohne Ergebnis).
+  const [done, setDone] = useState<boolean | null>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,12 +38,12 @@ export default function EmailGate({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, dialogId, sketchTitle }),
       });
-      const data = (await res.json()) as { ok: boolean; error?: string };
+      const data = (await res.json()) as { ok: boolean; sent?: boolean; error?: string };
       if (!data.ok) {
         setError(data.error ?? "Das hat nicht geklappt. Bitte prüfen Sie die Adresse.");
         return;
       }
-      setDone(true);
+      setDone(data.sent === true);
     } catch {
       setError("Keine Verbindung. Bitte versuchen Sie es erneut.");
     } finally {
@@ -49,10 +51,14 @@ export default function EmailGate({
     }
   };
 
-  if (done) {
+  // Nur versprechen, was wirklich passiert ist (Audit T4/CF-07): Die Mail ist
+  // entweder nachweislich raus — oder Moritz schickt sie selbst.
+  if (done !== null) {
     return (
-      <p className="gate-done">
-        Geht raus. Sie bekommen die Einschätzung mit der Lösungsskizze an {email}.
+      <p className="gate-done" role="status">
+        {done
+          ? `Ist unterwegs: Die Einschätzung mit Lösungsskizze und Preis-Herleitung geht an ${email}.`
+          : "Danke — Moritz schickt Ihnen die Einschätzung innerhalb eines Werktags persönlich."}
       </p>
     );
   }
@@ -69,7 +75,7 @@ export default function EmailGate({
     <form className="gate-inline" onSubmit={submit}>
       <label htmlFor="gate-email">
         Ihre geschäftliche E-Mail — Sie erhalten diese Einschätzung samt Skizze
-        schriftlich, ohne Anruf.
+        und Preis-Herleitung schriftlich, ohne Anruf.
       </label>
       <div className="gate-inline-row">
         <input

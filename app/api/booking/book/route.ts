@@ -9,11 +9,11 @@
 import { NextResponse } from "next/server";
 import { FieldValue } from "@google-cloud/firestore";
 import { bookingCalendarId, busyIntervals, createEvent, overlapsBusy } from "@/lib/calendar";
-import { BOOKING } from "@/lib/config";
+import { BOOKING, SITE } from "@/lib/config";
 import { checkBusinessEmail } from "@/lib/email";
 import { cleanAttribution, recordEvent } from "@/lib/events";
 import { firestore, safe } from "@/lib/firestore";
-import { bookingConfirmationHtml, sendMail } from "@/lib/mail";
+import { bookingConfirmationHtml, bookingMailSubject, ownerNoticeHtml, sendMail } from "@/lib/mail";
 import { clientIp } from "@/lib/ratelimit";
 import { formatBerlinDateTime, isValidSlotStart } from "@/lib/slots";
 
@@ -49,13 +49,14 @@ export async function POST(req: Request) {
   }
 
   // --- Validierung ---
-  const emailCheck = checkBusinessEmail(body.email ?? "");
+  // Nur Syntax, kein Freemail-Gate (Audit CA-H4): Wer einen Termin bucht, hat
+  // sich bereits entschieden — Gründer vor der Gründung haben keine
+  // Firmenadresse, und die soll sie nicht aussperren.
+  const emailCheck = checkBusinessEmail(body.email ?? "", { allowFreemail: true });
   if (!emailCheck.ok) {
-    // Ausweichweg statt Sackgasse: Wer keine Firmenadresse hat, soll den
-    // Termin trotzdem bekommen können — nur eben per Mail statt Formular.
     return bad(
       422,
-      "Bitte geben Sie Ihre geschäftliche E-Mail-Adresse an. Sie haben keine? Schreiben Sie an kontakt@vierwochen.de — der Termin lässt sich auch so vereinbaren."
+      `Das sieht nicht wie eine gültige E-Mail-Adresse aus. Alternativ erreichen Sie Moritz direkt unter ${SITE.email}.`
     );
   }
   const name = (body.name ?? "").trim();
@@ -109,10 +110,7 @@ export async function POST(req: Request) {
   const queueConfirmationMail = (mode: "bestätigt" | "angefragt", meetLink?: string) => {
     void sendMail({
       to: emailCheck.email,
-      subject:
-        mode === "bestätigt"
-          ? `Ihr Beratungsgespräch am ${formatBerlinDateTime(slotStartIso)} Uhr — vierwochen.de`
-          : `Ihre Terminanfrage für ${formatBerlinDateTime(slotStartIso)} Uhr — vierwochen.de`,
+      subject: bookingMailSubject(mode, formatBerlinDateTime(slotStartIso)),
       html: bookingConfirmationHtml({
         to: emailCheck.email,
         name,
@@ -125,6 +123,27 @@ export async function POST(req: Request) {
         meetLink,
       }),
     }).catch((err) => console.warn("[booking] Bestätigungsmail fehlgeschlagen:", err));
+    // Owner-Benachrichtigung: Moritz soll jede Buchung sofort im Postfach
+    // haben, auch wenn er gerade nicht in Firestore oder den Kalender schaut.
+    void sendMail({
+      to: SITE.email,
+      subject: `Neue Terminbuchung (${mode}): ${name}${company ? `, ${company}` : ""} — ${formatBerlinDateTime(slotStartIso)} Uhr`,
+      html: ownerNoticeHtml({
+        heading: mode === "bestätigt" ? "Neue Terminbuchung" : "Neue Terminanfrage",
+        rows: [
+          ["Termin", `${formatBerlinDateTime(slotStartIso)} Uhr`],
+          ["Kanal", channel === "video" ? "Online-Call" : `Telefon: ${phone}`],
+          ["Name", name],
+          ["E-Mail", `${emailCheck.email}${emailCheck.freemail ? " (Freemail)" : ""}`],
+          ["Unternehmen", company || "—"],
+          ["Größe / Branche", [companySize, industry].filter(Boolean).join(" / ") || "—"],
+          ["Fall", caseSummary || "—"],
+          ["Agenda", agenda || "—"],
+          ["Dialog-ID", typeof body.dialogId === "string" ? body.dialogId.slice(0, 64) : "—"],
+          ["Herkunft", attr ? JSON.stringify(attr) : "—"],
+        ],
+      }),
+    }).catch((err) => console.warn("[booking] Owner-Benachrichtigung fehlgeschlagen:", err));
   };
 
   const requestMode = !bookingCalendarId();
@@ -144,6 +163,7 @@ export async function POST(req: Request) {
           slotEnd,
           name,
           email: emailCheck.email,
+          freemail: emailCheck.freemail,
           company: company || null,
           companySize: companySize || null,
           industry: industry || null,
