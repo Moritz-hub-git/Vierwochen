@@ -1,9 +1,10 @@
 import s from "./styles.module.css";
 
 /**
- * Platzhalter-Visuals für die Showcases — abstrahierte Oberflächen, kein
- * echtes Projekt. Sobald echte Screenshots freigegeben sind, werden diese
- * drei Komponenten durch <Image> ersetzt; die Rahmen bleiben.
+ * Beispiel-Visuals für die Showcases — abstrahierte Oberflächen, als
+ * „Beispiel" gekennzeichnet, kein echtes Projekt. Sobald echte Screenshots
+ * freigegeben sind, werden diese Komponenten durch <Image> ersetzt; die
+ * Rahmen bleiben.
  */
 
 function Frame({ children }: { children: React.ReactNode }) {

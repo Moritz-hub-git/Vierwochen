@@ -7,6 +7,10 @@ import s from "./styles.module.css";
  * 1. Weniger Köpfe, kürzerer Weg → schneller.
  * 2. Wer die Anforderung bespricht, schreibt auch den Code → an der
  *    Schnittstelle geht nichts verloren, das Ergebnis ist näher dran.
+ *
+ * Ehrlich im Singular (Vollreview 2026-09-08): ein Kopf baut und
+ * verantwortet, AI verstärkt. Kein „Team", kein Plural „Entwickler" —
+ * das dreht die Fassung vom Vortag bewusst zurück.
  */
 
 const OLD_CHAIN = [
@@ -119,9 +123,9 @@ export function FormelVisual() {
         </span>
         <div className={s.formulaCard}>
           <span className={s.formulaNum}>1</span>
-          <b>Die, die bauen</b>
+          <b>Der, der baut</b>
           <span>
-            Businessverständnis und Code in einem Team — und der Blick aus
+            Businessverständnis und Code in einem Kopf — und der Blick aus
             vielen Produkten dafür, was benutzt wird und was nicht.
           </span>
         </div>
@@ -146,12 +150,12 @@ export function FormelVisual() {
   );
 }
 
-/* ---------- 3 · „Ein Team": Venn aus Geschäft und Code, AI als Ring ---------- */
+/* ---------- 3 · „Ein Kopf": Venn aus Geschäft und Code, AI als Ring ---------- */
 
 export function KernVisual() {
   return (
     <div className={s.vennWrap}>
-      <svg viewBox="0 0 640 400" className={s.venn} role="img" aria-label="Businessverständnis und Code überschneiden sich in einem Team, AI verstärkt es">
+      <svg viewBox="0 0 640 400" className={s.venn} role="img" aria-label="Businessverständnis und Code überschneiden sich in einem Kopf, AI verstärkt ihn">
         {/* AI-Orbit */}
         <ellipse cx="320" cy="205" rx="292" ry="168" fill="none" stroke="#4f46e5" strokeWidth="1.6" strokeDasharray="3 7" opacity="0.5" />
         <g transform="translate(320 22)">
@@ -177,7 +181,7 @@ export function KernVisual() {
           <circle r="56" fill="none" stroke="#181a33" strokeWidth="2" />
           <circle cx="0" cy="-22" r="8" fill="none" stroke="#181a33" strokeWidth="2.2" />
           <path d="M-13 8c2-10 6.5-14 13-14s11 4 13 14" fill="none" stroke="#181a33" strokeWidth="2.2" strokeLinecap="round" />
-          <text x="0" y="30" textAnchor="middle" fontSize="15" fontWeight="800" fill="#181a33" fontFamily="inherit">Ein Team</text>
+          <text x="0" y="30" textAnchor="middle" fontSize="15" fontWeight="800" fill="#181a33" fontFamily="inherit">Ein Kopf</text>
         </g>
         <g transform="translate(320 356)">
           <rect x="-138" y="-16" width="276" height="30" rx="15" fill="#ffffff" opacity="0.9" />
@@ -192,8 +196,9 @@ export function KernVisual() {
           kostet. Hier gibt es nichts zu übersetzen.
         </p>
         <p>
-          <b>AI ist der Verstärker.</b> Sie gibt dem Team hundert Hände:
-          bauen, testen, wiederholen — wir prüfen und verantworten jede Zeile.
+          <b>AI ist der Verstärker.</b> Sie gibt einem Kopf hundert Hände:
+          bauen, testen, wiederholen — geprüft und verantwortet von dem, der
+          sie schreibt.
         </p>
         <p className={s.vennWide}>
           <b>Der neue Engpass.</b> AI hat das Bauen billig gemacht —
@@ -241,7 +246,7 @@ export function BentoVisual() {
       <div className={`${s.mTile} ${s.mTileLime}`}>
         <span className={s.mBig}>Senior</span>
         <b>Qualität</b>
-        <p>Jede Zeile geprüft von erfahrenen Entwicklern.</p>
+        <p>Jede Zeile geprüft von dem, der sie verantwortet.</p>
       </div>
       <div className={`${s.mTile} ${s.mTileHalf} ${s.mTileInk}`}>
         <span className={s.mBig}>Was?</span>
@@ -287,7 +292,7 @@ export function PlanVisual() {
           <span className={s.bpLine} aria-hidden />
           <span className={`${s.bpNodeNew} ${s.bpNodeCore}`}>
             Gespräch&nbsp;=&nbsp;Code
-            <i>✦ AI baut · wir verantworten</i>
+            <i>✦ AI baut · ein Kopf verantwortet</i>
           </span>
           <span className={s.bpLine} aria-hidden />
           <span className={`${s.bpNodeNew} ${s.bpNodeLive}`}>

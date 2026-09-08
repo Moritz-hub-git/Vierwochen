@@ -1,3 +1,4 @@
+import { PRICE } from "@/lib/config";
 import s from "./styles.module.css";
 
 /**
@@ -5,7 +6,13 @@ import s from "./styles.module.css";
  * dargestellt: (1) Änderungen bleiben nach dem Go-live so schnell wie der
  * Anfang (kein Ticket-Ping-Pong), (2) durch den Festpreis werden Probleme
  * wirtschaftlich, die für klassische Projekte immer zu klein waren.
+ *
+ * Ehrlich im Singular: „der Kopf, der gebaut hat" — hier ist das ein
+ * Vorteil, nichts muss neu verstanden werden. Und „innerhalb weniger Tage"
+ * statt „ein Tag": der Gründer ist nicht rund um die Uhr verfügbar.
  */
+
+const floor = `${PRICE.floor.toLocaleString("de-DE")} €`;
 
 function MiniLive() {
   return (
@@ -41,11 +48,11 @@ export function AfterWege() {
           <span className={s.chainYou}>Ihr Anruf</span>
           <span className={s.chainArrow} aria-hidden>→</span>
           <span className={s.chainProduct}>
-            meist am nächsten Tag <MiniLive />
+            meist innerhalb weniger Tage <MiniLive />
           </span>
         </div>
         <p className={s.wayNote}>
-          Das Team, das Ihr System gebaut hat, plus AI — nichts muss neu
+          Der Kopf, der Ihr System gebaut hat, plus AI — nichts muss neu
           verstanden werden. Darum lohnt Software jetzt auch für Probleme, die
           früher „zu klein" dafür waren.
         </p>
@@ -63,7 +70,7 @@ export function AfterFormel() {
         Änderung&nbsp;=&nbsp;Ticket&nbsp;+&nbsp;Warteschlange&nbsp;+&nbsp;3&nbsp;Wochen&nbsp;+&nbsp;Rechnung
       </p>
       <p className={`${s.eqNew} ${s.eqSmall}`}>
-        Änderung&nbsp;=&nbsp;ein&nbsp;Anruf&nbsp;+&nbsp;<span className={s.eqResult}>meist&nbsp;ein&nbsp;Tag</span>
+        Änderung&nbsp;=&nbsp;ein&nbsp;Anruf&nbsp;+&nbsp;<span className={s.eqResult}>meist&nbsp;wenige&nbsp;Tage</span>
       </p>
       <p className={`${s.eqNew} ${s.eqSmall}`}>
         Lohnt&nbsp;sich&nbsp;=&nbsp;ab&nbsp;dem&nbsp;Problem,&nbsp;das&nbsp;
@@ -84,12 +91,13 @@ export function AfterKern() {
   return (
     <div className={s.vennPoints}>
       <p>
-        <b>Danach bleibt es schnell.</b> Das Team, das Ihr System gebaut hat,
+        <b>Danach bleibt es schnell.</b> Der Kopf, der Ihr System gebaut hat,
         kennt es — und Ihr Geschäft. Eine Anpassung ist ein Anruf und meist
-        ein Tag, kein Ticket und drei Wochen. Auf Wunsch inklusive Betrieb.
+        innerhalb weniger Tage erledigt, kein Ticket und drei Wochen. Auf
+        Wunsch inklusive Betrieb.
       </p>
       <p>
-        <b>Endlich wirtschaftlich.</b> Ab 9.500 € Festpreis lohnt Software
+        <b>Endlich wirtschaftlich.</b> Ab {floor} Festpreis lohnt Software
         auch für das Problem, das „nur" zwei Stunden pro Woche frisst — für
         das es nie ein klassisches Projekt gegeben hätte.
       </p>
@@ -106,12 +114,12 @@ export function AfterBento() {
         <span className={s.mBig}>1 Anruf</span>
         <b>statt Ticket &amp; drei Wochen</b>
         <p>
-          Änderungen bleiben nach dem Go-live so schnell wie der Anfang — das
-          Team, das gebaut hat, plus AI, nichts muss neu verstanden werden.
+          Änderungen bleiben nach dem Go-live so schnell wie der Anfang — der
+          Kopf, der gebaut hat, plus AI, nichts muss neu verstanden werden.
         </p>
       </div>
       <div className={s.mTile}>
-        <span className={s.mBig}>ab 9.500 €</span>
+        <span className={s.mBig}>ab {floor}</span>
         <b>Probleme, die „zu klein" waren</b>
         <p>
           Zum Festpreis lohnt Software schon ab dem Ablauf, der zwei Stunden
@@ -148,7 +156,7 @@ export function AfterPlan() {
           <span className={s.bpNodeNew}>Ihr Anruf</span>
           <span className={s.bpLine} aria-hidden />
           <span className={`${s.bpNodeNew} ${s.bpNodeLive}`}>
-            meist am nächsten Tag <MiniLive />
+            meist innerhalb weniger Tage <MiniLive />
           </span>
         </div>
       </div>

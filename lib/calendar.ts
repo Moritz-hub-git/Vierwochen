@@ -10,7 +10,7 @@
  *   diese Datei wird dann gar nicht erst aufgerufen.
  */
 import { GoogleAuth } from "google-auth-library";
-import { BOOKING, env } from "./config";
+import { BOOKING, SITE, env } from "./config";
 
 const auth = new GoogleAuth({
   scopes: [
@@ -91,8 +91,8 @@ export async function createEvent(input: EventInput): Promise<CreatedEvent> {
     .join("\n");
 
   const baseEvent = {
-    summary: `Erstgespräch vierwochen.de — ${input.name}`,
-    description: `Erstgespräch (30 Minuten), gebucht über vierwochen.de.\n\n${contactBlock}`,
+    summary: `Beratungsgespräch ${SITE.name} — ${input.name}`,
+    description: `Beratungsgespräch (${BOOKING.durationMinutes} Minuten), gebucht über ${SITE.domain}.\n\n${contactBlock}`,
     start: { dateTime: input.startUtc, timeZone: "UTC" },
     end: { dateTime: input.endUtc, timeZone: "UTC" },
     reminders: { useDefault: true },

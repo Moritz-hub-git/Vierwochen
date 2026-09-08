@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { SITE } from "@/lib/config";
 import Landing from "../fixfertig/Landing";
 
 export const metadata: Metadata = {
-  title: "neoapp.studio — Das Featureboard",
+  title: `${SITE.name} — Variante: Das Featureboard`,
 };
 
 export default function Page() {

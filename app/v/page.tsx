@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SITE } from "@/lib/config";
 
 /**
- * Vergleichsübersicht: fünf Fassungen derselben neoapp.studio-Seite —
+ * Interne Vergleichsübersicht: fünf Fassungen derselben Landing —
  * gleicher Hero, gleiche Showcases, gleicher Zeitplan; unterschiedlich
  * sind nur der Neugier-Haken und die grafische Darstellung der
- * 2+AI-Methode. Zum Durchklicken und Entscheiden.
+ * Methode. Nicht verlinkt, nicht indexiert (siehe layout.tsx) — zum
+ * Durchklicken und Entscheiden, nicht für Kunden.
  */
 
-export const metadata: Metadata = { title: "Methodik-Varianten — neoapp.studio" };
+export const metadata: Metadata = { title: `${SITE.name} — Varianten (intern)` };
 
 const VARIANTS = [
   {
@@ -23,8 +25,8 @@ const VARIANTS = [
   },
   {
     href: "/v/kern",
-    name: "Ein Team",
-    idea: "Venn-Diagramm: „Ihr Geschäft“ und „Der Code“ überschneiden sich in einem Team, AI als Orbit-Ring darum. Die konzeptionell klarste Darstellung des Schnittstellen-Arguments.",
+    name: "Ein Kopf",
+    idea: "Venn-Diagramm: „Ihr Geschäft“ und „Der Code“ überschneiden sich in einem Kopf, AI als Orbit-Ring darum. Die konzeptionell klarste Darstellung des Schnittstellen-Arguments.",
   },
   {
     href: "/v/bento",
@@ -41,12 +43,15 @@ const VARIANTS = [
 export default function VariantsIndex() {
   return (
     <main className="container legal">
+      <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "0.5rem" }}>
+        Interne Vergleichsseite — nicht verlinkt, nicht indexiert.
+      </p>
       <h1>Fünf Fassungen der Methodik</h1>
       <p>
         Gleiche Seite, gleicher Hero, gleicher Zeitplan — unterschiedlich sind
         der Neugier-Haken unter dem Knopf und die grafische Darstellung der
-        2+AI-Methode. Die Hauptadresse <Link href="/v/fixfertig">/v/fixfertig</Link>{" "}
-        zeigt die Empfehlung („Die zwei Wege").
+        Methode. Die <Link href="/">Hauptadresse</Link> zeigt die Empfehlung
+        („Die zwei Wege").
       </p>
 
       <div style={{ display: "grid", gap: "1rem", marginTop: "2rem" }}>

@@ -1,20 +1,42 @@
+import Link from "next/link";
+import { ACCEPTANCE_PROMISE, PRICE, SITE, WARRANTY_MONTHS } from "@/lib/config";
 import s from "./styles.module.css";
 
 /**
  * Die berechtigten Fragen — bewusst die unbequemen zuerst (Ausfallrisiko,
- * „warum ohne großes Team"). Wer den Einwand selbst ausspricht
- * und ehrlich beantwortet, wirkt souveräner als jede Behauptung.
+ * „warum nur ein Kopf", „wo sind die Referenzen"). Wer den Einwand selbst
+ * ausspricht und ehrlich beantwortet, wirkt souveräner als jede Behauptung.
+ *
+ * Ehrlichkeitsregel (Vollreview 2026-09-08): ein Kopf + AI. Kein „Team",
+ * kein Plural „Entwickler". Wo es um den Menschen geht, heißt er Moritz.
+ * Zahlen und Zusagen kommen aus lib/config.ts, damit sie überall gleich sind.
+ *
  * Natives <details>: kein JavaScript, tastaturbedienbar, indexierbar.
  */
 
-const FAQS = [
+const first = SITE.founder.name.split(" ")[0];
+const floor = `${PRICE.floor.toLocaleString("de-DE")} €`;
+
+const FAQS: { q: string; a: React.ReactNode }[] = [
   {
     q: "Was, wenn jemand bei Ihnen ausfällt?",
-    a: "Am Projekt arbeitet nie nur eine Person allein, und wir bauen auf einem verbreiteten Standard-Stack, dokumentieren alles, und der Code gehört vom ersten Tag Ihnen. Jeder gute Entwickler kann übernehmen — Sie sind an niemanden gekettet. Die zwölf Monate Garantie gelten unabhängig davon.",
+    a: `Hier baut ein Kopf — ${first}. Die Absicherung ist deshalb nicht personell, sondern mechanisch: verbreiteter Standard-Stack, alles dokumentiert, Code und Zugänge liegen ab Tag 1 bei Ihnen. Jeder gute Entwickler kann übernehmen — Sie sind an niemanden gekettet. Die ${WARRANTY_MONTHS} Monate Gewährleistung gelten unabhängig davon.`,
   },
   {
     q: "Warum geht das schneller als bei einer großen Agentur?",
-    a: "„Besser“ behaupten wir nicht — passgenauer. Bei uns sprechen Sie mit den Leuten, die auch bauen: keine Übersetzung von Ihnen über Projektleitung und Anforderungsdokument bis zum Entwicklerteam, bei der die Hälfte der Absicht verloren geht. Und für die Qualität verlassen Sie sich nicht auf unser Wort: Festpreis, Abnahme nach vereinbarten Kriterien, Garantie — wir haften dafür.",
+    a: `Weil es keine Übergabekette gibt. Der Mensch, der Ihren Ablauf versteht, ist derselbe, der ihn baut — ${first}, mit AI als hundert Händen. Keine Übersetzung von Ihnen über Projektleitung und Anforderungsdokument bis zur Entwicklung, bei der die Hälfte der Absicht verloren geht. „Besser“ behaupten wir nicht — passgenauer. Und für die Qualität verlassen Sie sich nicht auf unser Wort: Festpreis, Abnahme nach vereinbarten Kriterien, ${WARRANTY_MONTHS} Monate Gewährleistung.`,
+  },
+  {
+    q: "Haben Sie Referenzen?",
+    a: (
+      <>
+        Ehrlich: Mit dieser Methode sind wir neu am Markt — deshalb Festpreis,
+        und die zweite Rate erst nach Abnahme. Belegbar ist die Herkunft von{" "}
+        {SITE.founder.name}: {SITE.founder.facts.join(". ")}. Und diese Website
+        samt KI-Dialog ist selbst mit der Methode gebaut — Sie benutzen gerade
+        das Beispiel.
+      </>
+    ),
   },
   {
     q: "Woher wissen Sie, was wir wirklich brauchen?",
@@ -22,15 +44,27 @@ const FAQS = [
   },
   {
     q: "Was, wenn das Ergebnis nicht passt?",
-    a: "Dann zahlen Sie die zweite Hälfte nicht. Die Abnahmekriterien legen wir in Woche 1 gemeinsam fest — Sie messen uns an dem, was vereinbart ist, nicht an dem, was wir hineininterpretiert haben.",
+    a: `${ACCEPTANCE_PROMISE} Die Abnahmekriterien legen wir in Woche 1 gemeinsam fest — Sie messen uns an dem, was vereinbart ist, nicht an dem, was wir hineininterpretiert haben.`,
+  },
+  {
+    q: "Wann ist fertige Software die bessere Wahl?",
+    a: "Bei Standardproblemen: Buchhaltung, Zeiterfassung, ein CRM ohne Besonderheiten. Dafür gibt es gute Produkte für wenige Euro im Monat, und wir raten Ihnen ehrlich dazu. Individuell lohnt sich erst, wenn Ihr Ablauf anders ist als der Standard — und Sie sich sonst dem Werkzeug anpassen müssten statt umgekehrt.",
   },
   {
     q: "Was passiert nach den vier Wochen?",
-    a: "Der Teil, den die meisten unterschätzen: Änderungen bleiben schnell. Das Team, das Ihr System gebaut hat und Ihr Geschäft kennt, plus AI — eine Anpassung ist ein Anruf und meist ein Tag, kein Ticket und drei Wochen. Auf Wunsch übernehmen wir Betrieb und Wartung gleich mit.",
+    a: `Der Teil, den die meisten unterschätzen: Änderungen bleiben schnell. Der Kopf, der Ihr System gebaut hat und Ihr Geschäft kennt, plus AI — eine Anpassung ist ein Anruf und meist innerhalb weniger Tage erledigt, kein Ticket und drei Wochen. Auf Wunsch übernehmen wir Betrieb und Wartung gleich mit, monatlich kündbar.`,
   },
   {
     q: "Ist AI-geschriebener Code sicher und wartbar?",
-    a: "AI schreibt schnell, aber sie entscheidet nichts. Architektur, Prüfung und Verantwortung liegen bei erfahrenen Entwicklern — Standard-Stack, Tests, Dokumentation, gebaut, damit auch andere jederzeit damit arbeiten können.",
+    a: (
+      <>
+        AI schreibt schnell, aber sie entscheidet nichts. Architektur, Prüfung
+        und Verantwortung liegen bei {first} — Standard-Stack, Tests,
+        Dokumentation, gebaut, damit auch andere jederzeit damit arbeiten
+        können. Was Ihre IT dazu wissen will (Hosting, Daten, Zugänge), steht
+        auf der <Link href="/it">Seite für die IT</Link>.
+      </>
+    ),
   },
   {
     q: "Für wen ist das nichts?",
@@ -38,7 +72,7 @@ const FAQS = [
   },
   {
     q: "Was kostet es?",
-    a: "Ab 9.500 €, als Festpreis mit Abnahmetermin im Angebot. Damit werden auch Probleme wirtschaftlich, die für klassische Projekte immer zu klein waren. Die Preiseinschätzung unten ist kostenlos und dauert zehn Sekunden.",
+    a: `Ab ${floor} als Festpreis mit Abnahmetermin im Angebot, ${PRICE.vatNote}. Damit werden auch Probleme wirtschaftlich, die für klassische Projekte immer zu klein waren. Die Preiseinschätzung unten: 3 Fragen, eine Minute.`,
   },
 ];
 

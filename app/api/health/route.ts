@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { VERTEX } from "@/lib/config";
+import { SITE, VERTEX } from "@/lib/config";
 import { checkMinuteLimit, clientIp } from "@/lib/ratelimit";
 import { probeModel } from "@/lib/vertex";
 
@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   const base = {
     ok: true,
-    service: "vierwochen",
+    service: SITE.name,
     vertexConfigured: Boolean(VERTEX.project),
     model: VERTEX.model,
     location: VERTEX.location,

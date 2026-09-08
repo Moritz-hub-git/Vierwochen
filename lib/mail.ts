@@ -8,7 +8,7 @@
  * MAIL_SENDER über die Gmail API.
  *
  * Voraussetzungen (einmalig, außerhalb dieses Codes):
- *  1. MAIL_SENDER als Umgebungsvariable setzen (z. B. kontakt@vierwochen.de).
+ *  1. MAIL_SENDER als Umgebungsvariable setzen (z. B. SITE.email aus lib/config.ts).
  *  2. Dem Service-Account die Rolle „Service Account Token Creator" auf sich
  *     selbst geben (für signJwt).
  *  3. In der Workspace-Admin-Konsole der Client-ID des Service-Accounts den
@@ -18,7 +18,7 @@
  * die Buchung selbst darf daran nie scheitern (Funnel bricht nie).
  */
 import { GoogleAuth } from "google-auth-library";
-import { env } from "./config";
+import { SITE, env } from "./config";
 import { formatBerlinDateTime } from "./slots";
 
 const auth = new GoogleAuth({
@@ -103,7 +103,7 @@ export async function sendMail(input: MailInput): Promise<boolean> {
 
   try {
     const mime = [
-      `From: vierwochen.de <${sender}>`,
+      `From: ${SITE.name} <${sender}>`,
       `To: ${input.to}`,
       `Bcc: ${sender}`,
       `Subject: ${encodeSubject(input.subject)}`,
@@ -133,6 +133,14 @@ export async function sendMail(input: MailInput): Promise<boolean> {
   }
 }
 
+/** Betreff der Bestätigungsmail — Marke aus SITE, damit Mail und Seite
+ *  denselben Namen tragen. `when` ist der bereits formatierte Termin. */
+export function bookingMailSubject(mode: "bestätigt" | "angefragt", when: string): string {
+  return mode === "bestätigt"
+    ? `Ihr Beratungsgespräch am ${when} Uhr — ${SITE.name}`
+    : `Ihre Terminanfrage für ${when} Uhr — ${SITE.name}`;
+}
+
 export interface BookingMailInput {
   to: string;
   name: string;
@@ -145,7 +153,9 @@ export interface BookingMailInput {
   meetLink?: string;
 }
 
-/** Bestätigungsmail im Markenlook — bewusst schlicht, tabellenbasiert, ohne Bilder. */
+/** Bestätigungsmail im Markenlook (Ink/Indigo wie die Seite) — bewusst
+ *  schlicht, tabellenbasiert, ohne Bilder. „Moritz liest … persönlich" bleibt:
+ *  Es ist wahr, und es ist der Grund, warum das Gespräch kurz sein darf. */
 export function bookingConfirmationHtml(input: BookingMailInput): string {
   const when = `${formatBerlinDateTime(input.slotStartIso)} Uhr`;
   const kanal = input.channel === "video" ? "Online-Call" : "Telefon";
@@ -154,39 +164,179 @@ export function bookingConfirmationHtml(input: BookingMailInput): string {
       ? "Ihr Termin steht. Die Kalendereinladung kommt separat."
       : "Ihre Anfrage ist eingegangen — Sie erhalten kurzfristig die persönliche Bestätigung.";
   const row = (label: string, value: string) =>
-    `<tr><td style="padding:6px 14px 6px 0;color:#5c6a66;font-size:14px;white-space:nowrap;vertical-align:top">${label}</td><td style="padding:6px 0;color:#15201d;font-size:14px">${value}</td></tr>`;
+    `<tr><td style="padding:6px 14px 6px 0;color:#6a6d8c;font-size:14px;white-space:nowrap;vertical-align:top">${label}</td><td style="padding:6px 0;color:#181a33;font-size:14px">${value}</td></tr>`;
 
-  return `<!doctype html><html lang="de"><body style="margin:0;padding:0;background:#f4f6f5">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f5;padding:32px 12px"><tr><td align="center">
+  return `<!doctype html><html lang="de"><body style="margin:0;padding:0;background:#f3f4fd">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4fd;padding:32px 12px"><tr><td align="center">
 <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border-radius:14px;overflow:hidden;font-family:'Segoe UI',system-ui,-apple-system,sans-serif">
-<tr><td style="background:#0d7a68;padding:22px 32px">
-  <span style="color:#ffffff;font-size:19px;font-weight:700;letter-spacing:0.01em">vierwochen<span style="opacity:0.75">.</span></span>
+<tr><td style="background:#ffffff;padding:22px 32px 0">
+  <span style="color:#181a33;font-size:19px;font-weight:800;letter-spacing:-0.02em">${SITE.markA}<span style="color:#4f46e5">.</span>${SITE.markB}</span>
 </td></tr>
 <tr><td style="padding:30px 32px 8px">
-  <h1 style="margin:0 0 10px;font-size:21px;color:#15201d">${input.mode === "bestätigt" ? "Ihr Beratungsgespräch ist gebucht" : "Ihre Terminanfrage ist da"}</h1>
-  <p style="margin:0 0 18px;font-size:14.5px;line-height:1.6;color:#3c4a46">Guten Tag${input.name ? ` ${input.name}` : ""}, ${statusLine}</p>
-  <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-top:1px solid #e4e9e7;border-bottom:1px solid #e4e9e7;padding:4px 0">
+  <h1 style="margin:0 0 10px;font-size:21px;color:#181a33">${input.mode === "bestätigt" ? "Ihr Beratungsgespräch ist gebucht" : "Ihre Terminanfrage ist da"}</h1>
+  <p style="margin:0 0 18px;font-size:14.5px;line-height:1.6;color:#3c3f5e">Guten Tag${input.name ? ` ${input.name}` : ""}, ${statusLine}</p>
+  <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-top:1px solid #e6e8f8;border-bottom:1px solid #e6e8f8;padding:4px 0">
     ${row("Termin", when)}
     ${row("Dauer", "30 Minuten, kostenlos & unverbindlich")}
     ${row("Kanal", kanal)}
-    ${input.meetLink ? row("Zugang", `<a href="${input.meetLink}" style="color:#0d7a68">${input.meetLink}</a>`) : ""}
+    ${input.meetLink ? row("Zugang", `<a href="${input.meetLink}" style="color:#4f46e5">${input.meetLink}</a>`) : ""}
     ${input.company ? row("Unternehmen", input.company) : ""}
     ${input.caseTitle ? row("Ihr Fall", input.caseTitle) : ""}
     ${input.agenda ? row("Agenda", input.agenda) : ""}
   </table>
-  <p style="margin:18px 0 6px;font-size:14.5px;line-height:1.6;color:#3c4a46">
+  <p style="margin:18px 0 6px;font-size:14.5px;line-height:1.6;color:#3c3f5e">
     Moritz liest Ihre Lösungsskizze vor dem Termin persönlich durch — das Gespräch
     startet direkt bei Ihren offenen Punkten, nicht bei einer Präsentation.
     Danach erhalten Sie das verbindliche Festpreis-Angebot.
   </p>
-  <p style="margin:14px 0 0;font-size:13px;color:#5c6a66">
+  <p style="margin:14px 0 0;font-size:13px;color:#6a6d8c">
     Termin verschieben oder absagen? Antworten Sie einfach auf diese E-Mail.
   </p>
 </td></tr>
 <tr><td style="padding:22px 32px 28px">
-  <p style="margin:0;font-size:12px;color:#8a938f;border-top:1px solid #e4e9e7;padding-top:16px">
-    vierwochen.de · Individualsoftware in vier Wochen zum Festpreis<br>
+  <p style="margin:0;font-size:12px;color:#6a6d8c;border-top:1px solid #e6e8f8;padding-top:16px">
+    ${SITE.name} · ${SITE.claim}<br>
     Diese Nachricht wurde automatisch nach Ihrer Buchung versendet.
+  </p>
+</td></tr>
+</table></td></tr></table></body></html>`;
+}
+
+/** Zeilen einer Benachrichtigung: [Bezeichnung, Wert]. */
+export interface OwnerNoticeInput {
+  heading: string;
+  rows: [string, string][];
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/**
+ * Interne Benachrichtigung an den Gründer (neue Buchung, neue Anfrage).
+ * Nüchtern und tabellarisch — sie wird auf dem Telefon gelesen. Werte
+ * stammen aus Nutzereingaben und werden deshalb escaped.
+ */
+export function ownerNoticeHtml(input: OwnerNoticeInput): string {
+  const rows = input.rows
+    .map(
+      ([label, value]) =>
+        `<tr><td style="padding:6px 14px 6px 0;color:#6a6d8c;font-size:14px;white-space:nowrap;vertical-align:top">${escapeHtml(label)}</td><td style="padding:6px 0;color:#181a33;font-size:14px;white-space:pre-wrap">${escapeHtml(value)}</td></tr>`
+    )
+    .join("");
+  return `<!doctype html><html lang="de"><body style="margin:0;padding:24px 12px;background:#f3f4fd;font-family:'Segoe UI',system-ui,-apple-system,sans-serif">
+<table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;margin:0 auto;background:#ffffff;border-radius:14px;padding:24px 28px">
+<tr><td>
+  <span style="color:#181a33;font-size:15px;font-weight:800;letter-spacing:-0.02em">${SITE.markA}<span style="color:#4f46e5">.</span>${SITE.markB}</span>
+  <h1 style="margin:14px 0 10px;font-size:19px;color:#181a33">${escapeHtml(input.heading)}</h1>
+  <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-top:1px solid #e6e8f8;padding-top:4px">${rows}</table>
+</td></tr>
+</table></body></html>`;
+}
+
+/* ---------- Lead-Mail: die Einschätzung, die das Gate verspricht ----------
+   (Audit T4/CF-07): „Sie bekommen die Einschätzung mit der Lösungsskizze" war
+   ein leeres Versprechen — jetzt geht sie wirklich raus. Reine Funktionen,
+   der Versand bleibt sendMail(). Zahlen kommen fertig gerechnet vom Server
+   (dialog.ts), hier wird nur formatiert. */
+
+// Eigener Import im eigenen Abschnitt, damit die Kopfzeilen der Datei
+// (parallel in Bearbeitung) unangetastet bleiben.
+import { ACCEPTANCE_PROMISE as ACCEPTANCE } from "./config";
+
+/** Kurzform von escapeHtml (oben) — Modell- und Nutzertext landet in der Mail. */
+const esc = escapeHtml;
+
+const euro = (n: number) => `${n.toLocaleString("de-DE")} €`;
+
+export interface LeadSketchMailInput {
+  to: string;
+  title: string;
+  steps: { label: string; automation: string }[];
+  value: string[];
+  open: string[];
+  assumptions: string[];
+  price: number;
+  priceItems: { label: string; euro: number }[];
+  weeks: { week: number; label: string }[];
+  /** Absolute URL zur Terminseite. */
+  bookingUrl: string;
+}
+
+export function leadSketchSubject(title: string): string {
+  return `Ihre Einschätzung: ${title} — ${SITE.name}`;
+}
+
+/** Die Einschätzung als Mail: Skizze, Preis mit Herleitung, Zeitplan, Buchungslink. */
+export function leadSketchHtml(input: LeadSketchMailInput): string {
+  const li = (items: string[]) => items.map((v) => `<li style="margin:0 0 6px">${esc(v)}</li>`).join("");
+  const h2 = (t: string) =>
+    `<h2 style="margin:22px 0 8px;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#4f46e5">${t}</h2>`;
+  const steps = input.steps
+    .map(
+      (s, i) =>
+        `<tr><td style="padding:5px 10px 5px 0;color:#6a6d8c;font-size:14px;vertical-align:top;white-space:nowrap">${i + 1}.</td>` +
+        `<td style="padding:5px 0;color:#181a33;font-size:14px">${esc(s.label)} <span style="color:#6a6d8c;font-size:12px">· ${esc(s.automation)}</span></td></tr>`
+    )
+    .join("");
+  const items = input.priceItems
+    .map(
+      (it) =>
+        `<tr><td style="padding:5px 10px 5px 0;color:#3c3f5e;font-size:14px">${esc(it.label)}</td>` +
+        `<td align="right" style="padding:5px 0;color:#181a33;font-size:14px;white-space:nowrap">${euro(it.euro)}</td></tr>`
+    )
+    .join("");
+  const weeks = input.weeks
+    .map(
+      (w) =>
+        `<tr><td style="padding:5px 10px 5px 0;color:#6a6d8c;font-size:14px;white-space:nowrap;vertical-align:top">Woche ${w.week}</td>` +
+        `<td style="padding:5px 0;color:#181a33;font-size:14px">${esc(w.label)}</td></tr>`
+    )
+    .join("");
+
+  return `<!doctype html><html lang="de"><body style="margin:0;padding:0;background:#f3f4fd">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4fd;padding:32px 12px"><tr><td align="center">
+<table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border-radius:14px;overflow:hidden;font-family:'Segoe UI',system-ui,-apple-system,sans-serif">
+<tr><td style="padding:22px 32px 0">
+  <span style="color:#181a33;font-size:19px;font-weight:800;letter-spacing:-0.02em">${SITE.markA}<span style="color:#4f46e5">.</span>${SITE.markB}</span>
+</td></tr>
+<tr><td style="padding:26px 32px 8px">
+  <p style="margin:0 0 6px;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#4f46e5">Ihre Ersteinschätzung</p>
+  <h1 style="margin:0 0 12px;font-size:22px;color:#181a33">${esc(input.title)}</h1>
+  <p style="margin:0;font-size:14.5px;line-height:1.6;color:#3c3f5e">
+    Hier ist die Einschätzung aus dem Dialog — so, wie der KI-Assistent sie erstellt hat.
+    Moritz Schumacher liest sie vor einem Gespräch persönlich und korrigiert, was nicht stimmt.
+  </p>
+
+  ${h2("Lösungsskizze")}
+  <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%">${steps}</table>
+  ${input.value.length ? `${h2("Ihr Vorteil")}<ul style="margin:0;padding-left:18px;font-size:14px;line-height:1.5;color:#181a33">${li(input.value)}</ul>` : ""}
+
+  ${h2("Unverbindliche Preisschätzung")}
+  <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-top:1px solid #e6e8f8">
+    ${items}
+    <tr><td style="padding:9px 10px 5px 0;border-top:1px solid #e6e8f8;color:#181a33;font-size:15px;font-weight:700">Richtpreis</td>
+        <td align="right" style="padding:9px 0 5px;border-top:1px solid #e6e8f8;color:#181a33;font-size:15px;font-weight:700;white-space:nowrap">${euro(input.price)}</td></tr>
+  </table>
+  <p style="margin:6px 0 0;font-size:12.5px;color:#6a6d8c">Netto zzgl. USt. Festpreis nach dem Beratungsgespräch. ${esc(ACCEPTANCE)}</p>
+
+  ${input.weeks.length ? `${h2("Zeitplan")}<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%">${weeks}</table>` : ""}
+  ${input.open.length ? `${h2("Offene Punkte fürs Gespräch")}<ul style="margin:0;padding-left:18px;font-size:14px;line-height:1.5;color:#181a33">${li(input.open)}</ul>` : ""}
+  ${input.assumptions.length ? `${h2("Annahmen — bitte korrigieren")}<ul style="margin:0;padding-left:18px;font-size:14px;line-height:1.5;color:#181a33">${li(input.assumptions)}</ul>` : ""}
+
+  <table role="presentation" cellpadding="0" cellspacing="0" style="margin:26px 0 6px"><tr><td style="background:#4f46e5;border-radius:10px">
+    <a href="${esc(input.bookingUrl)}" style="display:inline-block;padding:12px 20px;color:#ffffff;font-size:14.5px;font-weight:700;text-decoration:none">Termin für 30 Minuten wählen</a>
+  </td></tr></table>
+  <p style="margin:8px 0 0;font-size:13px;color:#6a6d8c">Oder antworten Sie einfach auf diese E-Mail — sie landet direkt bei Moritz.</p>
+</td></tr>
+<tr><td style="padding:22px 32px 28px">
+  <p style="margin:0;font-size:12px;color:#6a6d8c;border-top:1px solid #e6e8f8;padding-top:16px">
+    ${SITE.name} · ${SITE.claim}<br>
+    Diese Nachricht wurde auf Ihre Anfrage im Dialog versendet.
   </p>
 </td></tr>
 </table></td></tr></table></body></html>`;

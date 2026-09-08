@@ -1,3 +1,4 @@
+import { ACCEPTANCE_PROMISE, RETAINER, SITE, WARRANTY_MONTHS } from "@/lib/config";
 import s from "./styles.module.css";
 
 /**
@@ -5,7 +6,12 @@ import s from "./styles.module.css";
  * Apple-Feature-Übersichten: farbige Icon-Container, kurze Titel, ein
  * Satz. Die Icons sind eigene Inline-SVGs (Vektor bleibt auf jeder
  * Bildschirmdichte scharf und erbt die Farben des Skins).
+ *
+ * Zusagen kommen aus lib/config.ts (Gewährleistung, Abnahme, Betrieb),
+ * damit Seite, Karte und AGB dasselbe versprechen. Ein Kopf, kein Plural.
  */
+
+const first = SITE.founder.name.split(" ")[0];
 
 const STROKE = {
   fill: "none",
@@ -79,7 +85,7 @@ const ITEMS: {
     tone: "indigo",
     big: true,
     title: "Festpreis",
-    text: "Steht im Angebot und hält — keine Tagessätze, keine Nachträge. Besteht die Abnahme nicht, entfällt die zweite Hälfte.",
+    text: `Steht im Angebot und hält — keine Tagessätze, keine Nachträge. ${ACCEPTANCE_PROMISE}`,
   },
   {
     icon: "key",
@@ -91,14 +97,14 @@ const ITEMS: {
   {
     icon: "shield",
     tone: "green",
-    title: "12 Monate Garantie",
-    text: "Auf alles, was wir bauen.",
+    title: `${WARRANTY_MONTHS} Monate Gewährleistung`,
+    text: "Gesetzlich beim Werkvertrag — wir kürzen das nicht.",
   },
   {
     icon: "server",
     tone: "sky",
-    title: "Betrieb auf Wunsch",
-    text: "Hosting, Wartung, Updates — wir übernehmen das gern.",
+    title: "Betrieb inklusive planbar",
+    text: `${RETAINER.basic.includes} — ${RETAINER.basic.monthly} € im Monat, ${RETAINER.notice}.`,
   },
   {
     icon: "spark",
@@ -122,7 +128,7 @@ const ITEMS: {
     icon: "code",
     tone: "lime",
     title: "Senior-Qualität",
-    text: "AI schreibt, erfahrene Entwickler verantworten jede Zeile.",
+    text: `AI schreibt, ${first} verantwortet jede Zeile.`,
   },
 ];
 
@@ -135,8 +141,8 @@ export default function Benefits({ echo }: { echo?: React.ReactNode }) {
         <h2 className={s.h2}>Alles, was dazugehört</h2>
         <p className={s.sectionLead}>
           Bezahlt wird, was läuft: Festpreis, Abnahme nach vereinbarten
-          Kriterien, zwölf Monate Garantie. Qualität behaupten kann jeder —
-          wir hängen Haftung dran:
+          Kriterien, {WARRANTY_MONTHS} Monate Gewährleistung. Qualität
+          behaupten kann jeder — wir hängen Haftung dran:
         </p>
       </div>
       <div className={s.benefits}>

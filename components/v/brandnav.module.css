@@ -1,0 +1,147 @@
+/* Navigation und Seitenrahmen der Marke — dieselben Werte wie .page/.nav/
+   .mark/.navLinks der Landing (app/v/fixfertig/styles.module.css), aber
+   in einem eigenen Modul: Die Unterseiten sollen aussehen wie die
+   Startseite, ohne an deren Stylesheet zu hängen. */
+
+.page {
+  min-height: 100dvh;
+  background:
+    radial-gradient(48rem 26rem at 12% -8%, rgba(79, 70, 229, 0.16), transparent 62%),
+    radial-gradient(40rem 24rem at 92% 4%, rgba(255, 107, 94, 0.13), transparent 60%),
+    #f3f4fd;
+  color: #181a33;
+  font-family: var(--font-body), system-ui, sans-serif;
+  padding-bottom: 16vh;
+  overflow-x: hidden;
+}
+
+/* ---------- Navigation ---------- */
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.3rem clamp(1rem, 4vw, 2rem);
+}
+
+/* Wortmarke einfarbig in Ink; nur der Punkt trägt das Indigo. Kein
+   Verlauf — die Marke soll auch in Schwarzweiß und auf Briefpapier
+   funktionieren. */
+.mark {
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: -0.035em;
+  color: #181a33;
+  text-decoration: none;
+}
+
+.dot { color: #4f46e5; }
+
+.navLinks { display: flex; gap: 1.5rem; align-items: center; font-size: 0.92rem; font-weight: 600; }
+.navLinks a { color: #6a6d8c; text-decoration: none; transition: color 0.2s ease; }
+.navLinks a:hover { color: #4f46e5; }
+
+@media (max-width: 560px) {
+  .navLinks { gap: 1rem; font-size: 0.85rem; }
+}
+
+/* ---------- Lesespalte der Unterseiten ---------- */
+
+/* 62ch: lang genug für Rechtstexte, kurz genug zum Lesen. Die Spalte sitzt
+   links im Raster, nicht zentriert — Rechtstexte sind Dokumente, keine
+   Plakate. */
+.article {
+  max-width: 62ch;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 4vw, 2rem) 3rem;
+}
+
+.article h1 {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  margin: 0 0 1.4rem;
+  color: #181a33;
+}
+
+.article h2 {
+  font-size: 1.22rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  margin: 2.2rem 0 0.6rem;
+  color: #181a33;
+}
+
+.article h3 {
+  font-size: 1.02rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.4rem;
+  color: #181a33;
+}
+
+.article p,
+.article li {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: #3c3f5e;
+}
+
+.article p { margin: 0 0 0.9rem; }
+.article ul,
+.article ol { padding-left: 1.3rem; margin: 0.4rem 0 1rem; }
+.article li { margin-bottom: 0.35rem; }
+
+.article a {
+  color: #4f46e5;
+  text-decoration: underline;
+  text-decoration-color: rgba(79, 70, 229, 0.35);
+  text-underline-offset: 0.15em;
+}
+.article a:hover { text-decoration-color: #4f46e5; }
+
+/* Einleitender Absatz — etwas größer, damit die Seite nicht als Wand beginnt. */
+.lead {
+  font-size: 1.1rem;
+  color: #3c3f5e;
+}
+
+/* Sichtbar markierte Lücken: Nur der Gründer kann sie füllen. */
+.placeholder {
+  background: #e4e1fd;
+  color: #4338ca;
+  border-radius: 6px;
+  padding: 0.05rem 0.45rem;
+  font-weight: 700;
+}
+
+.muted {
+  color: #6a6d8c;
+  font-size: 0.9rem;
+}
+
+/* Fußzeile der Unterseiten — wie .foot der Landing. */
+.foot {
+  max-width: 62ch;
+  margin: 2rem auto 0;
+  padding: 1.5rem clamp(1rem, 4vw, 2rem) 0;
+  border-top: 1px solid rgba(24, 26, 51, 0.1);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  font-size: 0.85rem;
+}
+.foot a { color: #6a6d8c; text-decoration: none; }
+.foot a:hover { color: #4f46e5; }
+
+/* Zugangsseite: Karte mittig, die Navigation bleibt oben stehen. */
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60dvh;
+  padding: 1.5rem;
+}

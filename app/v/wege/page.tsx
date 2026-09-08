@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { SITE } from "@/lib/config";
 import Landing from "../fixfertig/Landing";
 
 export const metadata: Metadata = {
-  title: "neoapp.studio — Die zwei Wege",
+  title: `${SITE.name} — Variante: Die zwei Wege`,
 };
 
 export default function Page() {

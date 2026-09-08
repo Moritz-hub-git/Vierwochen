@@ -21,7 +21,7 @@ import s from "./admin.module.css";
  */
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Auswertung — vierwochen", robots: { index: false } };
+export const metadata: Metadata = { title: "Auswertung", robots: { index: false } };
 
 const pct = (v: number) => `${Math.round(v * 100)} %`;
 const euro = (n: number) => n.toLocaleString("de-DE", { maximumFractionDigits: 0 }) + " €";
