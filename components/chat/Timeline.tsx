@@ -1,33 +1,25 @@
 "use client";
 
+import { planDates } from "@/lib/timeline";
+
 /**
  * Der Weg zum Launch — bewusst knapp (Rücksprache 2026-08-15: die vorherige
  * Fassung mit sechs Einzelschritten wirkte überladen). Drei Stationen genügen,
  * um aus der Vier-Wochen-Zusage einen Plan mit echten Daten zu machen: das
  * Beratungsgespräch (der nächste Klick), der Kick-off, der Launch. Die
- * Bauphase selbst steht kompakt als eine Zeile mit den vier Wochenzielen,
- * statt als vier eigene Stationen.
+ * Bauphase selbst steht kompakt als eine Zeile mit den vier Wochenzielen.
+ *
+ * Daten kommen aus lib/timeline.ts (Audit CP-07/CF-08): Kick-off frühestens
+ * am Montag in zehn Tagen, Launch 25 Tage später — und beides als
+ * „frühestens" beschriftet, weil zwischen Gespräch und Start Angebot und
+ * Unterschrift liegen, die nicht die Seite terminiert.
  */
-
-function addDays(d: Date, days: number): Date {
-  return new Date(d.getTime() + days * 24 * 3600 * 1000);
-}
 
 const fmtLong = (d: Date) =>
   new Intl.DateTimeFormat("de-DE", { weekday: "short", day: "numeric", month: "long" }).format(d);
 
-export function launchDate(): Date {
-  const today = new Date();
-  const nextMonday = addDays(today, ((8 - today.getDay()) % 7) || 7);
-  const kickoff = addDays(nextMonday, 7);
-  return addDays(kickoff, 25); // Freitag der vierten Woche
-}
-
 export default function Timeline({ weeks }: { weeks: { week: number; label: string }[] }) {
-  const today = new Date();
-  const nextMonday = addDays(today, ((8 - today.getDay()) % 7) || 7);
-  const kickoff = addDays(nextMonday, 7);
-  const launch = addDays(kickoff, 25);
+  const { kickoff, launch } = planDates();
 
   return (
     <div className="sched">
@@ -36,14 +28,14 @@ export default function Timeline({ weeks }: { weeks: { week: number; label: stri
           <span className="sched-dot sched-dot-pulse" aria-hidden />
           <span className="sched-body">
             <span className="sched-date">Diese Woche</span>
-            <span className="sched-title">Beratungsgespräch</span>
+            <span className="sched-title">Beratungsgespräch mit Moritz</span>
           </span>
         </li>
 
         <li className="sched-item">
           <span className="sched-dot" aria-hidden />
           <span className="sched-body">
-            <span className="sched-date">{fmtLong(kickoff)}</span>
+            <span className="sched-date">Frühestens {fmtLong(kickoff)}</span>
             <span className="sched-title">Kick-off-Workshop</span>
           </span>
         </li>
@@ -71,7 +63,7 @@ export default function Timeline({ weeks }: { weeks: { week: number; label: stri
             </svg>
           </span>
           <span className="sched-body">
-            <span className="sched-date">{fmtLong(launch)}</span>
+            <span className="sched-date">Live frühestens am {fmtLong(launch)}</span>
             <span className="sched-title">Launch &amp; Abnahme</span>
           </span>
         </li>

@@ -1612,11 +1612,21 @@ html[data-input="mouse"] :focus {
 /* KI-Offenlegung unter der Leiste (EU-KI-VO Art. 50): leise, mittig, nur im
    Ruhezustand. Sinkt beim Absenden mit der Leiste weg. */
 .dock-note {
-  margin: -0.15rem 0 0;
+  align-self: center;
+  width: fit-content;
+  max-width: 100%;
+  margin: -0.25rem 0 0;
+  padding: 0.22rem 0.8rem;
+  border-radius: 999px;
   text-align: center;
   font-size: 0.74rem;
   line-height: 1.4;
   color: var(--text-muted);
+  /* Eigener Grund: Die Zeile schwebt über Seitentext und wäre sonst
+     stellenweise unlesbar. */
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   pointer-events: none;
   transition: opacity 0.3s ease;
 }
@@ -1814,6 +1824,17 @@ html[data-input="mouse"] :focus {
 
 .chat-step.done { color: var(--accent); }
 
+/* Schmal: Titel/Hinweis links, X und Fortschritt rechts übereinander —
+   zwei Zeilen Höhe statt drei. */
+@media (max-width: 640px) {
+  .chat-head { flex-wrap: nowrap; padding-top: 0.7rem; }
+  .chat-head-title { font-size: 0.8rem; }
+  .chat-head-note { font-size: 0.7rem; }
+  .chat-head-side { flex-direction: column; align-items: flex-end; gap: 0.2rem; }
+  .chat-close { margin: -10px -10px 0 0; }
+  .chat-step { font-size: 0.72rem; white-space: normal; text-align: right; }
+}
+
 /* Schließen-Knopf: groß genug zum Treffen (44px), optisch ein leises X. */
 .chat-close {
   font: inherit;
@@ -1974,6 +1995,11 @@ html[data-input="mouse"] :focus {
      unten reichlich Luft, damit die Buchung nicht unter der schwebenden
      Leiste verschwindet. */
   padding: 1.7rem var(--chat-pad) calc(var(--dock-gap) + 7.5rem);
+  /* scrollIntoView kennt das Padding nicht: Ohne scroll-padding landete die
+     letzte Antwort exakt unter der schwebenden Leiste. Oben etwas Luft,
+     damit die Ergebniskarte nicht an der Kopfzeile klebt. */
+  scroll-padding-top: 0.6rem;
+  scroll-padding-bottom: calc(var(--dock-gap) + 7.5rem);
   display: flex;
   flex-direction: column;
   gap: 1.3rem;
@@ -2482,6 +2508,23 @@ html[data-input="mouse"] :focus {
 .auto-tag.teilautomatisch { background: color-mix(in srgb, var(--accent-soft) 55%, var(--surface-2)); color: var(--text-soft); }
 .auto-tag.manuell { background: var(--bg-raised); color: var(--text-muted); border: 1px solid var(--border); }
 
+/* In der Ergebniskarte (Audit CF-02: Skizze wurde erzeugt, nie gezeigt):
+   dieselbe Sprache, aber kompakter — die Karte darf nicht wachsen. */
+.flow-compact .flow-step {
+  padding: 0.5rem 0.7rem;
+  font-size: 0.86rem;
+  border-radius: 12px;
+  background: var(--surface);
+  animation: none;
+}
+
+.flow-compact .flow-dot { width: 22px; height: 22px; border-radius: 7px; font-size: 0.72rem; }
+.flow-compact .flow-step:not(:last-child)::after { left: 21px; }
+
+/* Schmale Spalte: Das Label behält eine Mindestbreite, der Tag rutscht
+   darunter — statt dass das Label neben dem Tag auf vier Zeilen bricht. */
+.flow-compact .flow-label { flex: 1 1 16ch; }
+
 .sketch-list { display: grid; gap: 0.4rem; }
 
 .sketch-item {
@@ -2744,9 +2787,68 @@ html[data-input="mouse"] :focus {
   margin-top: 0.2rem;
 }
 
-.offer-price-sub {
-  margin-top: 0.15rem;
+/* Nachgespräch ändert den Preis in place — kurz hervorheben, damit die
+   Änderung auffällt, ohne dass die Karte neu einfliegt. */
+.offer-price-value.is-updated { animation: offerPricePulse 1.3s ease-out; }
+
+@keyframes offerPricePulse {
+  0% { color: var(--accent); transform: scale(1.04); transform-origin: left center; }
+  60% { color: var(--accent); }
+  100% { color: inherit; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .offer-price-value.is-updated { animation: none; color: var(--accent); }
+}
+
+/* Herleitung (Audit CF-03): Grundprodukt + Bausteine als ruhige Zeilen mit
+   Summenstrich — die große Zahl wird nachrechenbar. */
+.offer-calc {
+  margin: 0.7rem 0 0;
+  display: grid;
+  gap: 0.22rem;
   font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.offer-calc-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  align-items: baseline;
+}
+
+.offer-calc-row dt { color: var(--text-soft); min-width: 0; }
+.offer-calc-row dd { margin: 0; color: var(--text); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.offer-calc-sum {
+  margin-top: 0.15rem;
+  padding-top: 0.3rem;
+  border-top: 1px solid var(--border-strong);
+  font-weight: 700;
+}
+
+.offer-calc-sum dt { color: var(--text); }
+
+/* Betrieb als Standard (Vollreview): eine Zeile unter der Rechnung, nicht
+   als Kleingedrucktes am Ende. */
+.offer-retainer {
+  margin-top: 0.7rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--text-soft);
+}
+
+.offer-retainer b { color: var(--text); font-weight: 700; }
+
+.offer-price-sub {
+  margin-top: 0.55rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
   color: var(--text-muted);
 }
 
@@ -2754,11 +2856,15 @@ html[data-input="mouse"] :focus {
    kurzer Text, Rücksprache 2026-08-15) — hier mit den echten Werten dieses
    Angebots statt der allgemeinen Anker. */
 .offer-pills {
-  margin-top: 0.95rem;
+  margin-top: 0.85rem;
   display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
+
+/* Die eine Zusage (ACCEPTANCE_PROMISE) trägt den Akzent, die beiden
+   Standards daneben bleiben ruhig. */
+.offer-pill-promise { border-color: color-mix(in srgb, var(--accent) 45%, var(--border-strong)); }
 
 .offer-pill {
   display: inline-flex;
@@ -2776,25 +2882,6 @@ html[data-input="mouse"] :focus {
 }
 
 .offer-pill svg { color: var(--accent); flex-shrink: 0; }
-
-.offer-pill-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  background: #22c55e;
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
-  animation: chatLivePulse 2.2s ease-in-out infinite;
-}
-
-@keyframes chatLivePulse {
-  0%, 100% { box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18); }
-  50% { box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.1); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .offer-pill-dot { animation: none; }
-}
 
 .offer-scope {
   margin-top: 0.95rem;
