@@ -531,7 +531,7 @@ export default function Booking({
                   die Kapazität EINER Person — kein „festes Team", das es nicht
                   gibt (Vollreview 2026-09-08). Deshalb als Zitat in Ich-Form. */}
               <p className="booking-scarcity">
-                <strong>{SITE.founder.name}:</strong> „Ich begleite jedes Projekt persönlich durch alle vier Wochen — deshalb starte ich höchstens zwei neue pro Monat."
+                <strong>{SITE.founder.name}:</strong> „Ich begleite jedes Projekt persönlich durch alle vier Wochen — deshalb starte ich höchstens ein neues pro Monat."
               </p>
             </div>
           )}

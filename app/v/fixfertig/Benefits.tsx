@@ -92,18 +92,18 @@ const ITEMS: {
     tone: "ink",
     big: true,
     title: "Der Code gehört Ihnen",
-    text: "100 % Custom Code, vom ersten Tag an Ihr Eigentum. Kein Baukasten, keine Lizenzfalle, kein Lock-in.",
+    text: "Liegt ab Tag 1 in Ihrem Repository und gehört Ihnen mit der Abnahme. Kein Baukasten, keine Lizenzfalle — Sie hängen an niemandem.",
   },
   {
     icon: "shield",
     tone: "green",
     title: `${WARRANTY_MONTHS} Monate Gewährleistung`,
-    text: "Gesetzlich beim Werkvertrag — wir kürzen das nicht.",
+    text: "Auf den abgenommenen Umfang — auch wenn später jemand anderes weiterentwickelt, solange der Fehler nicht daher kommt.",
   },
   {
     icon: "server",
     tone: "sky",
-    title: "Betrieb inklusive planbar",
+    title: "Betrieb optional, planbar",
     text: `${RETAINER.basic.includes} — ${RETAINER.basic.monthly} € im Monat, ${RETAINER.notice}.`,
   },
   {
@@ -116,7 +116,7 @@ const ITEMS: {
     icon: "rocket",
     tone: "coral",
     title: "Neueste Technologien",
-    text: "Der Stack von heute, nicht der von 2015.",
+    text: "Gängige, langlebige Technik von heute — nicht die von 2015.",
   },
   {
     icon: "sliders",
@@ -127,8 +127,8 @@ const ITEMS: {
   {
     icon: "code",
     tone: "lime",
-    title: "Senior-Qualität",
-    text: `AI schreibt, ${first} verantwortet jede Zeile.`,
+    title: "Eine Verantwortung",
+    text: `AI schreibt, ${first} prüft jede Zeile — Tests und Abhängigkeitsprüfung sind im Lieferumfang.`,
   },
 ];
 
@@ -140,9 +140,11 @@ export default function Benefits({ echo }: { echo?: React.ReactNode }) {
         <span className={s.kicker}>Was Sie bekommen</span>
         <h2 className={s.h2}>Alles, was dazugehört</h2>
         <p className={s.sectionLead}>
-          Bezahlt wird, was läuft: Festpreis, Abnahme nach vereinbarten
-          Kriterien, {WARRANTY_MONTHS} Monate Gewährleistung. Qualität
-          behaupten kann jeder — wir hängen Haftung dran:
+          Zweite Rate erst nach Abnahme: 50 % bei Auftrag, 50 % nach
+          bestandener Abnahme gegen vereinbarte Kriterien. Scheitert die
+          Abnahme, behalten Sie den bis dahin gebauten Code und Ihr
+          Repository. Qualität behaupten kann jeder — ich hänge Abnahme und
+          {WARRANTY_MONTHS} Monate Gewährleistung dran:
         </p>
       </div>
       <div className={s.benefits}>

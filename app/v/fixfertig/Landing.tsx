@@ -5,7 +5,7 @@ import { ACCEPTANCE_PROMISE, PRICE, RETAINER, SITE, WARRANTY_MONTHS } from "@/li
 import Showcases from "./Showcases";
 import Timeline from "./Timeline";
 import Benefits from "./Benefits";
-import { Cockpit, Schichtplan, Portal, Rechner, Protokoll, Lager } from "./Mockups";
+import { Cockpit, Schichtplan, Portal, Rechner, Protokoll, Lager, Buchung } from "./Mockups";
 import { WegeVisual, FormelVisual, KernVisual, BentoVisual, PlanVisual } from "./MethodVisuals";
 import { AfterWege, AfterFormel, AfterKern, AfterBento, AfterPlan } from "./AfterVisuals";
 import FAQ from "./FAQ";
@@ -46,7 +46,7 @@ const euro = (n: number) => n.toLocaleString("de-DE") + " €";
  */
 const PILLARS = [
   { icon: "pay", text: `Festpreis ab ${euro(PRICE.floor)}`, href: "#danach" },
-  { icon: "check", text: "Bezahlt wird, was läuft", href: "#garantie" },
+  { icon: "check", text: "Zweite Rate erst nach Abnahme", href: "#garantie" },
   { icon: "head", text: "Ein Kopf + AI", href: "#methode" },
 ] as const;
 
@@ -149,6 +149,12 @@ const SHOWCASES = [
     branch: "Beispiel · Internes Werkzeug",
     title: "Lager & Inventur",
     text: "Bestände in Echtzeit statt Stichtagszählung — inklusive Warnung, bevor ein Artikel tatsächlich ausgeht.",
+  },
+  {
+    visual: <Buchung />,
+    branch: "Beispiel · Erste Version eines Produkts",
+    title: "Buchungsportal für Praxen",
+    text: "Für Gründer: Version 1 mit Anmeldung, getrennten Mandanten und Abo-Abrechnung — verkaufbar an die ersten Kunden, bevor Sie ein Team finanzieren.",
   },
 ];
 
@@ -259,7 +265,7 @@ export default function Landing({ variant }: { variant: VariantKey }) {
             <DialogCta className={s.ctaBtn}>Preiseinschätzung erhalten</DialogCta>
           </div>
           <p className={s.heroFacts}>
-            3 Fragen <span aria-hidden>·</span> eine Minute{" "}
+            Meist 3 Fragen <span aria-hidden>·</span> eine Minute{" "}
             <span aria-hidden>·</span> ohne E-Mail-Adresse
           </p>
           <p className={s.heroAlt}>
@@ -279,7 +285,7 @@ export default function Landing({ variant }: { variant: VariantKey }) {
             <span className={s.kicker}>Beispiele</span>
             <h2 className={s.h2}>Was in vier Wochen entstehen kann</h2>
             <p className={s.sectionLead}>
-              Ein echtes Projekt und sechs typische Zuschnitte — keine
+              Ein echtes Projekt und sieben typische Zuschnitte — keine
               Kundenreferenzen. Die kommen, sobald die ersten Kunden sie
               freigeben.
             </p>
@@ -290,9 +296,9 @@ export default function Landing({ variant }: { variant: VariantKey }) {
         </section>
 
         {/* ---------- Methode ---------- */}
-        <section id="methode" className={s.promise} aria-label="Die 2+AI-Methode">
+        <section id="methode" className={s.promise} aria-label="Ein Kopf + AI: die Methode">
           <PillarEcho n={2} />
-          <span className={s.kicker}>Die 2+AI-Methode</span>
+          <span className={s.kicker}>Ein Kopf + AI — die Methode</span>
           <h2 className={s.promiseLine}>
             In vier Wochen <LivePill />
           </h2>
@@ -311,7 +317,7 @@ export default function Landing({ variant }: { variant: VariantKey }) {
           {/* ---------- Zeitplan mit echten Daten ---------- */}
           <div id="zeitplan" className={s.timelineHead}>
             <span className={s.kicker}>Der Zeitplan</span>
-            <h3 className={s.h3}>Start: Montag in zwei Wochen.</h3>
+            <h3 className={s.h3}>Start: frühestens Montag in zwei Wochen.</h3>
             <p className={s.timelineSub}>
               Gespräch diese Woche, Festangebot danach, dann geht es los —
               mit echten Daten:
@@ -335,7 +341,7 @@ export default function Landing({ variant }: { variant: VariantKey }) {
                 stand. Stattdessen die zwei Zahlen, die der Kunde braucht. */}
             <p className={s.priceLine}>
               <b>Festpreis ab {euro(PRICE.floor)}</b>
-              <span>{PRICE.vatNote}</span>
+              <span>{PRICE.vatNote} · 50 % bei Auftrag, 50 % nach Abnahme</span>
               <span aria-hidden>·</span>
               <b>
                 {RETAINER.basic.name} ab {euro(RETAINER.basic.monthly)}/Monat
@@ -364,10 +370,12 @@ export default function Landing({ variant }: { variant: VariantKey }) {
               </ul>
               <p className={s.whoHonest}>
                 Ich baue jedes Projekt selbst, mit AI als Bausystem. Damit
-                Sie nicht an mich gekettet sind: Standard-Stack, alles
-                dokumentiert, Code und Zugänge gehören Ihnen ab Tag 1 — jeder
-                gute Entwickler kann übernehmen. {WARRANTY_MONTHS} Monate
-                Gewährleistung gelten unabhängig davon.
+                Sie nicht an mich gekettet sind: gängige Technik, die jeder
+                Entwickler kennt, alles dokumentiert, Code und Zugänge gehören
+                Ihnen ab Tag 1 — jeder gute Entwickler kann übernehmen. Die{" "}
+                {WARRANTY_MONTHS} Monate Gewährleistung gelten auf den abgenommenen
+                Stand — auch wenn später jemand anderes weiterbaut, solange der
+                Fehler nicht daher kommt.
               </p>
               <p className={s.whoLimits}>
                 <b>Was ich nicht baue:</b> sicherheitskritische Steuerungen,
@@ -397,7 +405,7 @@ export default function Landing({ variant }: { variant: VariantKey }) {
           </p>
           <DialogCta className={s.ctaBtn}>Jetzt Skizze holen</DialogCta>
           <p className={s.ctaHint}>
-            Oder unten in die Leiste tippen. 3 Fragen, eine Minute.
+            Oder unten in die Leiste tippen. Meist 3 Fragen, eine Minute.
           </p>
         </section>
 

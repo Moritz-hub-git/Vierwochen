@@ -20,17 +20,17 @@ const floor = `${PRICE.floor.toLocaleString("de-DE")} €`;
 const FAQS: { q: string; a: React.ReactNode }[] = [
   {
     q: "Was, wenn jemand bei Ihnen ausfällt?",
-    a: `Hier baut ein Kopf — ${first}. Die Absicherung ist deshalb nicht personell, sondern mechanisch: verbreiteter Standard-Stack, alles dokumentiert, Code und Zugänge liegen ab Tag 1 bei Ihnen. Jeder gute Entwickler kann übernehmen — Sie sind an niemanden gekettet. Die ${WARRANTY_MONTHS} Monate Gewährleistung gelten unabhängig davon.`,
+    a: `Hier baut ein Kopf — ${first}. Die Absicherung ist deshalb nicht personell, sondern mechanisch: verbreiteter Standard-Stack, alles dokumentiert, Code und Zugänge liegen ab Tag 1 bei Ihnen. Jeder gute Entwickler kann übernehmen — Sie sind an niemanden gekettet. Die ${WARRANTY_MONTHS} Monate Gewährleistung gelten auf den abgenommenen Stand, auch wenn später jemand anderes weiterbaut — solange der Fehler nicht daher kommt.`,
   },
   {
     q: "Warum geht das schneller als bei einer großen Agentur?",
-    a: `Weil es keine Übergabekette gibt. Der Mensch, der Ihren Ablauf versteht, ist derselbe, der ihn baut — ${first}, mit AI als hundert Händen. Keine Übersetzung von Ihnen über Projektleitung und Anforderungsdokument bis zur Entwicklung, bei der die Hälfte der Absicht verloren geht. „Besser“ behaupten wir nicht — passgenauer. Und für die Qualität verlassen Sie sich nicht auf unser Wort: Festpreis, Abnahme nach vereinbarten Kriterien, ${WARRANTY_MONTHS} Monate Gewährleistung.`,
+    a: `Weil es keine Übergabekette gibt. Der Mensch, der Ihren Ablauf versteht, ist derselbe, der ihn baut — ${first}, mit AI als hundert Händen. Keine Übersetzung von Ihnen über Projektleitung und Anforderungsdokument bis zur Entwicklung, bei der die Hälfte der Absicht verloren geht. „Besser“ behaupte ich nicht — passgenauer. Und für die Qualität verlassen Sie sich nicht auf mein Wort: Festpreis, Abnahme nach vereinbarten Kriterien, ${WARRANTY_MONTHS} Monate Gewährleistung.`,
   },
   {
     q: "Haben Sie Referenzen?",
     a: (
       <>
-        Ehrlich: Mit dieser Methode sind wir neu am Markt — deshalb Festpreis,
+        Ehrlich: Mit dieser Methode bin ich neu am Markt — deshalb Festpreis,
         und die zweite Rate erst nach Abnahme. Belegbar ist die Herkunft von{" "}
         {SITE.founder.name}: {SITE.founder.facts.join(". ")}. Und diese Website
         samt KI-Dialog ist selbst mit der Methode gebaut — Sie benutzen gerade
@@ -40,11 +40,11 @@ const FAQS: { q: string; a: React.ReactNode }[] = [
   },
   {
     q: "Woher wissen Sie, was wir wirklich brauchen?",
-    a: "Sie kennen Ihren Betrieb — wir kennen die Muster aus vielen Produkten: welche Features benutzt werden, welche Darstellungen funktionieren und was nur teuer aussieht. Deshalb raten wir auch ab. Der Festpreis hält uns dabei ehrlich: Unnötiges zu bauen kostet uns, nicht Sie.",
+    a: "Sie kennen Ihren Betrieb — ich kenne die Muster aus vielen Produkten: welche Funktionen benutzt werden, welche Darstellungen funktionieren und was nur teuer aussieht. Deshalb rate ich auch ab. Der Festpreis hält mich dabei ehrlich: Unnötiges zu bauen kostet mich, nicht Sie.",
   },
   {
     q: "Was, wenn das Ergebnis nicht passt?",
-    a: `${ACCEPTANCE_PROMISE} Die Abnahmekriterien legen wir in Woche 1 gemeinsam fest — Sie messen uns an dem, was vereinbart ist, nicht an dem, was wir hineininterpretiert haben.`,
+    a: `${ACCEPTANCE_PROMISE} Die Abnahmekriterien lege ich in Woche 1 mit Ihnen fest — Sie messen mich an dem, was vereinbart ist, nicht an dem, was ich hineininterpretiert habe. Scheitert die Abnahme, behalten Sie den bis dahin gebauten Code.`,
   },
   {
     q: "Wann ist fertige Software die bessere Wahl?",
@@ -67,12 +67,16 @@ const FAQS: { q: string; a: React.ReactNode }[] = [
     ),
   },
   {
+    q: "Ich will ein Produkt bauen, das ich verkaufe — geht das?",
+    a: "Ja, wenn die erste Version mit wenigen Kunden startet: Sie bekommen eine verkaufbare Version 1 mit Anmeldung, getrennten Mandanten und Abrechnung — und Sie besitzen den Code, um später ein Team darauf zu setzen. Nicht der richtige Weg, wenn von Anfang an tausende Nutzer, ein App-Store-Launch in drei Ländern oder eine Zulassung als Medizinprodukt nötig sind.",
+  },
+  {
     q: "Für wen ist das nichts?",
-    a: "Für ERP-Ablösungen und Plattformen, an denen später zwanzig Leute gleichzeitig entwickeln. Wir bauen fokussierte Werkzeuge, die einen Ablauf richtig lösen — das ist die Stärke der Methode, und wir sagen ehrlich, wenn Ihr Vorhaben nicht dazu passt.",
+    a: "Für ERP-Ablösungen und Plattformen, an denen später zwanzig Leute gleichzeitig entwickeln. Viele Nutzer sind kein Problem — viele gleichzeitige Entwickler sind es. Ich baue fokussierte Werkzeuge, die einen Ablauf richtig lösen — das ist die Stärke der Methode, und ich sage ehrlich, wenn Ihr Vorhaben nicht dazu passt.",
   },
   {
     q: "Was kostet es?",
-    a: `Ab ${floor} als Festpreis mit Abnahmetermin im Angebot, ${PRICE.vatNote}. Damit werden auch Probleme wirtschaftlich, die für klassische Projekte immer zu klein waren. Die Preiseinschätzung unten: 3 Fragen, eine Minute.`,
+    a: `Ab ${floor} als Festpreis mit Abnahmetermin im Angebot, ${PRICE.vatNote}. Damit werden auch Probleme wirtschaftlich, die für klassische Projekte immer zu klein waren. Die Preiseinschätzung unten: meist 3 Fragen, eine Minute.`,
   },
 ];
 

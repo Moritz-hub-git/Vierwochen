@@ -216,3 +216,40 @@ export function Portal() {
     </Frame>
   );
 }
+
+/** Buchungsportal für Praxen — Wochenkalender mit Mandantenwechsel oben. */
+export function Buchung() {
+  return (
+    <Frame>
+      <svg viewBox="0 0 400 250" className={s.mock} role="img" aria-label="Skizze eines Buchungsportals: Mandantenwahl, Wochenkalender mit gebuchten Terminen">
+        <rect x="16" y="16" width="150" height="24" rx="12" fill="#181a33" />
+        <circle cx="32" cy="28" r="6" fill="#d8f26e" />
+        <rect x="46" y="24" width="90" height="8" rx="4" fill="#ffffff" opacity="0.75" />
+        <rect x="290" y="16" width="94" height="24" rx="12" fill="#4f46e5" />
+        <rect x="304" y="24" width="66" height="8" rx="4" fill="#ffffff" opacity="0.85" />
+
+        {[0, 1, 2, 3, 4].map((d) => (
+          <g key={d} transform={`translate(${16 + d * 74} 0)`}>
+            <rect x="0" y="56" width="66" height="10" rx="5" fill="#6a6d8c" opacity="0.35" />
+            {[0, 1, 2, 3].map((slot) => {
+              const booked = (d + slot) % 3 === 0;
+              const mine = d === 2 && slot === 1;
+              return (
+                <rect
+                  key={slot}
+                  x="0"
+                  y={78 + slot * 40}
+                  width="66"
+                  height="32"
+                  rx="10"
+                  fill={mine ? "#ff6b5e" : booked ? "#4f46e5" : "#f4f5ff"}
+                  opacity={mine ? 0.9 : booked ? 0.22 : 1}
+                />
+              );
+            })}
+          </g>
+        ))}
+      </svg>
+    </Frame>
+  );
+}

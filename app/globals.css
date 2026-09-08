@@ -1463,6 +1463,11 @@ html[data-input="mouse"] :focus {
    verschwindet statt an einer Kante abzuschneiden. */
 .dock.in-chat .dock-bar { animation: none; }
 
+/* Im Chat liegt die Leiste ÜBER dem Panel (z 90) — sonst fängt der Strom
+   jeden Tipp auf Feld und Pfeil ab (Verifikation 2026-09-08, Persona Thomas:
+   elementFromPoint lieferte DIV.stream, activeElement blieb BODY). */
+.dock.in-chat { z-index: 92; }
+
 .dock.in-chat::before {
   height: 200px;
   background: linear-gradient(to top, var(--bg) 42%, transparent);
@@ -3010,6 +3015,65 @@ html[data-input="mouse"] :focus {
   box-shadow: var(--glow);
 }
 
+
+.sketch-nudge {
+  margin: 0.7rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.offer-calc-soft dt { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; }
+.offer-calc-soft dd { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; }
+
+.offer-today {
+  margin-top: 0.7rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-soft);
+}
+.offer-today b { color: var(--text); }
+
+.result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.2rem;
+  align-items: center;
+  margin-top: 0.9rem;
+}
+.result-print {
+  appearance: none;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 0.5rem 0.95rem;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.result-print:hover { border-color: var(--accent); color: var(--accent); }
+.result-itlink { font-size: 0.82rem; color: var(--accent); text-decoration: none; }
+.result-itlink:hover { text-decoration: underline; }
+.print-only { display: none; }
+
+/* Druck / PDF: nur die Ersteinschätzung, als Blatt für Chef, Partner oder
+   Steuerberater (Verifikation 2026-09-08). Buchung, Leiste, Kopfzeilen weg. */
+@media print {
+  body * { visibility: hidden; }
+  #ergebnis, #ergebnis * { visibility: visible; }
+  .panel, .stream { position: static !important; overflow: visible !important; height: auto !important; padding: 0 !important; }
+  #ergebnis { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none !important; border: 0 !important; }
+  #ergebnis .offer-book, #ergebnis .offer-book *, #ergebnis .gate-inline, #ergebnis .gate-inline *, #ergebnis .gate-toggle, #ergebnis .result-actions, #ergebnis .result-actions * { visibility: hidden; display: none !important; }
+  .offer-card { grid-template-columns: 1fr !important; display: block !important; }
+  .print-only { display: block !important; }
+  .result-sender { margin-top: 0.6rem; font-size: 0.78rem; color: #444; }
+  .offer-price-value.is-updated { animation: none !important; }
+}
 
 .result-disclaimer {
   font-size: 0.78rem;

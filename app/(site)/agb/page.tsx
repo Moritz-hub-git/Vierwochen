@@ -77,7 +77,11 @@ export default function Agb() {
         Cloud-Projekte, Datenbanken) werden dem Auftraggeber übertragen oder auf
         dessen Konten geführt. Vorbestehende, allgemein einsetzbare Komponenten und
         Werkzeuge des Auftragnehmers bleiben davon unberührt; an ihnen erhält der
-        Auftraggeber ein einfaches, unbeschränktes Nutzungsrecht.
+        Auftraggeber ein einfaches, unbeschränktes Nutzungsrecht. Das Repository
+        wird ab Projektbeginn in der Organisation des Auftraggebers geführt oder
+        dorthin gespiegelt. Scheitert die Abnahme endgültig (§ 5), verbleibt der
+        bis dahin entstandene Quellcode beim Auftraggeber; er erhält daran ein
+        einfaches, zeitlich und räumlich unbeschränktes Nutzungsrecht.
       </p>
 
       <h2>§ 7 Gewährleistung</h2>
@@ -86,7 +90,8 @@ export default function Agb() {
         (§ 634a BGB). Der Auftragnehmer behebt Mängel, die den vereinbarten
         Umfang betreffen, in dieser Zeit kostenfrei. Nachbesserung setzt voraus,
         dass die Software seit der Abnahme nicht durch Dritte verändert wurde;
-        andernfalls nur, soweit die Änderung für den Mangel unerheblich ist.
+        andernfalls nur, soweit der Mangel nicht auf diese Änderung
+        zurückzuführen ist.
       </p>
 
       <h2>§ 8 Haftung</h2>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BrandPage } from "@/components/v/BrandNav";
-import { ACCEPTANCE_PROMISE, SITE, WARRANTY_MONTHS } from "@/lib/config";
+import { ACCEPTANCE_PROMISE, RETAINER, SITE, WARRANTY_MONTHS } from "@/lib/config";
 import s from "@/components/v/brandnav.module.css";
 
 /**
@@ -77,11 +77,48 @@ export default function ItFaktenPage() {
       />
 
       <Fact
+        title="Login und Schnittstellen"
+        items={[
+          "Anmeldung über Ihren bestehenden Identitätsanbieter (Microsoft Entra ID, Google Workspace) per OIDC oder SAML — keine zweite Passwortwelt, Rollen aus Ihren Gruppen.",
+          "Anbindung an ERP, Warenwirtschaft oder CRM bevorzugt über deren dokumentierte Schnittstellen (REST/OData, Import/Export). Direktzugriff auf fremde Produktivdatenbanken baue ich nicht.",
+          "Transportverschlüsselung überall (TLS), Daten im Ruhezustand verschlüsselt (Cloud-Standard), Zugriffe protokolliert.",
+        ]}
+      />
+
+      <Fact
         title="Betrieb"
         items={[
           "Wahlweise in Ihrer Umgebung (eigene Cloud-Organisation oder eigener Server) — Sie halten die Adminrechte, ich bekomme nur, was das Projekt braucht.",
           "Oder von mir betrieben: Google Cloud, Region Frankfurt (europe-west3), monatlich kündbar. Ein Wechsel zu Ihnen ist jederzeit möglich, weil Code und Daten ohnehin Ihnen gehören.",
           "Übergabe ist Teil des Festpreises: vollständige Dokumentation, Adminzugänge, Übergabegespräch mit Ihrer IT.",
+          <>
+            Betrieb durch mich heißt konkret: Störungsmeldung per E-Mail und
+            Telefon, Rückmeldung werktags am selben Tag, kritische Störungen mit
+            Vorrang; tägliche Backups mit 30 Tagen Aufbewahrung und dokumentiertem
+            Wiederherstellungstest; Sicherheitsupdates laufend. Preis ab{" "}
+            {RETAINER.basic.monthly} €/Monat für eine Installation — die
+            Cloud-Kosten darüber hinaus (etwa bei vielen Mandanten) reiche ich
+            1:1 ohne Aufschlag durch. Fällt der Betreiber aus, liegen Adminzugänge
+            ohnehin bei Ihnen.
+          </>,
+        ]}
+      />
+
+      <Fact
+        title="Für Ihren Einkauf"
+        items={[
+          <>
+            Rechtsform: Einzelunternehmen {SITE.founder.name}, Sitz{" "}
+            <span className={s.placeholder}>PLATZHALTER: Ort</span>, USt-IdNr.{" "}
+            <span className={s.placeholder}>PLATZHALTER: USt-IdNr.</span> (vollständig im{" "}
+            <Link href="/impressum">Impressum</Link>).
+          </>,
+          <>
+            IT-Haftpflicht (Vermögensschäden) bei{" "}
+            <span className={s.placeholder}>PLATZHALTER: Versicherer</span>, Deckungssumme{" "}
+            <span className={s.placeholder}>PLATZHALTER: Summe</span> je Schadensfall — Nachweis auf Anfrage.
+          </>,
+          "Lieferantenselbstauskunft, Auftragsverarbeitungsvertrag (Art. 28 DSGVO) und Abnahmekriterien-Vorlage schicke ich vor dem Angebot als PDF — fragen Sie im Gespräch danach.",
         ]}
       />
 
@@ -114,7 +151,7 @@ export default function ItFaktenPage() {
         title="Eigentum und Exit"
         items={[
           "Das Repository liegt ab Tag 1 in Ihrer Organisation (oder wird dort gespiegelt); Sie sehen jeden Commit, nicht erst das Ergebnis.",
-          "Der vollständige Quellcode gehört Ihnen — kein Lizenzmodell, keine Laufzeitgebühren für die Software selbst.",
+          "Der vollständige Quellcode gehört Ihnen mit der Abnahme — und liegt schon vorher in Ihrem Repository. Scheitert die Abnahme, behalten Sie den bis dahin entstandenen Code. Kein Lizenzmodell, keine Laufzeitgebühren für die Software selbst.",
           `Abnahme gegen vorab schriftlich vereinbarte Kriterien; die zweite Rate wird erst danach fällig. ${ACCEPTANCE_PROMISE}`,
           `${WARRANTY_MONTHS} Monate Gewährleistung auf den vereinbarten Umfang — die gesetzliche Frist beim Werkvertrag, nicht weniger.`,
           "Exit ohne Drama: Da Code, Daten, Doku und Zugänge bei Ihnen liegen, kann jederzeit ein anderer Dienstleister oder Ihre IT übernehmen.",

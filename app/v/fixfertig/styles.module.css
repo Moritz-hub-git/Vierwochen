@@ -109,6 +109,9 @@
 
 @media (max-width: 640px) {
   .h1Break { display: inline; }
+  /* Die Kontaktzeile lag auf dem ersten Bildschirm halb unter der
+     schwebenden Leiste (Verifikation 2026-09-08, drei Personas). */
+  .hero { padding-bottom: 7.5rem; }
 }
 
 /* Wechselndes Wort als Schreibmaschine: Der Text steht im normalen Fluss

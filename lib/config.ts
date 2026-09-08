@@ -69,7 +69,7 @@ export const PRICE = {
  * die ohne neue Verkaufsarbeit wiederkommt. Monatlich kündbar.
  */
 export const RETAINER = {
-  basic: { name: "Betrieb", monthly: 290, includes: "Hosting, Updates, Monitoring, Sicherheits-Patches" },
+  basic: { name: "Betrieb", monthly: 290, includes: "Hosting, Updates, Sicherheitsupdates, Überwachung rund um die Uhr" },
   plus: { name: "Betrieb + Weiterentwicklung", monthly: 990, includes: "wie Betrieb, plus ein Änderungstag pro Monat" },
   notice: "monatlich kündbar",
 } as const;

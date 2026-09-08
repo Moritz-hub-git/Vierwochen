@@ -134,6 +134,11 @@ export default function ChatDock() {
   const [booked, setBooked] = useState(false);
   const [dockDraft, setDockDraft] = useState("");
   const [dockFocused, setDockFocused] = useState(false);
+  // Beim Lesen taucht die Leiste ab (Scroll nach unten) und kommt beim
+  // Scroll nach oben oder am Seitenende zurück — Verifikation 2026-09-08:
+  // Alle Personas auf Bildschirmen unter 800 px Höhe lasen Text hinter der
+  // Leiste. Nur außerhalb des Gesprächs und nie mit Fokus im Feld.
+  const [tucked, setTucked] = useState(false);
   const [sending, setSending] = useState(false);
   // Index des Zuges, der gerade herausgeschrieben wird (nur der neueste).
   const [animateIdx, setAnimateIdx] = useState<number | null>(null);
@@ -161,11 +166,47 @@ export default function ChatDock() {
   // Dort soll nichts vom eigentlichen Zweck der Seite ablenken oder das
   // Formular überlappen. Der Dialog bleibt über den Kopfzeilen-Knopf erreichbar.
   const pathname = usePathname();
-  const dockSuppressed = pathname === "/termin" || pathname === "/it";
+  const dockSuppressed =
+    pathname === "/termin" ||
+    pathname === "/it" ||
+    pathname === "/impressum" ||
+    pathname === "/datenschutz" ||
+    pathname === "/agb" ||
+    pathname === "/zugang";
 
   if (!dialogIdRef.current && typeof window !== "undefined") {
     dialogIdRef.current = newDialogId();
   }
+
+  useEffect(() => {
+    if (open) {
+      setTucked(false);
+      return;
+    }
+    let last = window.scrollY;
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        ticking = false;
+        const y = window.scrollY;
+        const delta = y - last;
+        last = y;
+        const doc = document.documentElement;
+        const nearEnd = y + window.innerHeight >= doc.scrollHeight - 160;
+        if (y < 140 || nearEnd || dockFocused) {
+          setTucked(false);
+        } else if (delta > 6) {
+          setTucked(true);
+        } else if (delta < -6) {
+          setTucked(false);
+        }
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [open, dockFocused]);
 
   const scrollToEnd = useCallback(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -550,7 +591,7 @@ export default function ChatDock() {
       {!dockSuppressed && (
       <div
         id="dialog-dock"
-        className={`dock${open ? " in-chat" : ""}${sending || (open && (busy || revealing)) ? " is-sending" : ""}${!open && dockFocused ? " is-focused" : ""}`}
+        className={`dock${open ? " in-chat" : ""}${sending || (open && (busy || revealing)) ? " is-sending" : ""}${!open && dockFocused ? " is-focused" : ""}${!open && tucked && !dockFocused ? " is-hidden" : ""}`}
       >
         <div className="dock-stack">
           {/* Beim Anklicken der Leiste poppen Beispiele auf. Ein Klick schreibt
@@ -626,7 +667,7 @@ export default function ChatDock() {
             leise, unter der Leiste, nur im Ruhezustand. */}
         {!open && (
           <p className="dock-note">
-            KI-Berater · 3 Fragen, eine Minute · Moritz prüft jede Skizze persönlich
+            KI-Berater · meist 3 Fragen, eine Minute · Moritz prüft jede Skizze persönlich
           </p>
         )}
         </div>
@@ -647,7 +688,7 @@ export default function ChatDock() {
             <div className="chat-head-who">
               <span className="chat-head-title">Sie sprechen mit dem KI-Berater von {SITE.name}</span>
               <span className="chat-head-note">
-                Verarbeitung über Google Vertex AI — bitte keine vertraulichen Daten
+                Läuft über Google Vertex AI · Firmen- und Kundennamen können Sie weglassen — Ihr Ablauf reicht
               </span>
             </div>
             <div className="chat-head-side">

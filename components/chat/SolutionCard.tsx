@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ACCEPTANCE_PROMISE, PRICE, RETAINER, WARRANTY_MONTHS } from "@/lib/config";
+import Link from "next/link";
+import { ACCEPTANCE_PROMISE, PRICE, RETAINER, SITE, WARRANTY_MONTHS } from "@/lib/config";
 import Booking from "./Booking";
 import EmailGate from "./EmailGate";
 import Timeline from "./Timeline";
@@ -100,6 +101,14 @@ export default function SolutionCard({
   const items = result.priceItems ?? [];
   const assumptions = sketch.assumptions.slice(0, 3);
   const open = sketch.open.slice(0, 3);
+  // Was der Chef wissen will (Verifikation 2026-09-08, vier von sechs
+  // Personas): Zahlungsstaffel, Betrieb im ersten Jahr, und — nur wenn der
+  // Nutzer selbst eine Zeitangabe gemacht hat — was der Status quo kostet.
+  const half = Math.round(result.price / 2);
+  const opsYear = RETAINER.basic.monthly * 12;
+  const savings = result.savings && result.savings.annualEuro > 0 ? result.savings : null;
+  const paybackMonths = savings ? Math.max(1, Math.round((result.price / savings.annualEuro) * 12)) : null;
+  const today = new Intl.DateTimeFormat("de-DE", { day: "numeric", month: "long", year: "numeric" }).format(new Date());
 
   return (
     <div className="solution" id="ergebnis">
@@ -128,9 +137,27 @@ export default function SolutionCard({
                 <dt>Summe</dt>
                 <dd>{formatEuro(result.price)}</dd>
               </div>
+              <div className="offer-calc-row offer-calc-soft">
+                <dt>Zahlung: {formatEuro(half)} bei Auftrag, {formatEuro(half)} nach Abnahme</dt>
+              </div>
+              <div className="offer-calc-row offer-calc-soft">
+                <dt>{RETAINER.basic.name} im ersten Jahr (optional, 12 × {RETAINER.basic.monthly} €)</dt>
+                <dd>{formatEuro(opsYear)}</dd>
+              </div>
             </dl>
           )}
 
+          {savings && (
+            <div className="offer-today" aria-label="Was der heutige Ablauf kostet">
+              <b>Was es Sie heute kostet:</b> ca. {formatEuro(savings.annualEuro)} im Jahr
+              {savings.quote ? <> — Ihre Angabe: „{savings.quote}“</> : null}. Basis: {savings.basis}.
+              {paybackMonths ? <> Amortisation nach etwa {paybackMonths} {paybackMonths === 1 ? "Monat" : "Monaten"}.</> : null}
+            </div>
+          )}
+
+          <p className="offer-price-sub">
+            Grundprodukt = vier Wochen Arbeit eines Kopfes mit AI: Kick-off-Workshop, die Anwendung mit Anmeldung und Rechten, Tests, Einweisung, Übergabe. Zahlung 50 % bei Auftrag, 50 % nach Abnahme.
+          </p>
           <p className="offer-price-sub">
             Vom KI-Berater aus Ihren Angaben gerechnet. Moritz prüft die Schätzung vor dem Gespräch. Alle Beträge {PRICE.vatNote}
           </p>
@@ -174,6 +201,11 @@ export default function SolutionCard({
         <div className="story-col">
           <div className="sketch-label">Ihr Weg zum Launch</div>
           <Timeline weeks={result.weeks} />
+          {!savings && (
+            <p className="sketch-nudge">
+              Wie viele Stunden kostet Sie der Ablauf heute? Schreiben Sie es unten — dann rechne ich Ersparnis und Amortisation dazu.
+            </p>
+          )}
           {restValue.length > 0 && (
             <div className="sketch-card-block">
               <div className="sketch-label">Ihr Vorteil</div>
@@ -233,8 +265,24 @@ export default function SolutionCard({
 
       {!booked && <EmailGate dialogId={dialogId} sketchTitle={sketch.title} />}
 
+      <div className="result-actions">
+        <button
+          type="button"
+          className="result-print"
+          onClick={() => window.print()}
+        >
+          Drucken oder als PDF speichern
+        </button>
+        <Link href="/it" className="result-itlink">
+          Fragen Ihrer IT oder Ihres Einkaufs? Fakten für Ihre IT →
+        </Link>
+      </div>
+
       <p className="result-disclaimer">
         Ersteinschätzung, kein Angebot — das Festpreisangebot folgt nach dem Gespräch. Alle Beträge {PRICE.vatNote}
+      </p>
+      <p className="print-only result-sender">
+        {SITE.name} · {SITE.founder.name} · {SITE.email} · Ersteinschätzung vom {today}. Richtpreis aus dem KI-Dialog, vor dem Gespräch persönlich geprüft.
       </p>
     </div>
   );
