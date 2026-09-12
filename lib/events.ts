@@ -317,3 +317,43 @@ export async function loadBookings(limit = 100): Promise<BookingRow[]> {
   }, "Buchungen laden");
   return rows ?? [];
 }
+
+export interface ProcessCheckRow {
+  id: string;
+  name: string;
+  email: string;
+  company: string;
+  process: string;
+  volume: string | null;
+  message: string | null;
+  status: string;
+  deliveryStatus: string;
+  createdAt: Date | null;
+}
+
+export async function loadProcessChecks(days: number, limit = 200): Promise<ProcessCheckRow[]> {
+  const cutoff = new Date(Date.now() - Math.max(1, days) * 24 * 3600 * 1000);
+  const rows = await safe(async (db: Firestore) => {
+    const snap = await db.collection("processChecks")
+      .where("createdAt", ">=", cutoff)
+      .orderBy("createdAt", "desc")
+      .limit(limit)
+      .get();
+    return snap.docs.map((doc) => {
+      const value = doc.data() as Record<string, unknown>;
+      return {
+        id: doc.id,
+        name: typeof value.name === "string" ? value.name : "",
+        email: typeof value.email === "string" ? value.email : "",
+        company: typeof value.company === "string" ? value.company : "",
+        process: typeof value.process === "string" ? value.process : "",
+        volume: typeof value.volume === "string" ? value.volume : null,
+        message: typeof value.message === "string" ? value.message : null,
+        status: typeof value.status === "string" ? value.status : "new",
+        deliveryStatus: typeof value.deliveryStatus === "string" ? value.deliveryStatus : "unknown",
+        createdAt: (value.createdAt as { toDate?: () => Date })?.toDate?.() ?? null,
+      };
+    });
+  }, "Prozess-Checks laden");
+  return rows ?? [];
+}

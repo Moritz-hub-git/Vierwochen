@@ -6,18 +6,27 @@
  * Seit dem Vollreview (Audit T4/CF-07) wird das Versprechen auch eingelöst:
  * Nach dem Speichern wird der Dialog geladen und die Einschätzung als Mail
  * verschickt. Klappt das nicht (kein MAIL_SENDER, kein Firestore, kein
- * Ergebnis im Dialog), antwortet die Route trotzdem ok — mit `sent:false`,
- * damit die Oberfläche ehrlich sagt, dass Moritz sich persönlich meldet.
+ * Ergebnis im Dialog), meldet die Route den tatsächlichen Speicher- und
+ * Versandstatus. Ohne einen erfolgreichen Kanal gibt es keinen Erfolg zurück.
  */
 import { NextResponse } from "next/server";
 import { FieldValue } from "@google-cloud/firestore";
-import { SITE } from "@/lib/config";
+import { SITE, contactEmail } from "@/lib/config";
 import type { ChatMessage, DialogTurn } from "@/lib/dialog";
 import { checkBusinessEmail } from "@/lib/email";
 import { recordEvent } from "@/lib/events";
 import { safe } from "@/lib/firestore";
-import { leadSketchHtml, leadSketchSubject, ownerNoticeHtml, sendMail } from "@/lib/mail";
-import { clientIp } from "@/lib/ratelimit";
+import {
+  leadSketchHtml,
+  leadSketchSubject,
+  ownerNoticeHtml,
+  sendMail,
+} from "@/lib/mail";
+import {
+  checkPersistentDailyLimit,
+  checkWindowLimit,
+  clientIp,
+} from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -27,6 +36,7 @@ interface LeadRequest {
   name?: string;
   dialogId?: string;
   sketchTitle?: string;
+  website?: string;
 }
 
 /** Letzter Modell-Zug mit Ergebnis — followup darf das result aktualisiert haben. */
@@ -37,7 +47,8 @@ function lastResultTurn(messages: unknown): DialogTurn | null {
     if (m?.role !== "assistant" || typeof m.content !== "string") continue;
     try {
       const turn = JSON.parse(m.content) as DialogTurn;
-      if (turn?.result && typeof turn.result.price === "number" && turn.sketch) return turn;
+      if (turn?.result && typeof turn.result.price === "number" && turn.sketch)
+        return turn;
     } catch {
       // Alt-Züge ohne JSON: überspringen.
     }
@@ -46,11 +57,40 @@ function lastResultTurn(messages: unknown): DialogTurn | null {
 }
 
 export async function POST(req: Request) {
+  const ip = clientIp(req);
+  if (!checkWindowLimit(`lead:${ip}`, 5, 15 * 60_000)) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Zu viele Anfragen. Bitte versuchen Sie es später erneut.",
+      },
+      { status: 429 },
+    );
+  }
+  if (!(await checkPersistentDailyLimit("lead", ip, 20))) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "Das Tageslimit ist erreicht. Bitte versuchen Sie es morgen erneut.",
+      },
+      { status: 429 },
+    );
+  }
   let body: LeadRequest;
   try {
     body = (await req.json()) as LeadRequest;
   } catch {
-    return NextResponse.json({ ok: false, error: "Ungültige Anfrage." }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: "Ungültige Anfrage." },
+      { status: 400 },
+    );
+  }
+  if (typeof body.website === "string" && body.website.trim()) {
+    return NextResponse.json(
+      { ok: false, error: "Anfrage abgelehnt." },
+      { status: 400 },
+    );
   }
 
   const check = checkBusinessEmail(body.email ?? "");
@@ -59,15 +99,21 @@ export async function POST(req: Request) {
       check.reason === "freemail"
         ? `Dafür brauchen wir Ihre geschäftliche Adresse — private Postfächer wie Gmail, Web.de oder GMX lassen sich hier nicht zuordnen. Ohne Firmenadresse: einfach einen Termin buchen oder an ${SITE.email} schreiben.`
         : "Das sieht nicht wie eine gültige E-Mail-Adresse aus.";
-    return NextResponse.json({ ok: false, reason: check.reason, error: message }, { status: 422 });
+    return NextResponse.json(
+      { ok: false, reason: check.reason, error: message },
+      { status: 422 },
+    );
   }
 
-  const name = typeof body.name === "string" ? body.name.trim().slice(0, 200) : "";
+  const name =
+    typeof body.name === "string" ? body.name.trim().slice(0, 200) : "";
   const dialogId =
-    typeof body.dialogId === "string" && /^[a-zA-Z0-9-]{8,64}$/.test(body.dialogId)
+    typeof body.dialogId === "string" &&
+    /^[a-zA-Z0-9-]{8,64}$/.test(body.dialogId)
       ? body.dialogId
       : null;
-  const sketchTitle = typeof body.sketchTitle === "string" ? body.sketchTitle.slice(0, 300) : "";
+  const sketchTitle =
+    typeof body.sketchTitle === "string" ? body.sketchTitle.slice(0, 300) : "";
 
   const leadRef = await safe(
     (db) =>
@@ -77,10 +123,10 @@ export async function POST(req: Request) {
         name,
         dialogId,
         sketchTitle: sketchTitle || null,
-        ip: clientIp(req),
+        ip,
         createdAt: FieldValue.serverTimestamp(),
       }),
-    "Lead speichern"
+    "Lead speichern",
   );
 
   void recordEvent({
@@ -119,28 +165,69 @@ export async function POST(req: Request) {
       }),
     });
     if (leadRef) {
-      await safe(async () => leadRef.update({ sketchMailSent: sent, sketchMailAt: FieldValue.serverTimestamp() }), "Lead-Mailstatus");
+      await safe(
+        async () =>
+          leadRef.update({
+            sketchMailSent: sent,
+            sketchMailAt: FieldValue.serverTimestamp(),
+          }),
+        "Lead-Mailstatus",
+      );
     }
   } else {
-    console.warn(`[lead] Kein Ergebnis für Dialog ${dialogId ?? "—"} — Einschätzung wird persönlich nachgereicht.`);
+    console.warn(
+      `[lead] Kein Ergebnis für Dialog ${dialogId ?? "—"} — Einschätzung wird persönlich nachgereicht.`,
+    );
   }
 
-  // Owner-Benachrichtigung — nachgelagert, verzögert die Antwort nicht.
-  void sendMail({
-    to: SITE.email,
+  const ownerNotified = await sendMail({
+    to: contactEmail(),
     subject: `Neuer Lead per E-Mail: ${check.email}${sketchTitle ? ` — ${sketchTitle}` : ""}`,
     html: ownerNoticeHtml({
-      heading: sent ? "Neuer Lead — Einschätzung wurde automatisch versendet" : "Neuer Lead — Einschätzung bitte PERSÖNLICH nachreichen",
+      heading: sent
+        ? "Neuer Lead — Einschätzung wurde automatisch versendet"
+        : "Neuer Lead — Einschätzung bitte PERSÖNLICH nachreichen",
       rows: [
         ["E-Mail", check.email],
         ["Name", name || "—"],
         ["Skizze", sketchTitle || turn?.sketch.title || "—"],
-        ["Richtpreis", turn?.result ? `${turn.result.price.toLocaleString("de-DE")} €` : "—"],
+        [
+          "Richtpreis",
+          turn?.result ? `${turn.result.price.toLocaleString("de-DE")} €` : "—",
+        ],
         ["Dialog-ID", dialogId ?? "—"],
-        ["Mail an Lead", sent ? "versendet" : "NICHT versendet (kein Ergebnis oder Versand nicht konfiguriert)"],
+        [
+          "Mail an Lead",
+          sent
+            ? "versendet"
+            : "NICHT versendet (kein Ergebnis oder Versand nicht konfiguriert)",
+        ],
       ],
     }),
-  }).catch((err) => console.warn("[lead] Owner-Benachrichtigung fehlgeschlagen:", err));
+  });
 
-  return NextResponse.json({ ok: true, sent });
+  const persisted = leadRef !== null;
+  if (!persisted && !sent && !ownerNotified) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: `Ihre Anfrage konnte nicht gespeichert oder zugestellt werden. Bitte schreiben Sie direkt an ${SITE.email}.`,
+        persisted: false,
+        sent: false,
+      },
+      { status: 503 },
+    );
+  }
+  const message = sent
+    ? `Die Einschätzung wurde an ${check.email} gesendet.`
+    : ownerNotified
+      ? "Ihre Anfrage wurde an OpsDone zugestellt. Die Einschätzung konnte nicht automatisch versandt werden."
+      : "Ihre Anfrage wurde gespeichert. Die Einschätzung konnte nicht automatisch versandt werden.";
+  return NextResponse.json({
+    ok: true,
+    persisted,
+    sent,
+    ownerNotified,
+    message,
+  });
 }

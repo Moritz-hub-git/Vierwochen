@@ -1,60 +1,27 @@
 "use client";
 
-import { planDates } from "@/lib/timeline";
-
-/**
- * Der Weg zum Launch — bewusst knapp (Rücksprache 2026-08-15: die vorherige
- * Fassung mit sechs Einzelschritten wirkte überladen). Drei Stationen genügen,
- * um aus der Vier-Wochen-Zusage einen Plan mit echten Daten zu machen: das
- * Beratungsgespräch (der nächste Klick), der Kick-off, der Launch. Die
- * Bauphase selbst steht kompakt als eine Zeile mit den vier Wochenzielen.
- *
- * Daten kommen aus lib/timeline.ts (Audit CP-07/CF-08): Kick-off frühestens
- * am Montag in zehn Tagen, Launch 25 Tage später — und beides als
- * „frühestens" beschriftet, weil zwischen Gespräch und Start Angebot und
- * Unterschrift liegen, die nicht die Seite terminiert.
- */
-
-const fmtLong = (d: Date) =>
-  new Intl.DateTimeFormat("de-DE", { weekday: "short", day: "numeric", month: "long" }).format(d);
-
+/** The legacy `weeks` prop now carries scoped phases without a duration promise. */
 export default function Timeline({ weeks }: { weeks: { week: number; label: string }[] }) {
-  const { kickoff, launch } = planDates();
-
   return (
     <div className="sched">
       <ol className="sched-list">
         <li className="sched-item sched-item-now">
           <span className="sched-dot sched-dot-pulse" aria-hidden />
           <span className="sched-body">
-            <span className="sched-date">Diese Woche</span>
-            <span className="sched-title">Beratungsgespräch mit Moritz</span>
+            <span className="sched-date">Erster Schritt</span>
+            <span className="sched-title">Prozessgespräch und Zielbild</span>
           </span>
         </li>
 
-        <li className="sched-item">
-          <span className="sched-dot" aria-hidden />
-          <span className="sched-body">
-            <span className="sched-date">Frühestens {fmtLong(kickoff)}</span>
-            <span className="sched-title">Kick-off-Workshop</span>
-          </span>
-        </li>
-
-        {weeks.length > 0 && (
-          <li className="sched-item sched-item-build">
-            <span className="sched-dot sched-dot-num" aria-hidden>4</span>
+        {weeks.map((phase, index) => (
+          <li className="sched-item sched-item-build" key={`${phase.week}-${phase.label}`}>
+            <span className="sched-dot sched-dot-num" aria-hidden>{index + 1}</span>
             <span className="sched-body">
-              <span className="sched-date">4 Wochen Bauzeit</span>
-              <span className="sched-weeks">
-                {weeks.map((w) => (
-                  <span className="sched-week" key={w.week}>
-                    <b>W{w.week}</b> {w.label}
-                  </span>
-                ))}
-              </span>
+              <span className="sched-date">Phase {index + 1}</span>
+              <span className="sched-title">{phase.label}</span>
             </span>
           </li>
-        )}
+        ))}
 
         <li className="sched-item sched-item-final">
           <span className="sched-dot sched-dot-final" aria-hidden>
@@ -63,8 +30,8 @@ export default function Timeline({ weeks }: { weeks: { week: number; label: stri
             </svg>
           </span>
           <span className="sched-body">
-            <span className="sched-date">Live frühestens am {fmtLong(launch)}</span>
-            <span className="sched-title">Launch &amp; Abnahme</span>
+            <span className="sched-date">Nach erfolgreicher Abnahme</span>
+            <span className="sched-title">Managed Automation im Betrieb</span>
           </span>
         </li>
       </ol>

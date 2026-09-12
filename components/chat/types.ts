@@ -17,7 +17,7 @@ export interface DialogResult {
   tier: string;
   /** Ein gerundeter Betrag („unverbindliche Preisschätzung"), keine Spanne. */
   price: number;
-  /** Herleitung: Grundprodukt + Bausteine; die Summe rechnet der Server. */
+  /** Herleitung: Pilot und erkannte Scope-Bausteine; die Summe rechnet der Server. */
   priceItems: { label: string; euro: number }[];
   scope: string[];
   weeks: { week: number; label: string }[];

@@ -9,8 +9,10 @@
  * zugeordnet werden kann — das ist die Grundlage für den Google-Rückkanal.
  */
 
-const SESSION_KEY = "vw_sid";
-const ATTR_KEY = "vw_attr";
+const SESSION_KEY = "opsdone_sid";
+const ATTR_KEY = "opsdone_attr";
+const LEGACY_SESSION_KEY = "vw_sid";
+const LEGACY_ATTR_KEY = "vw_attr";
 
 const ATTR_PARAMS = [
   "gclid", "gbraid", "wbraid",
@@ -29,7 +31,7 @@ function newId(): string {
 export function sessionId(): string {
   if (typeof window === "undefined") return "";
   try {
-    let id = sessionStorage.getItem(SESSION_KEY);
+    let id = sessionStorage.getItem(SESSION_KEY) ?? sessionStorage.getItem(LEGACY_SESSION_KEY);
     if (!id) {
       id = newId();
       sessionStorage.setItem(SESSION_KEY, id);
@@ -51,7 +53,7 @@ export type Attribution = Record<string, string>;
 export function captureAttribution(): Attribution {
   if (typeof window === "undefined") return {};
   try {
-    const stored = sessionStorage.getItem(ATTR_KEY);
+    const stored = sessionStorage.getItem(ATTR_KEY) ?? sessionStorage.getItem(LEGACY_ATTR_KEY);
     if (stored) return JSON.parse(stored) as Attribution;
   } catch {
     // weiter unten neu aufbauen

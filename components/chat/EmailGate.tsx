@@ -24,9 +24,7 @@ export default function EmailGate({
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  // done: null = noch nicht; true = Mail ist raus; false = Moritz reicht sie
-  // persönlich nach (kein Versand konfiguriert oder Dialog ohne Ergebnis).
-  const [done, setDone] = useState<boolean | null>(null);
+  const [done, setDone] = useState<string | null>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,12 +36,12 @@ export default function EmailGate({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, dialogId, sketchTitle }),
       });
-      const data = (await res.json()) as { ok: boolean; sent?: boolean; error?: string };
+      const data = (await res.json()) as { ok: boolean; sent?: boolean; persisted?: boolean; message?: string; error?: string };
       if (!data.ok) {
         setError(data.error ?? "Das hat nicht geklappt. Bitte prüfen Sie die Adresse.");
         return;
       }
-      setDone(data.sent === true);
+      setDone(data.message ?? (data.sent ? `Die Einschätzung wurde an ${email} gesendet.` : "Ihre Anfrage wurde gespeichert."));
     } catch {
       setError("Keine Verbindung. Bitte versuchen Sie es erneut.");
     } finally {
@@ -51,14 +49,11 @@ export default function EmailGate({
     }
   };
 
-  // Nur versprechen, was wirklich passiert ist (Audit T4/CF-07): Die Mail ist
-  // entweder nachweislich raus — oder Moritz schickt sie selbst.
+  // Nur den vom Server bestätigten Speicher- oder Versandstatus anzeigen.
   if (done !== null) {
     return (
       <p className="gate-done" role="status">
-        {done
-          ? `Ist unterwegs: Die Einschätzung mit Lösungsskizze und Preis-Herleitung geht an ${email}.`
-          : "Danke — Moritz schickt Ihnen die Einschätzung innerhalb eines Werktags persönlich."}
+        {done}
       </p>
     );
   }

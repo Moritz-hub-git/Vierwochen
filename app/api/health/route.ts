@@ -26,7 +26,10 @@ export async function GET(req: Request) {
     return NextResponse.json(base);
   }
   if (!checkMinuteLimit(clientIp(req))) {
-    return NextResponse.json({ ...base, probe: { skipped: "Zu viele Anfragen." } }, { status: 429 });
+    return NextResponse.json(
+      { ...base, probe: { skipped: "Zu viele Anfragen." } },
+      { status: 429 },
+    );
   }
   // Optionaler Modellname, um nach einem Wechsel Kandidaten zu prüfen, ohne neu
   // auszurollen. Bewusst eng gefasst: nur Gemini-Kennungen, und der Aufruf
@@ -35,10 +38,19 @@ export async function GET(req: Request) {
   const candidate = params.get("model") ?? undefined;
   const candidateLocation = params.get("location") ?? undefined;
   if (candidate && !/^gemini-[a-z0-9.-]{1,40}$/.test(candidate)) {
-    return NextResponse.json({ ...base, probe: { ok: false, error: "Ungültiger Modellname." } }, { status: 400 });
+    return NextResponse.json(
+      { ...base, probe: { ok: false, error: "Ungültiger Modellname." } },
+      { status: 400 },
+    );
   }
   if (candidateLocation && !/^[a-z0-9-]{2,20}$/.test(candidateLocation)) {
-    return NextResponse.json({ ...base, probe: { ok: false, error: "Ungültiger Standort." } }, { status: 400 });
+    return NextResponse.json(
+      { ...base, probe: { ok: false, error: "Ungültiger Standort." } },
+      { status: 400 },
+    );
   }
-  return NextResponse.json({ ...base, probe: await probeModel(candidate, candidateLocation) });
+  return NextResponse.json({
+    ...base,
+    probe: await probeModel(candidate, candidateLocation),
+  });
 }

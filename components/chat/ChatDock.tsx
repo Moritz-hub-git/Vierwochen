@@ -16,14 +16,14 @@ import type { DialogInput, DialogResult, DialogTurn, Sketch, UiMessage } from ".
  *
  * Offenlegung (EU-KI-VO Art. 50): Es antwortet erkennbar eine KI — unter der
  * Leiste im Ruhezustand und im offenen Panel als dauerhafte Kopfzeile. Die
- * Skizze prüft Moritz persönlich; das steht dort ebenfalls.
+ * Ergebnisse sind ausdrücklich als unverbindliche KI-Einschätzung markiert.
  */
 
 /** Einstiegsbeispiele im geöffneten Dialog: Wer nicht formulieren muss, fängt eher an. */
 const STARTERS = [
   "Wir pflegen Artikel in mehreren Excel-Listen und tippen alles doppelt ein.",
   "Bestellungen kommen ins Sammelpostfach und gehen dort unter.",
-  "Ich habe eine Produktidee und brauche eine erste Version, die läuft.",
+  "Rechnungen werden aus E-Mails abgetippt und manuell im ERP geprüft.",
 ];
 
 /** Vorschläge, die beim Anklicken der Dialogleiste aufsteigen. Auf der
@@ -40,20 +40,20 @@ const DOCK_HINTS = [
     text: "Wir pflegen unsere Artikel- und Kundendaten in mehreren Excel-Listen. Jede Änderung muss an mehreren Stellen nachgetragen werden, und am Ende weiß niemand sicher, welche Liste gerade stimmt.",
   },
   {
-    label: "Produktidee, erste Version",
-    text: "Ich habe eine Produktidee und brauche eine erste Version, die echte Nutzer bedienen können: Anmeldung, Datenhaltung, die Kernfunktion. Kein Klick-Prototyp, sondern etwas, das läuft.",
+    label: "Rechnungen ins ERP übertragen",
+    text: "Eingangsrechnungen kommen per E-Mail. Unser Team liest die Daten ab, gleicht sie mit Bestellungen ab und überträgt sie manuell ins ERP.",
   },
   {
-    label: "IT hat keine Zeit für unser Tool",
-    text: "Unsere IT hat keine Kapazität für das Werkzeug, das unser Fachbereich braucht. Wir helfen uns mit Excel und Mails und brauchen etwas, das wir in wenigen Wochen nutzen können — abgestimmt mit der IT.",
+    label: "IT hat keine Zeit für den Ablauf",
+    text: "Unser Fachbereich bearbeitet einen wiederkehrenden Ablauf mit Excel und E-Mails. Die IT kann ihn gerade nicht automatisieren, die bestehenden Systeme sollen aber erhalten bleiben.",
   },
   {
     label: "Bestellungen gehen unter",
     text: "Bestellungen erreichen uns als PDF oder Mail im Sammelpostfach. Jemand muss sie von Hand ins System übertragen, dabei bleibt regelmäßig etwas liegen und Kunden fragen nach.",
   },
   {
-    label: "Prototyp muss jetzt echt laufen",
-    text: "Wir haben einen Prototyp, der jetzt echt laufen muss: mehrere Nutzer, Rechte, Anbindung an ein bestehendes System und ein sauberer Betrieb statt Bastellösung.",
+    label: "Freigaben kosten Zeit",
+    text: "Vorgänge werden per E-Mail weitergeleitet, bis alle Freigaben da sind. Status und Ausnahmen müssen jedes Mal manuell nachverfolgt werden.",
   },
   {
     label: "Ein Portal für unsere Kunden",
@@ -667,7 +667,7 @@ export default function ChatDock() {
             leise, unter der Leiste, nur im Ruhezustand. */}
         {!open && (
           <p className="dock-note">
-            KI-Berater · meist 3 Fragen, eine Minute · Moritz prüft jede Skizze persönlich
+            KI-Prozesscheck · meist 3 Fragen · unverbindliche Ersteinschätzung
           </p>
         )}
         </div>

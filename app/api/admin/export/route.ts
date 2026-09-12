@@ -6,7 +6,7 @@
  */
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/adminAuth";
-import { loadCases, loadEvents } from "@/lib/events";
+import { loadCases, loadEvents, loadProcessChecks } from "@/lib/events";
 
 export const dynamic = "force-dynamic";
 
@@ -26,18 +26,41 @@ const iso = (d: Date | null) => (d ? d.toISOString() : "");
 
 export async function GET(req: Request) {
   if (!(await isAdmin())) {
-    return NextResponse.json({ ok: false, error: "Zugang erforderlich." }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "Zugang erforderlich." },
+      { status: 401 },
+    );
   }
 
   const url = new URL(req.url);
-  const days = Math.min(365, Math.max(1, Number(url.searchParams.get("tage")) || 30));
-  const what = url.searchParams.get("was") === "ereignisse" ? "ereignisse" : "faelle";
+  const days = Math.min(
+    365,
+    Math.max(1, Number(url.searchParams.get("tage")) || 30),
+  );
+  const requested = url.searchParams.get("was");
+  const what =
+    requested === "ereignisse" || requested === "prozesschecks"
+      ? requested
+      : "faelle";
 
   let rows: unknown[][];
   if (what === "ereignisse") {
     const events = await loadEvents(days);
     rows = [
-      ["Zeitpunkt", "Typ", "Sitzung", "Dialog", "Pfad", "gclid", "utm_source", "utm_medium", "utm_campaign", "Verweis", "Landung", "Meta"],
+      [
+        "Zeitpunkt",
+        "Typ",
+        "Sitzung",
+        "Dialog",
+        "Pfad",
+        "gclid",
+        "utm_source",
+        "utm_medium",
+        "utm_campaign",
+        "Verweis",
+        "Landung",
+        "Meta",
+      ],
       ...events.map((e) => [
         iso(e.createdAt),
         e.type,
@@ -53,10 +76,49 @@ export async function GET(req: Request) {
         JSON.stringify(e.meta ?? {}),
       ]),
     ];
+  } else if (what === "prozesschecks") {
+    const checks = await loadProcessChecks(days, 1000);
+    rows = [
+      [
+        "Zeitpunkt",
+        "ID",
+        "Name",
+        "E-Mail",
+        "Unternehmen",
+        "Prozess",
+        "Volumen",
+        "Zusatz",
+        "Status",
+        "Zustellung",
+      ],
+      ...checks.map((check) => [
+        iso(check.createdAt),
+        check.id,
+        check.name,
+        check.email,
+        check.company,
+        check.process,
+        check.volume ?? "",
+        check.message ?? "",
+        check.status,
+        check.deliveryStatus,
+      ]),
+    ];
   } else {
     const cases = await loadCases(500);
     rows = [
-      ["Zeitpunkt", "Dialog", "Beschriebenes Problem", "Vorhaben", "Endphase", "Antworten", "Stufe", "Preis", "Personentage/Woche", "Status quo je Jahr"],
+      [
+        "Zeitpunkt",
+        "Dialog",
+        "Beschriebenes Problem",
+        "Vorhaben",
+        "Endphase",
+        "Antworten",
+        "Stufe",
+        "Preis",
+        "Personentage/Woche",
+        "Status quo je Jahr",
+      ],
       ...cases.map((c) => [
         iso(c.updatedAt),
         c.dialogId,
@@ -76,7 +138,7 @@ export async function GET(req: Request) {
   return new NextResponse(csv(rows), {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="vierwochen-${what}-${stamp}.csv"`,
+      "Content-Disposition": `attachment; filename="opsdone-${what}-${stamp}.csv"`,
       "Cache-Control": "no-store",
     },
   });

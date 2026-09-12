@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { SITE } from "@/lib/config";
-import { planDates } from "@/lib/timeline";
 import { captureAttribution, sessionId, track } from "@/lib/track";
 
 /**
@@ -235,18 +234,10 @@ export default function Booking({
           </div>
           <h3>{success.mode === "angefragt" ? "Anfrage eingegangen" : "Termin gebucht"}</h3>
           <p style={{ marginBottom: 0 }}>{success.message}</p>
-          {success.mode === "angefragt" ? (
-            <ul className="booking-next">
-              <li>Sie erhalten in Kürze eine persönliche Bestätigung mit Termin und Zugangslink.</li>
-              <li>Moritz liest Ihre Skizze vorher durch — das Gespräch startet direkt bei Ihren offenen Punkten.</li>
-            </ul>
-          ) : (
-            <ul className="booking-next">
-              <li>Die Kalendereinladung mit Zugangslink ist unterwegs.</li>
-              <li>Moritz liest Ihre Skizze vorher persönlich durch.</li>
-              <li>Ihr Kalender erinnert Sie automatisch kurz vor dem Termin.</li>
-            </ul>
-          )}
+          <ul className="booking-next">
+            <li>{success.mode === "angefragt" ? "Der Termin wird noch persönlich bestätigt." : "Der Termin wurde im Kalender angelegt."}</li>
+            <li>Ihre Prozessskizze dient als Ausgangspunkt für das Gespräch.</li>
+          </ul>
         </div>
       </div>
     );
@@ -350,7 +341,7 @@ export default function Booking({
                 )}
                 <span className="advisor-text">
                   <strong>{SITE.founder.name}</strong>
-                  <span className="advisor-role">baut Ihr Projekt persönlich — mit AI</span>
+                  <span className="advisor-role">prüft Ihren Prozess und den sinnvollen Pilotumfang</span>
                 </span>
                 <span className="advisor-picked" aria-hidden>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -528,14 +519,9 @@ export default function Booking({
                 Details: <a href="/datenschutz" target="_blank" rel="noopener">Datenschutz</a>.
               </p>
 
-              {/* Knappheit ohne erfundene Obergrenze (Rücksprache 2026-09-08):
-                  Kapazität lässt sich mit Partnern erweitern, ein Startdatum
-                  nicht. Deshalb steht hier der nächste mögliche Kick-off aus
-                  lib/timeline.ts statt einer selbstgesetzten Projektgrenze. */}
               <p className="booking-scarcity">
-                <strong>Nächster möglicher Start:</strong>{" "}
-                {new Intl.DateTimeFormat("de-DE", { weekday: "long", day: "numeric", month: "long" }).format(planDates().kickoff)}
-                {" "}— danach vier Wochen bis live.
+                <strong>Im Gespräch klären wir:</strong> Automatisierbare Standardfälle, notwendige Freigaben,
+                Integrationen und den belastbaren Umfang eines Piloten.
               </p>
             </div>
           )}

@@ -17,10 +17,22 @@
   margin-bottom: 2rem;
 }
 
-.head h1 { font-size: 1.9rem; margin: 0; }
-.sub { color: var(--text-muted); font-size: 0.9rem; margin: 0.2rem 0 0; }
+.head h1 {
+  font-size: 1.9rem;
+  margin: 0;
+}
+.sub {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0.2rem 0 0;
+}
 
-.range { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.range {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
 
 .range a {
   font-size: 0.85rem;
@@ -53,8 +65,13 @@
   margin-bottom: 2rem;
 }
 
-.section { margin-bottom: 2.8rem; }
-.section h2 { font-size: 1.15rem; margin-bottom: 1rem; }
+.section {
+  margin-bottom: 2.8rem;
+}
+.section h2 {
+  font-size: 1.15rem;
+  margin-bottom: 1rem;
+}
 
 .hint {
   font-size: 0.88rem;
@@ -65,22 +82,35 @@
 
 /* ---------- Trichter ---------- */
 
-.funnel { display: grid; gap: 0.5rem; }
+.funnel {
+  display: grid;
+  gap: 0.5rem;
+}
 
 .funnelRow {
   display: grid;
-  grid-template-columns: minmax(150px, 1.1fr) minmax(80px, 2fr) 3.5rem minmax(110px, 1fr);
+  grid-template-columns: minmax(150px, 1.1fr) minmax(80px, 2fr) 3.5rem minmax(
+      110px,
+      1fr
+    );
   align-items: center;
   gap: 0.8rem;
   font-size: 0.9rem;
 }
 
 @media (max-width: 720px) {
-  .funnelRow { grid-template-columns: 1fr 3.2rem; }
-  .funnelBarWrap, .funnelPct { display: none; }
+  .funnelRow {
+    grid-template-columns: 1fr 3.2rem;
+  }
+  .funnelBarWrap,
+  .funnelPct {
+    display: none;
+  }
 }
 
-.funnelLabel { color: var(--text-soft); }
+.funnelLabel {
+  color: var(--text-soft);
+}
 
 .funnelBarWrap {
   height: 22px;
@@ -104,11 +134,16 @@
   text-align: right;
 }
 
-.funnelPct { color: var(--text-muted); font-size: 0.82rem; }
+.funnelPct {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
 
 /* ---------- Tabellen ---------- */
 
-.tableWrap { overflow-x: auto; }
+.tableWrap {
+  overflow-x: auto;
+}
 
 .table {
   width: 100%;
@@ -120,7 +155,8 @@
   overflow: hidden;
 }
 
-.table th, .table td {
+.table th,
+.table td {
   text-align: left;
   padding: 0.6rem 0.85rem;
   border-bottom: 1px solid var(--border);
@@ -136,17 +172,29 @@
   white-space: nowrap;
 }
 
-.table tr:last-child td { border-bottom: 0; }
+.table tr:last-child td {
+  border-bottom: 0;
+}
 
-.mono { font-family: var(--font-mono), ui-monospace, monospace; font-size: 0.82rem; }
-.wrapCell { max-width: 260px; }
+.mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.82rem;
+}
+.wrapCell {
+  max-width: 260px;
+}
 
 /* ---------- Fälle ---------- */
 
-.cases { display: grid; gap: 0.85rem; }
+.cases {
+  display: grid;
+  gap: 0.85rem;
+}
 
 @media (min-width: 900px) {
-  .cases { grid-template-columns: 1fr 1fr; }
+  .cases {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .case {
@@ -164,8 +212,15 @@
   margin-bottom: 0.6rem;
 }
 
-.caseDate { font-size: 0.78rem; color: var(--text-muted); }
-.caseTurns { font-size: 0.78rem; color: var(--text-muted); margin-left: auto; }
+.caseDate {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.caseTurns {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-left: auto;
+}
 
 .badge {
   font-size: 0.7rem;
@@ -174,9 +229,18 @@
   border-radius: 999px;
 }
 
-.badgeOk { background: var(--accent-soft); color: var(--accent); }
-.badgeWarn { background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--danger); }
-.badgeMuted { background: var(--surface-2); color: var(--text-muted); }
+.badgeOk {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.badgeWarn {
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
+  color: var(--danger);
+}
+.badgeMuted {
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
 
 .caseQuote {
   font-size: 0.95rem;

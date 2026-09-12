@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ACCEPTANCE_PROMISE, PRICE, RETAINER, SITE, WARRANTY_MONTHS } from "@/lib/config";
+import { ACCEPTANCE_PROMISE, PRICE, PRICE_DISCLAIMER, RETAINER, SITE } from "@/lib/config";
 import Booking from "./Booking";
 import EmailGate from "./EmailGate";
 import Timeline from "./Timeline";
@@ -15,7 +15,7 @@ import { formatEuro } from "./types";
  *
  *   1. Titel + EIN Satz Nutzen            → was ist das, warum lohnt es sich
  *   2. EINE Karte: Preis MIT HERLEITUNG    → „zeig mir die Rechnung, dann
- *      (Grundprodukt + Bausteine, Summe),    glaube ich bottom-up" (Persona
+ *      (Pilot + Bausteine, Summe),           glaube ich bottom-up" (Persona
  *      Betrieb als Standard, die eine        Lena, Audit CF-03); daneben die
  *      Zusage — direkt neben der Buchung     Terminwahl, im selben Blick
  *   3. Weg zum Launch neben der Skizze    → Kick-off/Launch als „frühestens"
@@ -104,8 +104,6 @@ export default function SolutionCard({
   // Was der Chef wissen will (Verifikation 2026-09-08, vier von sechs
   // Personas): Zahlungsstaffel, Betrieb im ersten Jahr, und — nur wenn der
   // Nutzer selbst eine Zeitangabe gemacht hat — was der Status quo kostet.
-  const half = Math.round(result.price / 2);
-  const opsYear = RETAINER.basic.monthly * 12;
   const savings = result.savings && result.savings.annualEuro > 0 ? result.savings : null;
   const paybackMonths = savings ? Math.max(1, Math.round((result.price / savings.annualEuro) * 12)) : null;
   const today = new Intl.DateTimeFormat("de-DE", { day: "numeric", month: "long", year: "numeric" }).format(new Date());
@@ -122,7 +120,7 @@ export default function SolutionCard({
           Schätzung sieht, soll im selben Blick auch buchen können. */}
       <div className="offer-card">
         <div className="offer-price">
-          <span className="offer-price-label">Richtpreis — wird im Gespräch zum Festpreis</span>
+          <span className="offer-price-label">Unverbindliche Implementierungsschätzung</span>
           <div className={`offer-price-value${pulse ? " is-updated" : ""}`}>{formatEuro(result.price)}</div>
 
           {items.length > 0 && (
@@ -138,11 +136,7 @@ export default function SolutionCard({
                 <dd>{formatEuro(result.price)}</dd>
               </div>
               <div className="offer-calc-row offer-calc-soft">
-                <dt>Zahlung: {formatEuro(half)} bei Auftrag, {formatEuro(half)} nach Abnahme</dt>
-              </div>
-              <div className="offer-calc-row offer-calc-soft">
-                <dt>{RETAINER.basic.name} im ersten Jahr (optional, 12 × {RETAINER.basic.monthly} €)</dt>
-                <dd>{formatEuro(opsYear)}</dd>
+                <dt>Ein klar begrenzter Pilot startet ab {formatEuro(PRICE.floor)}. Der finale Umfang wird gemeinsam festgelegt.</dt>
               </div>
             </dl>
           )}
@@ -156,16 +150,17 @@ export default function SolutionCard({
           )}
 
           <p className="offer-price-sub">
-            Grundprodukt = vier Wochen Arbeit eines Kopfes mit AI: Kick-off-Workshop, die Anwendung mit Anmeldung und Rechten, Tests, Einweisung, Übergabe. Zahlung 50 % bei Auftrag, 50 % nach Abnahme.
+            Die Schätzung umfasst die Prozessaufnahme und den beschriebenen Pilotumfang. Integrationen,
+            Datenqualität, Ausnahmewege und Service-Level werden im Prozessgespräch validiert.
           </p>
           <p className="offer-price-sub">
-            Vom KI-Berater aus Ihren Angaben gerechnet. Moritz prüft die Schätzung vor dem Gespräch. Alle Beträge {PRICE.vatNote}
+            Vom KI-Assistenten aus Ihren Angaben abgeleitet. Unverbindlich und vor dem Gespräch noch nicht persönlich geprüft. Alle Beträge {PRICE.vatNote}
           </p>
 
           {/* Betrieb als Standard, nicht als Fußnote (Vollreview: die
               einzige wiederkehrende Einnahme) — Werte aus lib/config.ts. */}
           <p className="offer-retainer">
-            <b>Danach:</b> {RETAINER.basic.name} ab {RETAINER.basic.monthly} €/Monat ({RETAINER.basic.includes}) · {RETAINER.notice}
+            <b>Im Betrieb:</b> {RETAINER.basic.name} ({RETAINER.basic.includes}); {RETAINER.monthlyLabel}. {RETAINER.notice}.
           </p>
 
           {/* Dieselbe Pillen-Sprache wie auf der Startseite — mit der einen
@@ -175,7 +170,7 @@ export default function SolutionCard({
               <PillIcon kind="pay" /> {ACCEPTANCE_PROMISE}
             </span>
             <span className="offer-pill">
-              <PillIcon kind="shield" /> {WARRANTY_MONTHS} Monate Gewährleistung
+              <PillIcon kind="shield" /> Freigaben und Ausnahmewege nach Risiko
             </span>
             <span className="offer-pill">
               <PillIcon kind="code" /> Code gehört Ihnen
@@ -199,13 +194,8 @@ export default function SolutionCard({
 
       <div className="solution-story">
         <div className="story-col">
-          <div className="sketch-label">Ihr Weg zum Launch</div>
+          <div className="sketch-label">Mögliche Umsetzungsphasen</div>
           <Timeline weeks={result.weeks} />
-          {!savings && (
-            <p className="sketch-nudge">
-              Wie viele Stunden kostet Sie der Ablauf heute? Schreiben Sie es unten — dann rechne ich Ersparnis und Amortisation dazu.
-            </p>
-          )}
           {restValue.length > 0 && (
             <div className="sketch-card-block">
               <div className="sketch-label">Ihr Vorteil</div>
@@ -279,10 +269,10 @@ export default function SolutionCard({
       </div>
 
       <p className="result-disclaimer">
-        Ersteinschätzung, kein Angebot — das Festpreisangebot folgt nach dem Gespräch. Alle Beträge {PRICE.vatNote}
+        {PRICE_DISCLAIMER}
       </p>
       <p className="print-only result-sender">
-        {SITE.name} · {SITE.founder.name} · {SITE.email} · Ersteinschätzung vom {today}. Richtpreis aus dem KI-Dialog, vor dem Gespräch persönlich geprüft.
+        {SITE.name} · {SITE.founder.name} · {SITE.email} · Ersteinschätzung vom {today}. Unverbindliche Schätzung aus dem KI-Dialog.
       </p>
     </div>
   );

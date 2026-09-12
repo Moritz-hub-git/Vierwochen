@@ -3,7 +3,7 @@
  * hält sie ein (Vollreview 2026-09-08: die Zusagen standen im Text, nirgends
  * im Code).
  *
- *   • IP-Adressen: nach RETENTION.ipDays aus Dialogen, Buchungen und Leads
+ *   • IP-Adressen: nach RETENTION.ipDays aus Dialogen, Buchungen, Leads und Prozess-Checks
  *     entfernt; Tageszähler (rateLimits) ganz gelöscht.
  *   • Dialoge ohne Kontaktangabe: nach RETENTION.dialogDays gelöscht. „Mit
  *     Kontaktangabe" heißt: ein Lead oder eine Buchung verweist auf den
@@ -22,7 +22,7 @@ import { firestore } from "./firestore";
 
 export interface RetentionReport {
   ranAt: string;
-  ipsStripped: { dialogs: number; bookings: number; leads: number };
+  ipsStripped: { dialogs: number; bookings: number; leads: number; processChecks: number };
   rateLimitsDeleted: number;
   dialogsDeleted: number;
   dialogsKept: number;
@@ -111,7 +111,7 @@ export async function runRetention(now = new Date()): Promise<RetentionReport | 
 
   const report: RetentionReport = {
     ranAt: now.toISOString(),
-    ipsStripped: { dialogs: 0, bookings: 0, leads: 0 },
+    ipsStripped: { dialogs: 0, bookings: 0, leads: 0, processChecks: 0 },
     rateLimitsDeleted: 0,
     dialogsDeleted: 0,
     dialogsKept: 0,
@@ -139,6 +139,12 @@ export async function runRetention(now = new Date()): Promise<RetentionReport | 
   });
   await step("IP Leads", async () => {
     report.ipsStripped.leads = await stripIps(db, db.collection("leads").where("createdAt", "<", ipCutoff).orderBy("createdAt"));
+  });
+  await step("IP Prozess-Checks", async () => {
+    report.ipsStripped.processChecks = await stripIps(
+      db,
+      db.collection("processChecks").where("createdAt", "<", ipCutoff).orderBy("createdAt")
+    );
   });
   await step("Tageszähler", async () => {
     // Dokument-ID beginnt mit dem UTC-Tag (YYYY-MM-DD_…); das Feld `day` trägt ihn auch.
@@ -176,8 +182,15 @@ let running: Promise<RetentionReport | null> | null = null;
  * ein Instanz-Gedächtnis; doppelte Läufe sind harmlos (idempotent).
  */
 export function scheduleOpportunisticRetention(now = new Date()): void {
-  if (running) return;
-  if (now.getTime() - lastOpportunisticRun < 24 * 3600 * 1000) return;
+  void runOpportunisticRetention(now);
+}
+
+/** Awaitable form for Next.js `after()`, so serverless runtimes finish cleanup. */
+export async function runOpportunisticRetention(
+  now = new Date(),
+): Promise<RetentionReport | null> {
+  if (running) return running;
+  if (now.getTime() - lastOpportunisticRun < 24 * 3600 * 1000) return null;
   lastOpportunisticRun = now.getTime();
   running = runRetention(now)
     .catch((err) => {
@@ -187,4 +200,5 @@ export function scheduleOpportunisticRetention(now = new Date()): void {
     .finally(() => {
       running = null;
     });
+  return running;
 }

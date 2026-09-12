@@ -108,7 +108,7 @@ export async function createEvent(input: EventInput): Promise<CreatedEvent> {
       ? {
           conferenceData: {
             createRequest: {
-              requestId: `vw-${input.startUtc.replace(/\D/g, "")}`,
+              requestId: `opsdone-${input.startUtc.replace(/\D/g, "")}`,
               conferenceSolutionKey: { type: "hangoutsMeet" },
             },
           },
