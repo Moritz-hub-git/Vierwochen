@@ -39,3 +39,7 @@ Die automatische Freigabeprüfung hat einen direkten Push auf main nicht freigeg
 ## Morgen zuerst
 
 Mit Auftragsbestätigungen starten. Ads bleiben Entwürfe; persönliche Links und spätere Anzeigen führen in den Chat. 15 passende warme Kontakte/Unternehmen in die Pipeline, fünf persönliche Gesprächsangebote vorbereiten, drei Discovery-Termine anstreben. Im Chat maximal drei Rückfragen, danach Vorschau und Inline-Termin. Im ersten Gespräch Volumen, echte Bearbeitungszeit, Ausnahmen und Datenzugang erfassen. Ein Pilotangebot erst nach diesem Abgleich zuschneiden. Ohne Kalender bleibt die Buchung eine Terminanfrage.
+
+## Aktualisierte AI-first-Prüfung
+
+Der abschließende Stand mit 28 bestandenen Tests, mobiler Prüfung und echtem Vertex-Dialog ist in [13-QA-RELEASE.md](13-QA-RELEASE.md) dokumentiert. Die aktuelle Preview-Revision ist vierwochen-00061-gaz.
