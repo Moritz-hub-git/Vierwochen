@@ -63,7 +63,7 @@ Gemeinsam festhalten: ein Input-Kanal, ein Vergleichsobjekt, ein Output, ein Fre
 
 **„Unsere IT muss das prüfen.“** — „Ja. Wir definieren früh Datenzugang, Rollen, Hosting und einen kleinen Testpfad. Ohne diese Prüfung wird kein Live-Betrieb zugesagt.“
 
-**„Das ist zu teuer.“** — „Lassen Sie uns zuerst die Baseline und den Pilotumfang prüfen. Der Preis ist eine interne Hypothese, kein Anspruch auf eine bestimmte Ersparnis.“
+**„Das ist zu teuer.“** — „Lassen Sie uns zuerst die Baseline und den Pilotumfang prüfen. Wir stellen die Investition und die laufenden Kosten dem realistischen Nutzen gegenüber. Wenn das wirtschaftlich nicht trägt, verkleinern wir den Umfang oder empfehlen keinen Pilot.“
 
 **„Wir melden uns.“** — „Gern. Darf ich zusammenfassen, welcher Nachweis für Ihre Entscheidung fehlt und bis wann Sie ihn prüfen möchten?“
 

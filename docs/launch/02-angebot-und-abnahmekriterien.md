@@ -28,7 +28,7 @@ Zeitfenster
 [Kick-off] · [Testversion] · [Pilotfenster] · [Abnahme]
 Abhängigkeiten und Fristverschiebungen: [ ]
 
-Preis (interne Hypothese, netto zzgl. USt.)
+Vereinbarte Investition (netto zzgl. USt.)
 Implementierung: [ ] €
 Betrieb ab Livegang: [ ] €/Monat, Umfang [ ]
 Zahlungsplan: [ ]
