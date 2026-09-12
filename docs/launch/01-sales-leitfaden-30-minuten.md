@@ -2,6 +2,10 @@
 
 Ziel ist ein belastbarer Pilot-Scope. Das Gespräch verkauft keine KI und verspricht keine Quote. Ein positives Ergebnis ist: Prozessowner, Baseline, Datenweg, Ausnahme- und Freigaberegeln sowie ein nächster Schritt sind klar.
 
+## Übergabe aus dem AI-first-Funnel
+
+Ads und organische Links öffnen das persistente Chat-Dock. Der Besucher beschreibt den Prozess, beantwortet höchstens drei Rückfragen und sieht die konkrete Vorschau ohne E-Mail-Gate. Unter der Vorschau folgt inline die Terminbuchung. Vor dem Gespräch liegen daher idealerweise Dialog-ID, Prozessskizze, offene Punkte und die vom Besucher genannte Agenda vor; diese Vorschau ist eine Gesprächsgrundlage, kein Angebot. Ist kein Kalender konfiguriert, wird der Slot als Terminanfrage manuell bestätigt.
+
 ## Vorbereitung (5 Minuten)
 
 Notiere Branche, Rolle, Anlass und vermuteten Prozess. Öffne das [Prozess-Aufnahme-Arbeitsblatt](./09-PROZESS-AUFNAHME.md) und das Scope-Template. Prüfe, welche Aussage belegt ist; vermutete Mengen bleiben Vermutung.

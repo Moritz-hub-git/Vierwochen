@@ -2,8 +2,8 @@
  * Freie Termine (PROMPT.md §7): reguläre Slots berechnen, dann Belegungen aus
  * Google Calendar (freeBusy) und aus der eigenen Datenbank herausfiltern.
  *
- * Fällt die Kalenderprüfung aus, werden die Slots trotzdem geliefert — die
- * Buchung prüft erneut und fängt Konflikte sauber ab. Der Funnel bricht nie.
+ * Konfigurierte Kalender müssen erfolgreich geprüft sein. Bei einem Fehler
+ * liefern wir keine scheinbar freien, tatsächlich ungeprüften Termine.
  */
 import { NextResponse } from "next/server";
 import { bookingCalendarId, busyIntervals, overlapsBusy } from "@/lib/calendar";
@@ -46,9 +46,14 @@ export async function GET() {
     try {
       busy = await busyIntervals(windowStart, windowEnd);
     } catch (err) {
-      console.error(
-        "[slots] freeBusy fehlgeschlagen — liefere Slots ohne Kalenderprüfung:",
-        err,
+      console.error("[slots] freeBusy fehlgeschlagen:", err);
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "Die Terminverfügbarkeit kann gerade nicht geprüft werden. Bitte versuchen Sie es später erneut.",
+        },
+        { status: 503 },
       );
     }
   }

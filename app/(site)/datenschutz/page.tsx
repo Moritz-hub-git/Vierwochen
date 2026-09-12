@@ -16,97 +16,143 @@ export default function PrivacyPage() {
 
           <h2>1. Verantwortlicher</h2>
           <p>
-            {SITE.owner}, handelnd unter {SITE.name} (Einzelunternehmen)
+            {SITE.owner}, handelnd unter {SITE.name}
             <br />
             <strong>Noch zu ergänzen vor Veröffentlichung:</strong> vollständige
-            Anschrift
+            ladungsfähige Anschrift und geprüfte Betreiberangaben
             <br />
-            E-Mail: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+            E-Mail: <a href={`mailto:${SITE.email}`}>{SITE.email}</a> (derzeit
+            Übergangsadresse)
           </p>
 
           <h2>2. Bereitstellung der Website</h2>
           <p>
-            Die Website wird bei Google Cloud in der Region Frankfurt am Main
-            (europe-west3) betrieben. Beim Aufruf können technisch erforderliche
+            Die Website wird als Next.js-Anwendung auf Google Cloud Run
+            betrieben. Beim Aufruf können technisch erforderliche
             Verbindungsdaten wie IP-Adresse, Zeitpunkt, aufgerufene Ressource
-            und User-Agent in Serverprotokollen verarbeitet werden.
-            Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (Interesse an einem
-            sicheren und stabilen Betrieb). Anbieter ist Google Ireland Limited,
-            Gordon House, Barrow Street, Dublin 4, Irland.
+            und User-Agent in Serverprotokollen verarbeitet werden. Die
+            konkrete Aufbewahrung dieser Plattformprotokolle ist vor der
+            Veröffentlichung noch zu bestätigen.
           </p>
 
-          <h2>3. Direkter Prozess-Check</h2>
+          <h2>3. AI-first Prozessdialog</h2>
           <p>
-            Wenn Sie den Prozess-Check absenden, verarbeiten wir Ihren Namen,
-            Ihre E-Mail-Adresse, Ihr Unternehmen, Ihre Prozessbeschreibung,
-            Angaben zum Volumen und freiwillige Zusatzinformationen. Die Angaben
-            werden zur Prüfung Ihrer Anfrage in Google Firestore gespeichert und
-            per Gmail an den Verantwortlichen zugestellt. Die Datenbank ist für
-            die EU-Multiregion eur3 konfiguriert. Rechtsgrundlage ist Art. 6
-            Abs. 1 lit. b DSGVO (vorvertragliche Maßnahmen auf Ihre Anfrage).
+            Der primäre Einstieg ist das persistente Chat-Dock. Wenn Sie eine
+            Beschreibung absenden, verarbeitet OpsDone den eingegebenen
+            Prozess und den bisherigen Gesprächsverlauf, um höchstens drei
+            Rückfragen und anschließend eine konkrete, unverbindliche
+            Prozessvorschau zu erzeugen. Ein E-Mail-Gate ist für die Vorschau
+            nicht erforderlich. Bitte geben Sie nur Informationen ein, die für
+            die erste Einordnung erforderlich sind, und lassen Sie Firmen- und
+            Kundennamen weg, wenn sie nicht nötig sind.
           </p>
           <p>
-            Bitte übermitteln Sie nur Informationen, die für eine erste
-            Einordnung erforderlich sind. Geben Sie insbesondere keine
-            besonderen Kategorien personenbezogener Daten nach Art. 9 DSGVO und
-            keine unnötigen Betriebsgeheimnisse ein.
-          </p>
-
-          <h2>4. Missbrauchsschutz</h2>
-          <p>
-            Beim Absenden wird die IP-Adresse zur Begrenzung automatisierter
-            oder missbräuchlicher Anfragen verarbeitet und derzeit zusammen mit
-            der Anfrage gespeichert. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f
-            DSGVO. Die gespeicherte IP-Adresse wird nach 30 Tagen durch die
-            regelmäßige Bereinigungsroutine aus der Anfrage entfernt.
+            Die Chat-Anfrage wird an die API-Route <code>/api/chat</code>
+            übertragen. Das konfigurierte Gemini-Modell von Google Vertex AI
+            verarbeitet den Text; bei konfigurierter Firestore-Persistenz
+            werden Gesprächsverlauf, Prozessskizze, Ergebnis-Metadaten,
+            Zeitstempel und zunächst die IP-Adresse in der Sammlung
+            <code>dialogs</code> gespeichert. Die Modellregion wird über die
+            Laufzeitkonfiguration bestimmt. Die konkrete Betriebs- und
+            Transferkonfiguration ist vor Veröffentlichung abschließend zu
+            prüfen.
           </p>
 
-          <h2>5. Speicherdauer</h2>
+          <h2>4. Inline-Terminbuchung</h2>
           <p>
-            Anfragedaten werden gelöscht, sobald sie für die Bearbeitung und
-            eine mögliche Zusammenarbeit nicht mehr erforderlich sind, sofern
-            keine gesetzlichen Aufbewahrungspflichten entgegenstehen. Eine
-            verbindliche Frist und ihre technische Umsetzung für den neuen
-            direkten Prozess-Check sind vor Veröffentlichung noch festzulegen
-            und zu prüfen.
+            Nach der Vorschau können Sie inline einen Termin auswählen. Für
+            die Buchungsanfrage verarbeiten wir den gewählten Zeitpunkt, Name,
+            E-Mail-Adresse, optional Unternehmen, Unternehmensgröße, Branche,
+            Telefonnummer bei Telefonterminen, Agenda, Dialog-ID und die
+            übermittelten Attributionseinstellungen. Die Angaben werden in
+            Firestore in der Sammlung <code>bookings</code> gespeichert und
+            können für eine Termin- und Prozessvorbereitung an den Betreiber
+            übermittelt werden.
+          </p>
+          <p>
+            Ist <code>BOOKING_CALENDAR_ID</code> eingerichtet und berechtigt,
+            werden freie Zeiten gegen Google Calendar geprüft und ein Termin
+            angelegt. Ohne diese Konfiguration wird die Auswahl als
+            <strong> Terminanfrage</strong> gespeichert und anschließend
+            manuell bestätigt; sie ist dann noch keine Kalenderbestätigung.
+            Bestätigungs- und Betreiber-E-Mails werden nur versendet, wenn der
+            Mailversand mit <code>MAIL_SENDER</code> eingerichtet ist.
           </p>
 
-          <h2>6. Reichweitenmessung, Cookies und KI</h2>
+          <h2>5. Datensparsame Funnelmessung</h2>
           <p>
-            Auf den öffentlichen Seiten ist derzeit keine Reichweitenmessung
-            eingebunden. Der öffentliche Prozess-Check verwendet keinen
-            KI-Dialog und übermittelt Ihre Beschreibung nicht an ein KI-Modell.
-            Für die dargestellten öffentlichen Funktionen werden keine Analyse-
-            oder Werbe-Cookies gesetzt.
+            Die eigene Funnelmessung wird nur nach Interaktionen im Chat oder
+            bei der Terminbuchung ausgelöst. Es gibt keinen allgemeinen
+            Pageview-Mount in dieser Messung, keine Drittanbieter-Analyse und
+            keine Werbe-Cookies. Die Sitzungs-ID bleibt ausschließlich im
+            Arbeitsspeicher dieses Seitenkontexts; es werden weder Cookies noch
+            <code>localStorage</code> oder <code>sessionStorage</code> genutzt.
+          </p>
+          <p>
+            Für die Zuordnung einer Interaktion können Ereignistyp,
+            Sitzungs-ID, Dialog-ID, Seitenpfad, höchstens die nötigen UTM-
+            Parameter, der Ursprung einer externen Referrer-URL und einfache
+            technische Metadaten an <code>/api/event</code> übertragen und in
+            Firestore gespeichert werden. Klick-IDs wie gclid, gbraid und
+            wbraid werden nicht gespeichert. Die konkrete rechtliche Einordnung
+            dieser Messung ist vor Veröffentlichung fachlich zu prüfen.
           </p>
 
-          <h2>7. Empfänger und Auftragsverarbeitung</h2>
+          <h2>6. Direkter Formular-Fallback</h2>
           <p>
-            Google ist Auftragsverarbeiter für Hosting, Firestore und den
-            Versand über Gmail. Die konkreten Vertragsgrundlagen,
-            Unterauftragnehmer und anwendbaren Informationen zu möglichen
-            Drittlandübermittlungen sind vor Veröffentlichung anhand der
-            tatsächlich eingesetzten Google-Cloud- und Workspace-Konfiguration
-            abschließend zu prüfen. Weitere Empfänger erhalten Daten nur, wenn
-            dies für die Bearbeitung Ihrer Anfrage erforderlich oder gesetzlich
-            vorgeschrieben ist.
+            Ein separates Formular kann ausdrücklich über
+            <code>?formular=1</code> angefordert werden. Dann verarbeiten wir
+            Name, E-Mail-Adresse, Unternehmen, Prozessbeschreibung,
+            Volumenangabe, freiwillige Zusatzinformationen und die
+            Einwilligungsangabe zur Bearbeitung des Prozess-Checks. Diese
+            Daten werden, sofern Firestore verfügbar ist, in
+            <code>processChecks</code> gespeichert und dem Betreiber zur
+            Bearbeitung zugestellt. Die normale Verlinkung öffnet den
+            AI-first-Chat.
           </p>
 
-          <h2>8. Ihre Rechte</h2>
+          <h2>7. Missbrauchsschutz und Speicherdauer</h2>
           <p>
-            Sie haben nach Maßgabe der DSGVO Rechte auf Auskunft, Berichtigung,
-            Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und
-            Widerspruch. Zudem können Sie sich bei einer
-            Datenschutz-Aufsichtsbehörde beschweren. Schreiben Sie zur Ausübung
-            Ihrer Rechte an <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+            Zur Begrenzung automatisierter oder missbräuchlicher Anfragen wird
+            die IP-Adresse serverseitig verarbeitet. Die Anwendung entfernt
+            diese IP-Felder nach derzeit 30 Tagen aus Dialogen, Buchungen,
+            Leads und Prozess-Checks. Ereignisse der Funnelmessung werden nach
+            derzeit 365 Tagen bereinigt. Dialoge ohne Verweis auf Lead oder
+            Buchung werden nach derzeit 90 Tagen gelöscht; referenzierte
+            Dialoge bleiben bis zur Bearbeitung der Anfrage erhalten. Die
+            technische Routine und ihre Abdeckung werden vor Veröffentlichung
+            gegen die tatsächlichen Betriebsanforderungen geprüft.
           </p>
 
-          <h2>9. Stand und offene Pflichtangaben</h2>
+          <h2>8. Empfänger und Dienste</h2>
           <p>
-            Stand: 12. September 2026. Vor Veröffentlichung sind die
-            vollständige Anschrift, die Löschfristen und -routinen,
-            Server-Log-Aufbewahrung sowie die Vertrags- und Transferangaben der
-            eingesetzten Dienste rechtlich und technisch zu prüfen.
+            Je nach genutzter Funktion können Google Cloud Run, Firestore und
+            Vertex AI sowie die Gmail- und Calendar-APIs als technische Dienste
+            eingesetzt werden. Die zuständigen Google-Gesellschaften,
+            Auftragsverarbeitungsverträge, Unterauftragnehmer, Speicherorte und
+            mögliche Drittlandübermittlungen sind anhand der produktiven
+            Konfiguration abschließend zu dokumentieren. Weitere Empfänger
+            erhalten Daten nur, wenn dies für die Bearbeitung erforderlich oder
+            gesetzlich vorgeschrieben ist.
+          </p>
+
+          <h2>9. Ihre Rechte</h2>
+          <p>
+            Sie haben nach Maßgabe der DSGVO Rechte auf Auskunft,
+            Berichtigung, Löschung, Einschränkung der Verarbeitung,
+            Datenübertragbarkeit und Widerspruch. Zudem können Sie sich bei
+            einer Datenschutz-Aufsichtsbehörde beschweren. Schreiben Sie zur
+            Ausübung Ihrer Rechte an <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+          </p>
+
+          <h2>10. Offene Pflichtangaben</h2>
+          <p>
+            Stand: 13. September 2026. Vor öffentlicher Veröffentlichung sind
+            die vollständige Betreiberanschrift, endgültige Kontaktadresse,
+            Rechtsform, Plattform- und Transferangaben, Log-Aufbewahrung,
+            Formularfristen sowie der tatsächliche Einbau der Chat- und
+            Messkomponenten rechtlich und technisch zu prüfen. Diese Seite ist
+            bis dahin ein Entwurf und keine rechtliche Beratung.
           </p>
         </div>
       </section>

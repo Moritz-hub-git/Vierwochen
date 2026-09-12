@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { IS_LIVE, SITE } from "@/lib/config";
 import "./globals.css";
+import "./experience.css";
 const body = localFont({
   src: [
     { path: "./fonts/manrope-latin.woff2", weight: "200 800" },
@@ -11,8 +12,9 @@ const body = localFont({
   display: "swap",
 });
 const display = localFont({
-  src: "./fonts/space-grotesk-latin.woff2",
+  src: "./fonts/manrope-latin.woff2",
   variable: "--font-display",
+  weight: "200 800",
   display: "swap",
 });
 export const metadata: Metadata = {
@@ -37,7 +39,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#f8f8f5",
+  themeColor: "#fafbff",
 };
 export default function RootLayout({
   children,

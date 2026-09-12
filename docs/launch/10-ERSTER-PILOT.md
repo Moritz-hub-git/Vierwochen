@@ -4,6 +4,10 @@
 
 Zielkunden sind industrielle Mittelständler und Großhändler mit wiederkehrenden Lieferantenbestätigungen. Ansprechpartner ist die Einkaufsleitung oder Geschäftsführung. Verkauft wird ein abgegrenzter Nachweis, dass Standardfälle ohne manuelles Vergleichen auskommen. Der folgende Umfang ist eine empfohlene Startkonfiguration, noch kein abgegebenes Angebot.
 
+## Übergabe aus dem AI-first-Funnel
+
+Ads und persönliche Links führen in das persistente Chat-Dock. Der Interessent beschreibt den Prozess, beantwortet höchstens drei Rückfragen und sieht eine konkrete Vorschau ohne E-Mail-Gate. Unter der Vorschau wird inline ein Termin ausgewählt und gebucht. Der Pilottext wird erst nach diesem Gespräch und nach Prüfung der Daten als Angebot konkretisiert. Ohne konfigurierten Kalender bleibt der Termin eine manuell zu bestätigende Anfrage.
+
 **Einstieg:** ein Postfach oder Upload-Ordner, zunächst zwei bis drei häufige Lieferantenformate, ein Bestellexport als CSV/Excel. Keine Änderungen am ERP-Kern. Der Export enthält Bestellnummer, Position, Artikel, Menge, Preis und vereinbarten Liefertermin.
 
 **Ergebnis:** strukturierter Vergleich je Position. Übereinstimmungen und Abweichungen sind mit Dokumentquelle und Bestellwert nachvollziehbar. Unklare Zuordnung, unlesbare Dateien und Abweichungen landen zur Prüfung beim Einkauf. Im Pilot wird nicht ohne Freigabe ins ERP geschrieben.

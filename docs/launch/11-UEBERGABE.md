@@ -1,25 +1,27 @@
 # OpsDone — Übergabe zum Start
 
-Stand: 12. September 2026.
+Stand: 13. September 2026.
 
 ## Fertig
 
-- Neue OpsDone-Website mit fünf Prozessseiten, Unternehmens-/Sicherheitsseiten und direktem Prozess-Check.
+- Neue OpsDone-Website mit fünf Prozessseiten, Unternehmens-/Sicherheitsseiten und vorbereitetem AI-first-Chat-Funnel.
 - Interaktive Standardfall-/Ausnahme-Demo und nachvollziehbarer Potenzialrechner.
+- Primärer Funnel: Ad-/Landing-Einstieg → persistentes Chat-Dock → höchstens drei Rückfragen → KI-Vorschau ohne E-Mail-Gate → Inline-Terminbuchung.
 - Validierung, Missbrauchsschutz, Firestore-Anfragen, Zustellstatus, geschützter Admin und CSV-Export.
 - Überarbeitete Strategie, Sales-Leitfaden, Angebots-/Abnahmevorlagen, Outbound-Entwürfe, Prozessaufnahme und Pilotpaket.
-- 16 automatisierte Tests erfolgreich; TypeScript und lokaler sowie Cloud-Produktionsbuild erfolgreich.
+- `npm run typecheck` erfolgreich; der aktuelle Testlauf meldet 8 bestandene Tests und überspringt lokale HTTP-Tests ohne gestarteten Server. Produktionsbuild und Browser-Smoke-Test vor jeder Veröffentlichung erneut ausführen.
 - npm audit: keine bekannten Schwachstellen zum Prüfzeitpunkt.
 - Browserprüfung: Desktop und 390px-Mobilansicht, Menüfokus/Escape, FAQ, Rechner, Vorauswahl, Fehlerzustand; keine horizontalen Überläufe im geprüften mobilen Formular.
 
 ## Links
 
-- [Online-Vorschau](https://opsdone-preview---vierwochen-mlik6uuoxa-ey.a.run.app)
+- [Review-Vorschau (nicht öffentliche Produktion)](https://opsdone-preview---vierwochen-mlik6uuoxa-ey.a.run.app)
 - [Review-Pull-Request](https://github.com/Moritz-hub-git/Vierwochen/pull/1)
 - [GitHub-Branch](https://github.com/Moritz-hub-git/Vierwochen/tree/codex/opsdone-rebrand)
 - [Erster Pilot](./10-ERSTER-PILOT.md)
 - [Prozessaufnahme](./09-PROZESS-AUFNAHME.md)
 - [Lead-Pipeline](./LEAD-PIPELINE-TEMPLATE.csv)
+- [Funnel-Design](./12-FUNNEL-DESIGN.md)
 
 ## Deployment
 
@@ -36,4 +38,4 @@ Die automatische Freigabeprüfung hat einen direkten Push auf main nicht freigeg
 
 ## Morgen zuerst
 
-Mit Auftragsbestätigungen starten. 15 passende warme Kontakte/Unternehmen in die Pipeline, fünf persönliche Gesprächsangebote vorbereiten, drei Discovery-Termine anstreben. Im ersten Gespräch Volumen, echte Bearbeitungszeit, Ausnahmen und Datenzugang erfassen. Ein Pilotangebot erst nach diesem Abgleich zuschneiden. Die Website ersetzt nicht den Nachweis des ersten wirtschaftlich tragfähigen Kundenprozesses.
+Mit Auftragsbestätigungen starten. Ads bleiben Entwürfe; persönliche Links und spätere Anzeigen führen in den Chat. 15 passende warme Kontakte/Unternehmen in die Pipeline, fünf persönliche Gesprächsangebote vorbereiten, drei Discovery-Termine anstreben. Im Chat maximal drei Rückfragen, danach Vorschau und Inline-Termin. Im ersten Gespräch Volumen, echte Bearbeitungszeit, Ausnahmen und Datenzugang erfassen. Ein Pilotangebot erst nach diesem Abgleich zuschneiden. Ohne Kalender bleibt die Buchung eine Terminanfrage.

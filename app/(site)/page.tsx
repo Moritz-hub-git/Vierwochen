@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import ProcessDemo from "@/components/site/ProcessDemo";
+import ProcessShowcase from "@/components/site/ProcessShowcase";
 import PotentialCalculator from "@/components/site/PotentialCalculator";
 import { Arrow, Check, Mark, ProcessIcon } from "@/components/site/Icons";
 export const metadata: Metadata = {
@@ -69,53 +69,55 @@ const faq = [
   ],
   [
     "Ist der Prozess-Check kostenpflichtig?",
-    "Der erste Prozess-Check ist kostenlos und unverbindlich. Wir besprechen Ihren heutigen Ablauf, den manuellen Aufwand und mögliche Integrationswege. Wenn der Prozess nicht wirtschaftlich automatisierbar ist, sagen wir Ihnen das.",
+    "Die KI-Ersteinschätzung und das erste Prozessgespräch sind kostenlos und unverbindlich. Im Chat sehen Sie zunächst eine Vorschau ohne Kontaktdaten. Anschließend können Sie direkt im selben Interface einen Termin wählen. Wenn der Prozess nicht wirtschaftlich automatisierbar ist, sagen wir Ihnen das.",
   ],
 ];
 export default function Home() {
   return (
     <main id="main">
-      <section className="hero container">
-        <div className="hero-copy">
-          <div className="eyebrow">
-            <span className="status-dot" /> AI-NATIVE PROCESS AUTOMATION
+      <section className="new-hero">
+        <div className="hero-halo" aria-hidden="true" />
+        <div className="container new-hero-inner">
+          <div className="brand-pill">
+            <span className="status-dot" /> AI-native Process Automation{" "}
+            <span className="pill-divider">/</span> Work eliminated.
           </div>
           <h1>
-            Work
+            Weniger Handarbeit.
             <br />
-            <span className="hero-word">
-              eliminated<span className="accent-period">.</span>
-            </span>
+            <span>Mehr geschafft.</span>
           </h1>
-          <p className="hero-description">
-            Die Routine erledigt sich.
-            <br />
-            Ihr Team macht den Unterschied.
+          <p className="new-hero-lead">
+            Ihr Team hat Besseres zu tun als Copy-Paste.
+            <br className="desktop-break" /> Wir automatisieren die Prozesse
+            dazwischen.
           </p>
-          <p className="hero-explanation">
-            Wir automatisieren wiederkehrende Geschäftsprozesse auf Ihren
-            bestehenden Systemen. Standardfälle laufen von selbst. Menschen
-            entscheiden bei Ausnahmen.
-          </p>
-          <div className="hero-actions">
+          <div className="new-hero-actions">
             <Link className="button button-primary" href="/prozess-check">
-              Prozess prüfen lassen <Arrow />
+              Meinen Prozess durchspielen <Arrow />
             </Link>
-            <a className="button button-secondary" href="#prozesse">
-              Prozesse entdecken <span aria-hidden="true">↓</span>
+            <a href="#beispiel" className="button button-secondary">
+              So sieht das aus <span aria-hidden="true">↓</span>
             </a>
           </div>
-          <div className="hero-reassurance">
+          <p className="new-hero-micro">
+            Ein Satz genügt zum Start. Ihre erste Vorschau – ohne
+            E-Mail-Adresse.
+          </p>
+          <div className="hero-principles">
             <span>
-              <Check /> Kostenloser Prozess-Check
+              <Check /> Ihre Systeme bleiben.
             </span>
             <span>
-              <Check /> Ohne Systemwechsel
+              <Check /> Menschen entscheiden.
+            </span>
+            <span>
+              <Check /> Wir betreiben den Prozess.
             </span>
           </div>
         </div>
-        <ProcessDemo />
       </section>
+      <ProcessShowcase />
       <section className="systems-strip">
         <div className="container">
           <p>
@@ -396,7 +398,7 @@ export default function Home() {
             welche Handgriffe entfallen können und ob es sich rechnet.
           </p>
           <Link className="button button-primary" href="/prozess-check">
-            Jetzt Prozess prüfen lassen <Arrow />
+            Jetzt Prozess durchspielen <Arrow />
           </Link>
           <span className="cta-note">
             Kostenlos. Unverbindlich. Direkt mit dem Gründer.

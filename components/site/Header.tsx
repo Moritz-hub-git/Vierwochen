@@ -54,11 +54,11 @@ export default function Header() {
               Über OpsDone
             </Link>
             <Link className="mobile-nav-cta" href="/prozess-check">
-              Prozess prüfen lassen <Arrow />
+              Prozess-Check starten <Arrow />
             </Link>
           </nav>
           <Link className="button button-primary nav-cta" href="/prozess-check">
-            Prozess prüfen lassen <Arrow />
+            Prozess-Check starten <Arrow />
           </Link>
           <button
             ref={menuButton}

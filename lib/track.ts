@@ -3,19 +3,17 @@
 /**
  * Browserseite der Trichter-Messung.
  *
- * Datensparsam mit Absicht: Sitzungs-ID im sessionStorage (verfällt mit dem
- * Tab), keine Cookies, kein Drittanbieter-Skript. Die Werbe-Herkunft (gclid,
- * utm_*) wird beim ersten Aufruf gemerkt, damit sie später der Buchung
- * zugeordnet werden kann — das ist die Grundlage für den Google-Rückkanal.
+ * Datensparsam mit Absicht: Sitzungs-ID und Attribution bleiben ausschließlich
+ * im Arbeitsspeicher dieses Seitenkontexts. Keine Cookies, kein localStorage,
+ * kein sessionStorage, kein Drittanbieter-Skript. Es werden nur die für die
+ * Kampagnenauswertung nötigen UTM-Parameter und der Ursprung des Referrers
+ * übernommen; Klick-IDs werden nicht gespeichert.
  */
 
-const SESSION_KEY = "opsdone_sid";
-const ATTR_KEY = "opsdone_attr";
-const LEGACY_SESSION_KEY = "vw_sid";
-const LEGACY_ATTR_KEY = "vw_attr";
+let memorySessionId: string | null = null;
+let memoryAttribution: Attribution | null = null;
 
 const ATTR_PARAMS = [
-  "gclid", "gbraid", "wbraid",
   "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content",
 ] as const;
 
@@ -30,34 +28,21 @@ function newId(): string {
 
 export function sessionId(): string {
   if (typeof window === "undefined") return "";
-  try {
-    let id = sessionStorage.getItem(SESSION_KEY) ?? sessionStorage.getItem(LEGACY_SESSION_KEY);
-    if (!id) {
-      id = newId();
-      sessionStorage.setItem(SESSION_KEY, id);
-    }
-    return id;
-  } catch {
-    // Privater Modus o. Ä.: Messung ohne Sitzungsbezug statt gar nicht.
-    return "no-storage";
-  }
+  if (!memorySessionId) memorySessionId = newId();
+  return memorySessionId;
 }
 
 export type Attribution = Record<string, string>;
 
 /**
- * Liest Werbeparameter aus der URL und merkt sie für die Sitzung. Beim ersten
- * Aufruf gewinnt die URL, danach bleibt die ursprüngliche Herkunft bestehen —
- * sonst würde ein interner Klick die Kampagne überschreiben.
+ * Liest die nötigen UTM-Parameter und merkt sie nur im Arbeitsspeicher dieses
+ * Seitenkontexts. Beim ersten Aufruf gewinnt die URL, danach bleibt die
+ * ursprüngliche Herkunft bestehen — sonst würde ein interner Klick die
+ * Kampagne überschreiben.
  */
 export function captureAttribution(): Attribution {
   if (typeof window === "undefined") return {};
-  try {
-    const stored = sessionStorage.getItem(ATTR_KEY) ?? sessionStorage.getItem(LEGACY_ATTR_KEY);
-    if (stored) return JSON.parse(stored) as Attribution;
-  } catch {
-    // weiter unten neu aufbauen
-  }
+  if (memoryAttribution) return memoryAttribution;
 
   const attr: Attribution = {};
   try {
@@ -66,14 +51,18 @@ export function captureAttribution(): Attribution {
       const value = params.get(key);
       if (value) attr[key] = value.slice(0, 300);
     }
-    if (document.referrer && !document.referrer.startsWith(window.location.origin)) {
-      attr.referrer = document.referrer.slice(0, 300);
+    if (document.referrer) {
+      try {
+        const referrer = new URL(document.referrer);
+        if (referrer.origin !== window.location.origin) attr.referrer = referrer.origin;
+      } catch {
+        // Ungültige Referrerangabe nicht speichern.
+      }
     }
-    attr.landing = window.location.pathname.slice(0, 200);
-    sessionStorage.setItem(ATTR_KEY, JSON.stringify(attr));
   } catch {
-    // Ohne Speicher bleibt die Herkunft eben nur für diesen Aufruf bekannt.
+    // Bei fehlendem Browserkontext bleibt die Attribution leer.
   }
+  memoryAttribution = attr;
   return attr;
 }
 

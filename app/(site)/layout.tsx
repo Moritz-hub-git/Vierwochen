@@ -1,4 +1,5 @@
 import Header from "@/components/site/Header";
+import ChatDock from "@/components/chat/ChatDock";
 import Footer from "@/components/site/Footer";
 export default function SiteLayout({
   children,
@@ -10,6 +11,7 @@ export default function SiteLayout({
       <Header />
       {children}
       <Footer />
+      <ChatDock />
     </>
   );
 }

@@ -18,8 +18,8 @@
 }
 
 .processNav a:hover {
-  border-color: var(--pine, #235a47);
-  color: var(--pine, #235a47);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .flow {
@@ -44,7 +44,7 @@
   counter-increment: process-step;
   content: "0" counter(process-step);
   display: block;
-  color: var(--pine, #235a47);
+  color: var(--accent);
   font-family: var(--font-display), sans-serif;
   font-size: 0.8rem;
   font-weight: 600;
@@ -58,7 +58,7 @@
 }
 
 .flow p {
-  color: #5d625f;
+  color: #626b7f;
   font-size: 0.94rem;
   line-height: 1.7;
   margin: 0;
@@ -81,7 +81,7 @@
 }
 
 .listBox ul {
-  color: #4d5350;
+  color: #505d74;
   display: grid;
   gap: 0.7rem;
   margin: 0;
@@ -89,14 +89,14 @@
 }
 
 .output {
-  background: #173f33;
+  background: #263a61;
   border-radius: 1.2rem;
   color: #fff;
   padding: clamp(2rem, 5vw, 4rem);
 }
 
 .output p {
-  color: #dce9e3;
+  color: #e1e9fc;
   font-size: clamp(1.15rem, 2vw, 1.5rem);
   line-height: 1.6;
   margin: 1rem 0 0;
@@ -104,7 +104,7 @@
 }
 
 .output :global(.eyebrow) {
-  color: #dce9e3;
+  color: #e1e9fc;
 }
 
 .pageActions {
@@ -155,7 +155,7 @@
 }
 
 .faq p {
-  color: #555b57;
+  color: #63728b;
   line-height: 1.7;
   margin: 0.8rem 0 0;
   max-width: 48rem;

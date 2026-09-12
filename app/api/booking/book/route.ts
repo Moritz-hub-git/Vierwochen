@@ -33,6 +33,7 @@ import { formatBerlinDateTime, isValidSlotStart } from "@/lib/slots";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
+const MAX_BODY_CHARS = 24_000;
 
 interface BookRequest {
   slotStart?: string;
@@ -71,9 +72,43 @@ export async function POST(req: Request) {
   }
   let body: BookRequest;
   try {
-    body = (await req.json()) as BookRequest;
+    const declaredLength = Number(req.headers.get("content-length") ?? 0);
+    if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_CHARS) {
+      return bad(413, "Die Anfrage ist zu groß.");
+    }
+    const rawBody = await req.text();
+    if (rawBody.length > MAX_BODY_CHARS) {
+      return bad(413, "Die Anfrage ist zu groß.");
+    }
+    const parsed: unknown = JSON.parse(rawBody);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return bad(400, "Ungültige Anfrage.");
+    }
+    body = parsed as BookRequest;
   } catch {
     return bad(400, "Ungültige Anfrage.");
+  }
+
+  const stringFields = [
+    "email",
+    "name",
+    "channel",
+    "phone",
+    "company",
+    "companySize",
+    "industry",
+    "slotStart",
+    "dialogId",
+    "caseSummary",
+    "agenda",
+    "sessionId",
+    "website",
+  ] as const;
+  for (const field of stringFields) {
+    const value = body[field];
+    if (value !== undefined && value !== null && typeof value !== "string") {
+      return bad(400, "Ungültige Anfrage.");
+    }
   }
   if (typeof body.website === "string" && body.website.trim()) {
     return bad(400, "Anfrage abgelehnt.");
@@ -328,10 +363,32 @@ export async function POST(req: Request) {
       );
     }
   } catch (err) {
-    console.error(
-      "[booking] Kalenderprüfung vor Buchung fehlgeschlagen — fahre fort:",
-      err,
+    console.error("[booking] Kalenderprüfung vor Buchung fehlgeschlagen:", err);
+    if (!bookingRef) {
+      return bad(
+        503,
+        `Die Terminverfügbarkeit kann gerade nicht geprüft und die Anfrage nicht gespeichert werden. Bitte kontaktieren Sie uns unter ${SITE.email}.`,
+      );
+    }
+    await safe(
+      async () =>
+        bookingRef.update({
+          status: "angefragt",
+          reason: "Kalenderprüfung fehlgeschlagen",
+        }),
+      "Buchung als Anfrage markieren",
     );
+    const mail = await sendBookingMails("angefragt");
+    recordBooked("angefragt");
+    return NextResponse.json({
+      ok: true,
+      mode: "angefragt",
+      persisted: true,
+      confirmationSent: mail.confirmationSent,
+      message: mail.confirmationSent
+        ? `Ihre Terminanfrage für ${formatBerlinDateTime(slotStartIso)} Uhr wurde gespeichert. Eine Eingangsbestätigung wurde an ${emailCheck.email} gesendet; die Verfügbarkeit ist noch nicht bestätigt.`
+        : `Ihre Terminanfrage für ${formatBerlinDateTime(slotStartIso)} Uhr wurde gespeichert. Verfügbarkeit und Terminbestätigung stehen noch aus.`,
+    });
   }
 
   // --- Termin anlegen ---
@@ -364,12 +421,16 @@ export async function POST(req: Request) {
     return NextResponse.json({
       ok: true,
       mode: "bestätigt",
+      persisted: Boolean(bookingRef),
+      eventCreated: true,
       meetLink: event.meetLink ?? null,
       attendeeInvited: event.attendeeInvited,
       confirmationSent: mail.confirmationSent,
       message: event.attendeeInvited
-        ? `Ihr Termin am ${formatBerlinDateTime(slotStartIso)} Uhr steht. Die Kalendereinladung ist unterwegs an ${emailCheck.email}.`
-        : `Ihr Termin am ${formatBerlinDateTime(slotStartIso)} Uhr steht. Sie erhalten die Einladung kurzfristig per E-Mail an ${emailCheck.email}.`,
+        ? `Ihr Termin am ${formatBerlinDateTime(slotStartIso)} Uhr wurde im Kalender angelegt und ${emailCheck.email} als Teilnehmer eingetragen.`
+        : mail.confirmationSent
+          ? `Ihr Termin am ${formatBerlinDateTime(slotStartIso)} Uhr wurde im Kalender angelegt. Die Bestätigung wurde an ${emailCheck.email} gesendet; eine Kalendereinladung wurde nicht automatisch bestätigt.`
+          : `Ihr Termin am ${formatBerlinDateTime(slotStartIso)} Uhr wurde im Kalender angelegt. Eine automatische E-Mail oder Kalendereinladung konnte nicht bestätigt werden.`,
     });
   } catch (err) {
     console.error(

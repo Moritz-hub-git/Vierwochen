@@ -15,8 +15,10 @@ OpsDone is an AI-native process automation company. The public product is elimin
 - Next.js App Router, React, TypeScript; self-hosted fonts.
 - Public homepage and pages: `app/(site)`. Shared UI: `components/site`.
 - Five process definitions: `lib/processes.ts`; outcome calculation: `lib/potential.ts`.
-- Primary funnel: `/prozess-check` → `/api/process-check` → Firestore `processChecks` and owner notification.
-- Existing AI chat/booking code is secondary infrastructure, not mounted in the public site layout.
+- Primary funnel: Ads → persistent ChatDock → `/api/chat` → at most three questions → concrete AI process preview without an email gate → inline booking via `/api/booking/*`.
+- The AI chat result is visible before contact details. Booking collects contact details only when the visitor chooses a slot; without `BOOKING_CALENDAR_ID`, the selected slot is an explicitly labeled request for manual confirmation.
+- `/api/process-check` and a possible direct form are secondary/fallback intake infrastructure; they must not be described as the primary launch funnel.
+- Chat dialogs and funnel events use Firestore when configured; the process preview must not be blocked by an email gate.
 - Intake must return failure if neither durable storage nor confirmed delivery succeeds.
 - Admin views and exports must require authentication; never expose lead data in public pages.
 
@@ -24,7 +26,7 @@ OpsDone is an AI-native process automation company. The public product is elimin
 
 Run `npm test`, `npm run typecheck`, and `npm run build`. For full local integration tests, run a local server without `GOOGLE_CLOUD_PROJECT` or `MAIL_SENDER`, then `TEST_BASE_URL=http://127.0.0.1:3000 TEST_EXPECT_MISSING_INFRA=1 npm test`. Do not run delivery tests against a live service or use real customer data.
 
-Check desktop and mobile navigation, process-prefill, calculator assumptions, form validation and failure states when editing the funnel. Do not run dev and production builds concurrently against the same `.next` directory.
+Check desktop and mobile navigation, persistent Dock behavior, three-question limit, process preview, booking handoff, `/termin` as the inline booking page (no redirect), calculator assumptions, form validation and failure states when editing the funnel. Do not run dev and production builds concurrently against the same `.next` directory.
 
 ## Deployment
 

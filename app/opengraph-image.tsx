@@ -12,9 +12,9 @@ export default function Image() {
           width: "100%",
           display: "flex",
           flexDirection: "column",
-          background: "#edf0e5",
+          background: "#eef2ff",
           padding: "65px 80px",
-          color: "#1d2420",
+          color: "#202331",
           fontFamily: "sans-serif",
         }}
       >
@@ -33,14 +33,14 @@ export default function Image() {
           }}
         >
           <div style={{ display: "flex" }}>Work</div>
-          <div style={{ display: "flex", color: "#6f7d56" }}>eliminated.</div>
+          <div style={{ display: "flex", color: "#425de8" }}>eliminated.</div>
         </div>
         <div
           style={{
             display: "flex",
             marginTop: 45,
             fontSize: 23,
-            color: "#54614b",
+            color: "#707b9b",
           }}
         >
           AI-native Process Automation · opsdone.de

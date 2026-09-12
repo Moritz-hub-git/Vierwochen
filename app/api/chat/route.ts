@@ -7,29 +7,34 @@
  * Fehler werden mit Ursache geloggt; die Oberfläche bekommt eine ehrliche,
  * aber knappe Meldung — nie pauschal „nicht erreichbar" ohne Log.
  */
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { FieldValue } from "@google-cloud/firestore";
 import { LIMITS } from "@/lib/config";
 import {
   ChatMessage,
   RESPONSE_SCHEMA,
   countQuestions,
+  ensureConverged,
   normalizeTurn,
+  sanitizeAssistantMessage,
   systemPrompt,
   toContents,
 } from "@/lib/dialog";
 import { safe } from "@/lib/firestore";
 import { checkDayLimit, checkMinuteLimit, clientIp } from "@/lib/ratelimit";
-import { scheduleOpportunisticRetention } from "@/lib/retention";
+import { runOpportunisticRetention } from "@/lib/retention";
 import { generateStructured } from "@/lib/vertex";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 120;
+/** Includes the post-response persistence and daily retention pass. */
+export const maxDuration = 300;
 
 interface ChatRequest {
   dialogId?: string;
   messages?: ChatMessage[];
 }
+
+const MAX_BODY_CHARS = 96_000;
 
 function bad(status: number, error: string) {
   return NextResponse.json({ ok: false, error }, { status });
@@ -37,12 +42,22 @@ function bad(status: number, error: string) {
 
 export async function POST(req: Request) {
   const ip = clientIp(req);
-  // Einmal je Instanz und Tag: Löschfristen aus /datenschutz durchsetzen (wartet nicht).
-  scheduleOpportunisticRetention();
 
   let body: ChatRequest;
   try {
-    body = (await req.json()) as ChatRequest;
+    const declaredLength = Number(req.headers.get("content-length") ?? 0);
+    if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_CHARS) {
+      return bad(413, "Die Anfrage ist zu groß.");
+    }
+    const rawBody = await req.text();
+    if (rawBody.length > MAX_BODY_CHARS) {
+      return bad(413, "Die Anfrage ist zu groß.");
+    }
+    const parsed: unknown = JSON.parse(rawBody);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return bad(400, "Ungültige Anfrage.");
+    }
+    body = parsed as ChatRequest;
   } catch {
     return bad(400, "Ungültige Anfrage.");
   }
@@ -53,17 +68,23 @@ export async function POST(req: Request) {
     /^[a-zA-Z0-9-]{8,64}$/.test(body.dialogId)
       ? body.dialogId
       : null;
+  if (body.dialogId !== undefined && dialogId === null) {
+    return bad(400, "Ungültige Dialog-ID.");
+  }
 
   // Validierung der Historie (Kostenbremse: Zeichen- und Zuglimits).
   if (messages.length === 0 || messages.length > LIMITS.maxUserTurns * 2 + 2) {
     return bad(400, "Ungültiger Gesprächsverlauf.");
   }
   let userTurns = 0;
-  for (const m of messages) {
+  const sanitizedMessages: ChatMessage[] = [];
+  for (let index = 0; index < messages.length; index += 1) {
+    const m = messages[index];
     if (
       !m ||
       (m.role !== "user" && m.role !== "assistant") ||
-      typeof m.content !== "string"
+      typeof m.content !== "string" ||
+      m.role !== (index % 2 === 0 ? "user" : "assistant")
     ) {
       return bad(400, "Ungültiger Gesprächsverlauf.");
     }
@@ -78,8 +99,14 @@ export async function POST(req: Request) {
           `Nachrichten sind auf ${LIMITS.maxMessageChars} Zeichen begrenzt.`,
         );
       }
-    } else if (m.content.length > 20_000) {
-      return bad(400, "Ungültiger Gesprächsverlauf.");
+      sanitizedMessages.push({ role: "user", content: m.content.trim() });
+    } else {
+      if (m.content.length > 20_000) {
+        return bad(400, "Ungültiger Gesprächsverlauf.");
+      }
+      const sanitized = sanitizeAssistantMessage(m.content);
+      if (!sanitized) return bad(400, "Ungültiger Gesprächsverlauf.");
+      sanitizedMessages.push({ role: "assistant", content: sanitized });
     }
   }
   if (messages[messages.length - 1].role !== "user") {
@@ -102,54 +129,57 @@ export async function POST(req: Request) {
     );
   }
 
-  const questionsAsked = countQuestions(messages);
+  const questionsAsked = countQuestions(sanitizedMessages);
 
   try {
     const { json, finishReason, repaired } = await generateStructured({
-      contents: toContents(messages),
+      contents: toContents(sanitizedMessages),
       systemInstruction: systemPrompt(userTurns, questionsAsked),
       responseSchema: RESPONSE_SCHEMA as unknown as Record<string, unknown>,
     });
     // Nutzertext mitgeben: Mengenangaben im Ergebnis müssen durch das belegt
     // sein, was der Nutzer tatsächlich geschrieben hat (siehe normalizeTurn).
-    const userText = messages
+    const userText = sanitizedMessages
       .filter((m) => m.role === "user")
       .map((m) => m.content)
       .join(" ");
-    const turn = normalizeTurn(json, userText);
+    const turn = ensureConverged(normalizeTurn(json, userText), {
+      questionsAsked,
+      userTurns,
+    });
 
-    // Dialog persistieren (nachgelagert; Ausfall bricht den Funnel nicht).
-    if (dialogId) {
-      void safe(
-        (db) =>
-          db
-            .collection("dialogs")
-            .doc(dialogId)
-            .set(
-              {
-                messages: [
-                  ...messages,
-                  { role: "assistant", content: JSON.stringify(turn) },
-                ],
-                lastPhase: turn.phase,
-                sketchTitle: turn.sketch.title,
-                // Ergebniskennzahlen flach mitschreiben, damit die Auswertung
-                // sie lesen kann, ohne jeden Zug zu parsen (Nachfragetest).
-                resultTier: turn.result?.tier ?? null,
-                resultPrice: turn.result?.price ?? null,
-                resultPersonDays:
-                  turn.result?.savings?.personDaysPerWeek ?? null,
-                resultAnnualEuro: turn.result?.savings?.annualEuro ?? null,
-                finishReason,
-                repaired,
-                ip,
-                updatedAt: FieldValue.serverTimestamp(),
-              },
-              { merge: true },
-            ),
-        "Dialog speichern",
-      );
-    }
+    after(async () => {
+      const persistence = dialogId
+        ? safe(
+            (db) =>
+              db
+                .collection("dialogs")
+                .doc(dialogId)
+                .set(
+                  {
+                    messages: [
+                      ...sanitizedMessages,
+                      { role: "assistant", content: JSON.stringify(turn) },
+                    ],
+                    lastPhase: turn.phase,
+                    sketchTitle: turn.sketch.title,
+                    resultTier: turn.result?.tier ?? null,
+                    resultPrice: turn.result?.price ?? null,
+                    resultPersonDays:
+                      turn.result?.savings?.personDaysPerWeek ?? null,
+                    resultAnnualEuro: turn.result?.savings?.annualEuro ?? null,
+                    finishReason,
+                    repaired,
+                    ip,
+                    updatedAt: FieldValue.serverTimestamp(),
+                  },
+                  { merge: true },
+                ),
+            "Dialog speichern",
+          )
+        : Promise.resolve(null);
+      await Promise.all([persistence, runOpportunisticRetention()]);
+    });
 
     return NextResponse.json({ ok: true, turn });
   } catch (err) {

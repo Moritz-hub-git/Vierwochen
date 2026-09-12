@@ -2,75 +2,21 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ACCEPTANCE_PROMISE, PRICE, PRICE_DISCLAIMER, RETAINER, SITE } from "@/lib/config";
+import { PRICE, PRICE_DISCLAIMER, RETAINER, SITE } from "@/lib/config";
 import Booking from "./Booking";
-import EmailGate from "./EmailGate";
-import Timeline from "./Timeline";
-import type { DialogResult, Sketch } from "./types";
+import type { DialogResult, Sketch, SketchStep } from "./types";
 import { formatEuro } from "./types";
 
-/**
- * Das große Finale des Dialogs — bewusst schlank (Rücksprache 2026-08-15),
- * nach dem Vollreview vom 2026-09-08 inhaltlich vervollständigt:
- *
- *   1. Titel + EIN Satz Nutzen            → was ist das, warum lohnt es sich
- *   2. EINE Karte: Preis MIT HERLEITUNG    → „zeig mir die Rechnung, dann
- *      (Pilot + Bausteine, Summe),           glaube ich bottom-up" (Persona
- *      Betrieb als Standard, die eine        Lena, Audit CF-03); daneben die
- *      Zusage — direkt neben der Buchung     Terminwahl, im selben Blick
- *   3. Weg zum Launch neben der Skizze    → Kick-off/Launch als „frühestens"
- *      (Ablauf, Annahmen, Agenda)            (CP-07); die Skizze wurde bisher
- *                                            erzeugt, aber nie gezeigt (CF-02)
- *
- * DOM-Reihenfolge = Mobil-Reihenfolge (Titel → Preis → Termin → Zeitplan →
- * Skizze); auf dem Desktop legen die Grids Preis|Termin und Zeitplan|Skizze
- * nebeneinander. So braucht es kein CSS-order, das Screenreader verwirrt.
- *
- * Ein Nachgespräch (phase=followup) ändert nur die Props — die Karte bleibt
- * gemountet und aktualisiert sich in place; der Preis pulsiert kurz.
- */
-
-function PillIcon({ kind }: { kind: "pay" | "shield" | "code" }) {
-  if (kind === "pay") {
-    return (
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <path d="M20.6 13.4 12 22 2 12V4a2 2 0 0 1 2-2h8l8.6 8.6a2 2 0 0 1 0 2.8Z" />
-        <circle cx="7.5" cy="7.5" r="1.6" fill="currentColor" stroke="none" />
-      </svg>
-    );
-  }
-  if (kind === "code") {
-    return (
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <path d="m8 7-5 5 5 5" />
-        <path d="m16 7 5 5-5 5" />
-        <path d="m14 4-4 16" />
-      </svg>
-    );
-  }
-  return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M12 2 4 5.5V11c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5.5L12 2Z" />
-      <path d="m8.8 11.8 2.3 2.3 4.2-4.6" />
-    </svg>
-  );
+function automationLabel(value: SketchStep["automation"]): string {
+  if (value === "automatisch") return "Automatisch";
+  if (value === "teilautomatisch") return "Mit Prüfung";
+  return "Ihr Team";
 }
 
-/**
- * Kurz hervorheben, wenn sich der Preis im Nachgespräch ändert — nur dann,
- * nicht beim ersten Erscheinen (da trägt schon die Karte ihren Einzug).
- */
-function usePricePulse(price: number): boolean {
-  const [pulse, setPulse] = useState(false);
-  const last = useRef(price);
-  useEffect(() => {
-    if (last.current === price) return;
-    last.current = price;
-    setPulse(true);
-    const t = window.setTimeout(() => setPulse(false), 1400);
-    return () => window.clearTimeout(t);
-  }, [price]);
-  return pulse;
+function automationClass(value: SketchStep["automation"]): string {
+  if (value === "automatisch") return "is-automatic";
+  if (value === "teilautomatisch") return "is-assisted";
+  return "is-human";
 }
 
 export default function SolutionCard({
@@ -81,6 +27,7 @@ export default function SolutionCard({
   suggestedAgenda,
   booked,
   onBooked,
+  onChooseBooking,
 }: {
   sketch: Sketch;
   result: DialogResult;
@@ -89,100 +36,57 @@ export default function SolutionCard({
   suggestedAgenda?: string;
   booked: boolean;
   onBooked: () => void;
+  onChooseBooking?: () => void;
 }) {
-  // Der wichtigste Nutzen zuerst: EIN Satz als Zusammenfassung unter dem
-  // Titel — das Modell schreibt value nutzenorientiert und in absteigender
-  // Wichtigkeit (PROMPT.md „value: konkreter Nutzen").
-  const [summary, ...restValue] = sketch.value;
-  const pulse = usePricePulse(result.price);
-  // Der Server hat die Summe schon gerechnet und in price gesetzt; die
-  // Zeilen hier sind die Herleitung — der Summenstrich wiederholt price,
-  // damit Rechnung und große Zahl nie auseinanderlaufen können.
-  const items = result.priceItems ?? [];
-  const assumptions = sketch.assumptions.slice(0, 3);
-  const open = sketch.open.slice(0, 3);
-  // Was der Chef wissen will (Verifikation 2026-09-08, vier von sechs
-  // Personas): Zahlungsstaffel, Betrieb im ersten Jahr, und — nur wenn der
-  // Nutzer selbst eine Zeitangabe gemacht hat — was der Status quo kostet.
-  const savings = result.savings && result.savings.annualEuro > 0 ? result.savings : null;
-  const paybackMonths = savings ? Math.max(1, Math.round((result.price / savings.annualEuro) * 12)) : null;
-  const today = new Intl.DateTimeFormat("de-DE", { day: "numeric", month: "long", year: "numeric" }).format(new Date());
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const bookingRef = useRef<HTMLDivElement | null>(null);
+  const [summary, ...additionalValue] = sketch.value;
+  const assumptions = sketch.assumptions.slice(0, 4);
+  const openQuestions = sketch.open.slice(0, 4);
+  const humanSteps = sketch.steps.filter((step) => step.automation !== "automatisch");
+  const priceItems = result.priceItems ?? [];
+  const today = new Intl.DateTimeFormat("de-DE", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date());
+  const chooseBooking = () => {
+    if (onChooseBooking) {
+      onChooseBooking();
+      return;
+    }
+    setBookingOpen(true);
+  };
+
+  useEffect(() => {
+    if (!bookingOpen) return;
+    bookingRef.current?.focus({ preventScroll: true });
+    bookingRef.current?.scrollIntoView({ block: "nearest" });
+  }, [bookingOpen]);
 
   return (
-    <div className="solution" id="ergebnis">
-      <div className="solution-head">
-        <span className="offer-eyebrow">Ihre Ersteinschätzung</span>
-        <h3 className="solution-title">{sketch.title}</h3>
+    <section className="solution process-preview" id="ergebnis" aria-labelledby="process-preview-title">
+      <header className="solution-head process-preview-head">
+        <span className="offer-eyebrow">Ihre Prozessvorschau</span>
+        <h3 className="solution-title" id="process-preview-title">{sketch.title}</h3>
         {summary && <p className="solution-summary">{summary}</p>}
-      </div>
+        <p className="process-preview-origin">
+          Aus Ihren Angaben im KI-Dialog abgeleitet. Noch nicht persönlich geprüft.
+        </p>
+        {!booked && !bookingOpen && (
+          <button
+            type="button"
+            className="preview-head-cta btn btn-primary"
+            aria-controls={onChooseBooking ? undefined : "inline-booking"}
+            onClick={chooseBooking}
+          >
+            Vorschau besprechen
+          </button>
+        )}
+      </header>
 
-      {/* Eine Karte für Preis und Termin (Rücksprache 2026-08-15): Wer die
-          Schätzung sieht, soll im selben Blick auch buchen können. */}
-      <div className="offer-card">
-        <div className="offer-price">
-          <span className="offer-price-label">Unverbindliche Implementierungsschätzung</span>
-          <div className={`offer-price-value${pulse ? " is-updated" : ""}`}>{formatEuro(result.price)}</div>
-
-          {items.length > 0 && (
-            <dl className="offer-calc" aria-label="Herleitung des Preises">
-              {items.map((it, i) => (
-                <div className="offer-calc-row" key={`${i}-${it.label}`}>
-                  <dt>{it.label}</dt>
-                  <dd>{formatEuro(it.euro)}</dd>
-                </div>
-              ))}
-              <div className="offer-calc-row offer-calc-sum">
-                <dt>Summe</dt>
-                <dd>{formatEuro(result.price)}</dd>
-              </div>
-              <div className="offer-calc-row offer-calc-soft">
-                <dt>Ein klar begrenzter Pilot startet ab {formatEuro(PRICE.floor)}. Der finale Umfang wird gemeinsam festgelegt.</dt>
-              </div>
-            </dl>
-          )}
-
-          {savings && (
-            <div className="offer-today" aria-label="Was der heutige Ablauf kostet">
-              <b>Was es Sie heute kostet:</b> ca. {formatEuro(savings.annualEuro)} im Jahr
-              {savings.quote ? <> — Ihre Angabe: „{savings.quote}“</> : null}. Basis: {savings.basis}.
-              {paybackMonths ? <> Amortisation nach etwa {paybackMonths} {paybackMonths === 1 ? "Monat" : "Monaten"}.</> : null}
-            </div>
-          )}
-
-          <p className="offer-price-sub">
-            Die Schätzung umfasst die Prozessaufnahme und den beschriebenen Pilotumfang. Integrationen,
-            Datenqualität, Ausnahmewege und Service-Level werden im Prozessgespräch validiert.
-          </p>
-          <p className="offer-price-sub">
-            Vom KI-Assistenten aus Ihren Angaben abgeleitet. Unverbindlich und vor dem Gespräch noch nicht persönlich geprüft. Alle Beträge {PRICE.vatNote}
-          </p>
-
-          {/* Betrieb als Standard, nicht als Fußnote (Vollreview: die
-              einzige wiederkehrende Einnahme) — Werte aus lib/config.ts. */}
-          <p className="offer-retainer">
-            <b>Im Betrieb:</b> {RETAINER.basic.name} ({RETAINER.basic.includes}); {RETAINER.monthlyLabel}. {RETAINER.notice}.
-          </p>
-
-          {/* Dieselbe Pillen-Sprache wie auf der Startseite — mit der einen
-              Zusage, die überall wortgleich steht (ACCEPTANCE_PROMISE). */}
-          <div className="offer-pills">
-            <span className="offer-pill offer-pill-promise">
-              <PillIcon kind="pay" /> {ACCEPTANCE_PROMISE}
-            </span>
-            <span className="offer-pill">
-              <PillIcon kind="shield" /> Freigaben und Ausnahmewege nach Risiko
-            </span>
-            <span className="offer-pill">
-              <PillIcon kind="code" /> Code gehört Ihnen
-            </span>
-          </div>
-
-          {result.scope.length > 0 && (
-            <p className="offer-scope">Gebaut wird: {result.scope.slice(0, 4).join(" · ")}</p>
-          )}
-        </div>
-
-        <div className="offer-book">
+      {!onChooseBooking && (bookingOpen || booked) && (
+        <div className="solution-booking-panel" id="inline-booking" ref={bookingRef} tabIndex={-1}>
           <Booking
             dialogId={dialogId}
             caseSummary={caseSummary}
@@ -190,90 +94,169 @@ export default function SolutionCard({
             onBooked={onBooked}
           />
         </div>
+      )}
+
+      <div className="process-preview-grid">
+        <section className="process-preview-block process-preview-flow" aria-labelledby="preview-flow-title">
+          <div className="sketch-label" id="preview-flow-title">So könnte der Prozess laufen</div>
+          {sketch.steps.length > 0 ? (
+            <ol className="preview-steps">
+              {sketch.steps.map((step, index) => (
+                <li className="preview-step" key={`${index}-${step.label}`}>
+                  <span className="preview-step-number" aria-hidden="true">{index + 1}</span>
+                  <span className="preview-step-content">
+                    <strong>{step.label}</strong>
+                    <span className={`preview-step-tag ${automationClass(step.automation)}`}>
+                      {automationLabel(step.automation)}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="preview-empty">Der genaue Ablauf wird im Prozessgespräch gemeinsam abgegrenzt.</p>
+          )}
+        </section>
+
+        <section className="process-preview-block process-preview-controls" aria-labelledby="preview-controls-title">
+          <div className="sketch-label" id="preview-controls-title">Wo Ihr Team entscheidet</div>
+          {humanSteps.length > 0 ? (
+            <ul className="preview-human-list">
+              {humanSteps.map((step, index) => (
+                <li key={`${index}-${step.label}`}>
+                  <span aria-hidden="true">↳</span>
+                  <span>
+                    <strong>{step.label}</strong>
+                    <small>{step.automation === "manuell" ? "Bleibt eine menschliche Aufgabe" : "Automation bereitet vor, ein Mensch prüft"}</small>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="preview-empty">
+              Noch keine konkrete Freigabe erkannt. Vor dem Pilot legen wir Grenzen,
+              Ausnahmen und notwendige menschliche Entscheidungen ausdrücklich fest.
+            </p>
+          )}
+        </section>
       </div>
 
-      <div className="solution-story">
-        <div className="story-col">
-          <div className="sketch-label">Mögliche Umsetzungsphasen</div>
-          <Timeline weeks={result.weeks} />
-          {restValue.length > 0 && (
-            <div className="sketch-card-block">
-              <div className="sketch-label">Ihr Vorteil</div>
-              <div className="sketch-list">
-                {restValue.slice(0, 3).map((v) => (
-                  <div className="sketch-item" key={v}>{v}</div>
-                ))}
-              </div>
+      <div className="process-preview-grid process-preview-details">
+        <section className="process-preview-block" aria-labelledby="preview-assumptions-title">
+          <div className="sketch-label" id="preview-assumptions-title">Annahmen der Vorschau</div>
+          {assumptions.length > 0 ? (
+            <ul className="preview-check-list">
+              {assumptions.map((assumption) => <li key={assumption}>{assumption}</li>)}
+            </ul>
+          ) : (
+            <p className="preview-empty">Es wurden noch keine belastbaren Annahmen festgehalten.</p>
+          )}
+        </section>
+
+        <section className="process-preview-block" aria-labelledby="preview-open-title">
+          <div className="sketch-label" id="preview-open-title">Vor einem Pilot zu klären</div>
+          {openQuestions.length > 0 ? (
+            <ul className="preview-check-list preview-open-list">
+              {openQuestions.map((question) => <li key={question}>{question}</li>)}
+            </ul>
+          ) : (
+            <p className="preview-empty">Datenzugang, Ausnahmefälle und Abnahmekriterien prüfen wir gemeinsam.</p>
+          )}
+        </section>
+      </div>
+
+      {(result.scope.length > 0 || additionalValue.length > 0) && (
+        <section className="process-preview-block process-preview-scope" aria-labelledby="preview-scope-title">
+          <div className="sketch-label" id="preview-scope-title">Was ein erster Pilot umfassen könnte</div>
+          {result.scope.length > 0 && (
+            <ul className="preview-scope-list">
+              {result.scope.slice(0, 5).map((item) => <li key={item}>{item}</li>)}
+            </ul>
+          )}
+          {additionalValue.length > 0 && (
+            <div className="preview-value-list">
+              {additionalValue.slice(0, 3).map((item) => <p key={item}>{item}</p>)}
             </div>
           )}
+        </section>
+      )}
+
+      <section className="offer-card process-preview-commercial" aria-labelledby="preview-estimate-title">
+        <div className="offer-price">
+          <span className="offer-price-label" id="preview-estimate-title">Unverbindliche Implementierungsschätzung</span>
+          <div className="offer-price-value">{formatEuro(result.price)}</div>
+
+          {priceItems.length > 0 && (
+            <dl className="offer-calc" aria-label="Herleitung der Schätzung">
+              {priceItems.map((item, index) => (
+                <div className="offer-calc-row" key={`${index}-${item.label}`}>
+                  <dt>{item.label}</dt>
+                  <dd>{formatEuro(item.euro)}</dd>
+                </div>
+              ))}
+              <div className="offer-calc-row offer-calc-sum">
+                <dt>Geschätzter Gesamtumfang</dt>
+                <dd>{formatEuro(result.price)}</dd>
+              </div>
+            </dl>
+          )}
+
+          <p className="offer-price-sub">
+            Die Schätzung basiert auf Ihren bisherigen Angaben. Datenqualität,
+            Integrationen, Ausnahmewege und Abnahmekriterien werden vor einem Angebot geprüft.
+            Alle Beträge {PRICE.vatNote}
+          </p>
+          <p className="offer-retainer">
+            <strong>Managed-Betrieb als Standard:</strong> {RETAINER.basic.name} mit dem
+            vereinbarten Umfang für Überwachung, Fehlerbehandlung und Pflege.
+          </p>
+          <p className="offer-pilot-note">
+            Ein klar begrenzter Pilot kann ab {formatEuro(PRICE.floor)} starten.
+            Der konkrete Umfang entscheidet über den finalen Preis.
+          </p>
         </div>
 
-        {/* Die Skizze war bisher unsichtbar (Audit CF-02): Sie ist das, was
-            der Berater aus dem Gespräch gemacht hat — und die Agenda des
-            Termins gleich mit. */}
-        {(sketch.steps.length > 0 || assumptions.length > 0 || open.length > 0) && (
-          <div className="story-col">
-            {sketch.steps.length > 0 && (
-              <>
-                <div className="sketch-label">So würde es laufen</div>
-                <ol className="flow flow-compact">
-                  {sketch.steps.map((s, i) => (
-                    <li className="flow-step" key={`${i}-${s.label}`}>
-                      <span className="flow-dot" aria-hidden>{i + 1}</span>
-                      <span className="flow-body">
-                        <span className="flow-label">{s.label}</span>
-                        <span className={`auto-tag ${s.automation}`}>{s.automation}</span>
-                      </span>
-                    </li>
-                  ))}
-                </ol>
-              </>
-            )}
-            {assumptions.length > 0 && (
-              <div className="sketch-card-block">
-                <div className="sketch-label">Annahmen — bitte korrigieren, wenn falsch</div>
-                <div className="sketch-list">
-                  {assumptions.map((a) => (
-                    <div className="sketch-item" key={a}>{a}</div>
-                  ))}
-                </div>
-              </div>
-            )}
-            {open.length > 0 && (
-              <div className="sketch-card-block">
-                <div className="sketch-label">Das klären wir im Gespräch</div>
-                <div className="sketch-list">
-                  {open.map((o) => (
-                    <div className="sketch-item open-point" key={o}>{o}</div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {!booked && <EmailGate dialogId={dialogId} sketchTitle={sketch.title} />}
+        <div className="preview-booking-cta">
+          <span className="sketch-label">Vorschau gemeinsam prüfen</span>
+          <h4>Passt der Ablauf zu Ihrem Alltag?</h4>
+          <p>
+            Im Gespräch klären wir die Annahmen, menschlichen Freigaben und den
+            kleinsten belastbaren Pilot. Für diese Vorschau war keine E-Mail nötig.
+          </p>
+          {!booked && !bookingOpen && (
+            <button
+              type="button"
+              className="preview-booking-button btn btn-primary"
+              aria-controls={onChooseBooking ? undefined : "inline-booking"}
+              onClick={chooseBooking}
+            >
+              Kostenloses Prozessgespräch wählen
+            </button>
+          )}
+          {booked ? (
+            <p className="preview-booking-open-note">Ihre Buchung oder Terminanfrage ist eingegangen.</p>
+          ) : bookingOpen ? (
+            <p className="preview-booking-open-note">
+              Wählen Sie zuerst unverbindlich eine Zeit. Kontaktdaten folgen im zweiten Schritt.
+            </p>
+          ) : null}
+        </div>
+      </section>
 
       <div className="result-actions">
-        <button
-          type="button"
-          className="result-print"
-          onClick={() => window.print()}
-        >
-          Drucken oder als PDF speichern
+        <button type="button" className="result-print" onClick={() => window.print()}>
+          Vorschau drucken oder als PDF speichern
         </button>
-        <Link href="/it" className="result-itlink">
-          Fragen Ihrer IT oder Ihres Einkaufs? Fakten für Ihre IT →
+        <Link href="/sicherheit" className="result-itlink">
+          Sicherheit und Datenschutz →
         </Link>
       </div>
 
-      <p className="result-disclaimer">
-        {PRICE_DISCLAIMER}
-      </p>
+      <p className="result-disclaimer">{PRICE_DISCLAIMER}</p>
       <p className="print-only result-sender">
-        {SITE.name} · {SITE.founder.name} · {SITE.email} · Ersteinschätzung vom {today}. Unverbindliche Schätzung aus dem KI-Dialog.
+        {SITE.name} · {SITE.founder.name} · {SITE.email} · Prozessvorschau vom {today}.
+        Unverbindlich und aus dem KI-Dialog abgeleitet.
       </p>
-    </div>
+    </section>
   );
 }

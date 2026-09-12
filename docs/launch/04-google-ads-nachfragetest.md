@@ -8,8 +8,9 @@ Menschen mit dem Problem suchen eher nach „Auftragsbestätigung prüfen automa
 
 ## Vorbereitung
 
-- Eine Wedge-Zielseite mit Prozess, Voraussetzungen, Grenzen und CTA.
-- Ein Prozess-Check-Formular, das Volumen, Zeit, Ausnahmequote und Systemweg im Gespräch nacherfasst.
+- Eine Wedge-Zielseite mit Prozess, Voraussetzungen, Grenzen und persistentem Chat-Dock.
+- Ein Chat, der die Prozessbeschreibung entgegennimmt, höchstens drei Rückfragen stellt und eine konkrete Vorschau ohne E-Mail-Gate ausgibt.
+- Inline-Terminbuchung unter der Vorschau; ohne `BOOKING_CALENDAR_ID` wird eine Terminanfrage zur manuellen Bestätigung gespeichert.
 - Lead-Quelle und Suchbegriff mitführen, ohne unnötige personenbezogene Daten zu sammeln.
 - Ausschluss: Jobs, Schulungen, Vorlagen, private Buchhaltung, allgemeine Chatbots.
 - Ein sachlicher Preis-/Scope-Hinweis: Pilot wird nach Discovery scoped; keine Ergebnisgarantie.
@@ -38,16 +39,16 @@ Nicht verwenden: „garantiert“, konkrete Einsparungen ohne Kundendaten, erfun
 | Stufe | Ereignis | Mindestdaten |
 |---|---|---|
 | 1 | qualifizierter Klick | Suchbegriff, Landingpage |
-| 2 | Prozess-Check gestartet | Use Case, Datum |
-| 3 | Baseline angegeben | Volumen, Zeit, Quelle |
-| 4 | Discovery gebucht | Rolle, Unternehmen, Quelle |
-| 5 | Pilot angeboten/angenommen | Scope, Preis-Hypothese, Status |
+| 2 | Chat geöffnet/Prozess eingegeben | Session, Dialog-ID, Use Case |
+| 3 | KI-Vorschau erhalten | Ergebnis, offene Punkte, Annahmen |
+| 4 | Termin-Slot gewählt | Session, Dialog-ID, Slot |
+| 5 | Termin gebucht/angefragt | Status, Kanal, Quelle |
 
 Vorab definieren: maximaler Testbetrag [___] €, Laufzeit [___] Tage, Stop bei [___] € ohne qualifizierte Discovery. Erst nach dem Test Zahlen eintragen; keine nachträgliche Schönrechnung.
 
 ## Auswertung
 
-Notiere pro Suchbegriff: Ausgaben, Klicks, Prozess-Check-Starts, qualifizierte Baselines, gebuchte Gespräche, No-Go-Gründe, Angebote und Pilote. Ein Lead gilt nur dann als qualifiziert, wenn Prozessowner, wiederkehrendes Volumen, Input/Output und ein nächster Prüfschritt vorhanden sind.
+Notiere pro Suchbegriff: Ausgaben, Klicks, Chat-Starts, Vorschauen, gewählte Slots, bestätigte oder angefragte Termine, No-Go-Gründe, Angebote und Pilote. Ein Lead gilt nur dann als qualifiziert, wenn Prozessowner, wiederkehrendes Volumen, Input/Output und ein nächster Prüfschritt vorhanden sind. Die Interaktionsmessung verwendet dafür `dialog_opened`, `dialog_started`, `dialog_question`, `result_delivered`, `booking_slot_selected` und `booked`; ein allgemeiner Pageview-Mount und Klick-ID-Speicherung gehören nicht zum Launch-Funnel.
 
 **Weiter testen**, wenn mehrere qualifizierte Gespräche mit ähnlichem Wedge entstehen und der Aufwand je Gespräch tragbar ist. **Landing/Keyword ändern**, wenn Klicks aber keine Baselines entstehen. **Stoppen**, wenn keine qualifizierten Signale nach dem vorher festgelegten Testbetrag entstehen oder Anfragen überwiegend außerhalb des Scopes liegen.
 

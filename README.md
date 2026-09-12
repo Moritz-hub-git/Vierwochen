@@ -2,18 +2,18 @@
 
 **AI-native Process Automation — Work eliminated.**
 
-OpsDone baut und betreibt schlanke Automationen für wiederkehrende operative Arbeit im Mittelstand. Der erste empfohlene Keil sind Lieferanten-Auftragsbestätigungen: E-Mail/PDF kommt an, Standardfälle werden gegen Bestellung und ERP geprüft, nur Abweichungen gehen an den Einkauf. Die Website auf `opsdone.de` ist der Erstkontakt; der Prozess-Check, ein klar begrenzter Pilot und die gemessenen eliminierten Arbeitsstunden sind das Produktversprechen. Die öffentliche Kontaktadresse bleibt bis zur Bestätigung `hallo@vierwochen.de` als Übergangswert.
+OpsDone baut und betreibt schlanke Automationen für wiederkehrende operative Arbeit im Mittelstand. Der erste empfohlene Keil sind Lieferanten-Auftragsbestätigungen: E-Mail/PDF kommt an, Standardfälle werden gegen Bestellung und ERP geprüft, nur Abweichungen gehen an den Einkauf. Der AI-first-Erstkontakt auf `opsdone.de` führt vom persistenten Chat-Dock über höchstens drei Rückfragen zu einer konkreten Prozessvorschau und anschließend inline zur Terminbuchung. Die öffentliche Kontaktadresse bleibt bis zur Bestätigung `hallo@vierwochen.de` als Übergangswert.
 
 Die operative Planung steht in [`docs/launch/00-START-HIER.md`](./docs/launch/00-START-HIER.md). Die ursprüngliche Strategie wurde unverändert in [`docs/COMPANY-STRATEGY.md`](./docs/COMPANY-STRATEGY.md) archiviert. Aussagen mit dem Status „Fakt“ beziehen sich auf dieses Repository oder ausdrücklich belegte Angaben; „Annahme“ bleibt bis zur Validierung offen.
 
 ## Tatsächliche Architektur
 
-- **Next.js App Router + TypeScript**: Website, Prozess-Check, Zugangs-/Admin-Seiten und API-Routen; `output: 'standalone'` für den Container.
+- **Next.js App Router + TypeScript**: Website, persistentes Chat-Dock, Zugangs-/Admin-Seiten und API-Routen; `output: 'standalone'` für den Container.
 - **Cloud Run**: Laufzeit in `europe-west3`; der Container hört auf Port 8080.
 - **Firestore**: Dialoge, Leads, Buchungsanfragen, Events, Rate-Limits und Aufbewahrung. Ohne Google-Cloud-Projekt läuft lokal ein kontrollierter Anfrage-/Fallback-Modus ohne Persistenz.
-- **Gemini über Vertex AI**: Der vorhandene Chat-Endpunkt ruft das Modell über die Dienstkonto-Identität auf. Der primäre Launch-Funnel ist der direkte Prozess-Check; Standort und Modell sind konfigurierbar; es werden keine API-Schlüssel in den Code gelegt.
+- **Gemini über Vertex AI**: `/api/chat` ruft das in `VERTEX_MODEL` konfigurierte Gemini-Modell über die Dienstkonto-Identität auf; aktuell fällt die Konfiguration auf `gemini-3.5-flash-lite` zurück. Der primäre Launch-Funnel ist der Chat mit konkreter Vorschau. Es werden keine API-Schlüssel in den Code gelegt.
 - **Google Calendar**: freie Slots werden geprüft und Buchungen angelegt, wenn `BOOKING_CALENDAR_ID` gesetzt ist. Ohne diese Variable werden Buchungsanfragen gespeichert und manuell bestätigt.
-- **Schutzmechanismen**: Zeichen- und Zuglimits im Dialog, Rate-Limits pro IP, optionale Vorschau-Sperre, Admin-Export und Bereinigung nach den Aufbewahrungsfristen.
+- **Schutzmechanismen**: maximal drei Rückfragen im öffentlichen Chat, Zeichen- und Zuglimits, Rate-Limits pro IP, optionale Vorschau-Sperre, Admin-Export und Bereinigung nach den Aufbewahrungsfristen.
 
 Der Frontend-Auftritt ist auf OpsDone umgestellt. `opsdone.de` ist die Ziel-Domain; die Betreiberangaben und die endgültige Kontaktadresse sind noch offen. Die vorhandene Infrastruktur und die wiederverwendbaren Backend-Bausteine bleiben die technische Basis.
 
@@ -45,9 +45,9 @@ Der vorhandene [`cloudbuild.yaml`](./cloudbuild.yaml) baut das Docker-Image, pus
 | Pfad | Zweck |
 |---|---|
 | `app/(site)/page.tsx` | öffentliche Startseite |
-| `app/(site)/prozess-check` | primärer Prozess-Check mit validierter Anfrage, Fehlerzustand und Bestätigung |
-| `components/chat/`, `app/api/chat` | vorhandener KI-Dialog-Stack, aktuell sekundär/legacy |
-| `app/api/process-check` | direkter Prozess-Check mit Persistenz und Mailversand |
+| `components/chat/`, `app/api/chat` | primärer AI-first Dialog, Vorschau und Inline-Buchungsübergabe |
+| `components/Track.tsx`, `app/api/event` | datensparsame Sitzungs-/Attributions- und Funnelmessung, sofern im Root-Layout eingebunden |
+| `app/(site)/prozess-check`, `app/api/process-check` | direkter sekundärer Prozess-Check/Fallback mit Persistenz und Mailversand |
 | `app/api/booking/*` | Slots und Buchungen bzw. Anfrage-Modus |
 | `app/api/lead`, `app/api/event` | Leads und Messereignisse |
 | `app/api/health` | Laufzeit- und optionale Modellprüfung |
@@ -57,7 +57,7 @@ Der vorhandene [`cloudbuild.yaml`](./cloudbuild.yaml) baut das Docker-Image, pus
 
 ## Inhaltliche Leitplanke
 
-OpsDone verkauft einen messbaren Prozessoutput und die dadurch entfallende manuelle Arbeit. Die fünf dokumentierten Start-Use-Cases sind Auftragsbestätigungen, RFQ-/Angebotsvorbereitung, Reklamationen/8D, Management-Reporting und Lieferanten-Onboarding. Auf der Website werden sie als Beispiele und Hypothesen behandelt, solange keine Kundenvalidierung vorliegt. Outreach-Texte in `docs/launch/03-outbound-und-content.md` sind Entwürfe und werden nicht automatisch versendet.
+OpsDone verkauft einen messbaren Prozessoutput und die dadurch entfallende manuelle Arbeit. Die fünf dokumentierten Start-Use-Cases sind Auftragsbestätigungen, RFQ-/Angebotsvorbereitung, Reklamationen/8D, Management-Reporting und Lieferanten-Onboarding. Auf der Website werden sie als Beispiele und Hypothesen behandelt, solange keine Kundenvalidierung vorliegt. Outreach-Texte in `docs/launch/03-outbound-und-content.md` sind Entwürfe und werden nicht automatisch versendet. Der Funnel und seine Messpunkte stehen in [`docs/launch/00-START-HIER.md`](./docs/launch/00-START-HIER.md).
 
 Für die operative Arbeit: [Prozess-Aufnahme](./docs/launch/09-PROZESS-AUFNAHME.md) und [leere Lead-Pipeline-Vorlage](./docs/launch/LEAD-PIPELINE-TEMPLATE.csv).
 
@@ -71,4 +71,4 @@ npm run build
 TEST_BASE_URL=http://127.0.0.1:3000 TEST_EXPECT_MISSING_INFRA=1 npm test
 ```
 
-Tests für Zustellstatus nutzen isolierte Speicher-/Mailadapter und versenden nichts. HTTP-Tests laufen nur mit expliziter lokaler Ziel-URL. Der neue direkte Funnel benötigt Firestore oder bestätigten Mailversand; ohne beides meldet er bewusst einen Fehler. Neue Anfragen erscheinen unter `/admin` und im CSV-Export `?was=prozesschecks`.
+Tests für Zustellstatus nutzen isolierte Speicher-/Mailadapter und versenden nichts. HTTP-Tests laufen nur mit expliziter lokaler Ziel-URL. Der AI-first-Chat kann die Vorschau auch ohne Persistenz anzeigen; für eine belastbare Nachverfolgung muss der Dialog gespeichert werden. Terminbuchungen bleiben bei fehlendem Kalender ausdrücklich Terminanfragen. Der optionale Formular-Fallback schreibt nach `/admin` und in den CSV-Export `?was=prozesschecks`.

@@ -6,7 +6,8 @@ Das Dashboard trennt beobachtete Fakten von Annahmen. Jede Zahl bekommt Zeitraum
 
 ```text
 Woche / Datum: [ ]   Owner: [ ]
-Neue Kontakte: [ ]   Antworten: [ ]   Discovery: [ ]
+Ad-Klicks: [ ]   Chat-Starts: [ ]   Vorschauen: [ ]
+Slots gewählt: [ ]   gebucht/angefragt: [ ]   Discovery: [ ]
 Qualifizierte Baselines: [ ]   Angebote: [ ]   Pilote: [ ]
 Implementierungs-Hypothese netto: [ ]   tatsächlicher Aufwand: [ ]
 Work Eliminated geschätzt: [ ] h   gemessen: [ ] h
@@ -26,9 +27,9 @@ Zusätzlich erfassen: Messfenster, Datenquelle, Standard-/Ausnahmequote, Nacharb
 
 ## 30 Tage
 
-**Tage 1–2 — Startfähigkeit:** Launch-Checkliste, Domain/Mail, Preview, `/api/health`, Lead und Anfrage-Modus prüfen; Betreiber-/Arbeitgeberpunkte parallel klären. Wedge-Text auf jeder relevanten Oberfläche konsistent machen.
+**Tage 1–2 — Startfähigkeit:** Launch-Checkliste, Domain/Mail, Preview, `/api/health`, Chat bis Vorschau und Inline-Buchung im Anfrage-Modus prüfen; Betreiber-/Arbeitgeberpunkte parallel klären. Wedge-Text auf jeder relevanten Oberfläche konsistent machen.
 
-**Tage 3–5 — Discovery vorbereiten:** 15 zulässige Kontakte auswählen, fünf Outreach-Entwürfe personalisieren, Baseline- und Scope-Template öffnen, drei Termine anbieten. Kein Versand ohne Betreiber-/Absenderprüfung.
+**Tage 3–5 — Discovery vorbereiten:** 15 zulässige Kontakte auswählen, fünf Outreach-Entwürfe personalisieren, Baseline- und Scope-Template öffnen, drei Termine über den Chat-Funnel anbieten. Kein Versand ohne Betreiber-/Absenderprüfung.
 
 **Tage 6–7 — Lernen:** erste Gespräche führen; pro Gespräch Volumen, Zeit, Ausnahmen, Systeme, Owner und Risiko dokumentieren. Wedge nur anhand dieser Antworten anpassen.
 

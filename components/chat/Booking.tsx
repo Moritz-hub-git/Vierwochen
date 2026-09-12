@@ -1,22 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { SITE } from "@/lib/config";
 import { captureAttribution, sessionId, track } from "@/lib/track";
-
-/**
- * Terminbuchung direkt unter dem Ergebnis (PROMPT.md §2.2, §5.6, §7).
- *
- * Reihenfolge bewusst: erst Termin wählen, dann Kontaktdaten.
- * Die Slotwahl kostet den Besucher nichts und ist ein Mikro-Commitment.
- *
- * Im Kontaktschritt kommt die E-MAIL ZUERST: Aus ihr leiten wir Name und
- * Firma ab und befüllen die Felder animiert vor („die KI liest mit") —
- * ein kleiner Produktbeweis an genau der Stelle, an der sonst Formularmüdigkeit
- * einsetzt. Beide Felder bleiben editierbar; erkannt heißt nicht behauptet.
- *
- * Zeiten kommen als UTC vom Server und werden hier nach Europe/Berlin formatiert.
- */
 
 interface Slot {
   startUtc: string;
@@ -28,6 +14,19 @@ interface SlotDay {
   label: string;
   slots: Slot[];
 }
+
+interface SlotsResponse {
+  ok: boolean;
+  requestMode?: boolean;
+  days?: SlotDay[];
+  error?: string;
+}
+
+type BookingResult = {
+  message: string;
+  mode: "bestätigt" | "angefragt";
+  slot?: string;
+};
 
 function berlinTime(utcIso: string): string {
   return new Intl.DateTimeFormat("de-DE", {
@@ -46,50 +45,8 @@ function berlinDay(utcIso: string): string {
   }).format(new Date(utcIso));
 }
 
-/** Häufige Privat-Domains: daraus lässt sich keine Firma ableiten. */
-const FREEMAIL_HINTS = new Set([
-  "gmail.com", "googlemail.com", "web.de", "gmx.de", "gmx.net", "gmx.at", "gmx.ch",
-  "t-online.de", "freenet.de", "yahoo.com", "yahoo.de", "hotmail.com", "hotmail.de",
-  "outlook.com", "outlook.de", "live.com", "live.de", "icloud.com", "me.com",
-  "proton.me", "protonmail.com", "posteo.de", "mail.de", "magenta.de",
-]);
-
-const cap = (w: string) => (w ? w[0].toUpperCase() + w.slice(1) : w);
-
-/**
- * Leitet Name und Firma aus einer geschäftlichen Adresse ab.
- * max.mustermann@musterbau-gmbh.de → „Max Mustermann", „Musterbau Gmbh".
- * Deterministisch und sofort — die kurze Animation macht die Arbeit sichtbar.
- */
-function deriveFromEmail(email: string): { name: string; company: string } | null {
-  const at = email.indexOf("@");
-  if (at < 1 || at === email.length - 1) return null;
-  const local = email.slice(0, at).toLowerCase();
-  const domain = email.slice(at + 1).toLowerCase();
-  if (!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(domain)) return null;
-
-  const nameParts = local
-    .split(/[._+-]+/)
-    .map((p) => p.replace(/\d+$/, ""))
-    .filter((p) => p.length > 1)
-    .slice(0, 3);
-  const name = nameParts.map(cap).join(" ");
-
-  let company = "";
-  if (!FREEMAIL_HINTS.has(domain)) {
-    const labels = domain.split(".");
-    labels.pop(); // TLD
-    if (labels.length > 1 && ["co", "com"].includes(labels[labels.length - 1])) labels.pop();
-    const core = labels[labels.length - 1] ?? "";
-    const LEGAL: Record<string, string> = { gmbh: "GmbH", ag: "AG", kg: "KG", ug: "UG", ohg: "OHG", se: "SE" };
-    company = core
-      .split("-")
-      .filter(Boolean)
-      .map((w) => LEGAL[w] ?? cap(w))
-      .join(" ");
-  }
-  if (!name && !company) return null;
-  return { name, company };
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === "AbortError";
 }
 
 export default function Booking({
@@ -103,425 +60,366 @@ export default function Booking({
   suggestedAgenda?: string;
   onBooked?: () => void;
 }) {
-  const [days, setDays] = useState<SlotDay[] | null>(null);
+  const [days, setDays] = useState<SlotDay[]>([]);
+  const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [requestMode, setRequestMode] = useState<boolean | null>(null);
   const [activeDay, setActiveDay] = useState(0);
   const [slot, setSlot] = useState<string | null>(null);
   const [channel, setChannel] = useState<"video" | "telefon">("video");
-  const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
-  const [companySize, setCompanySize] = useState("");
-  const [industry, setIndustry] = useState("");
   const [phone, setPhone] = useState("");
-  const [agenda, setAgenda] = useState(suggestedAgenda ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<{ message: string; mode: string } | null>(null);
-
-  // Autofill-Zustand: idle → scanning (Animation) → done (Hinweis).
-  const [scan, setScan] = useState<"idle" | "scanning" | "done">("idle");
-  const touchedRef = useRef({ name: false, company: false });
-  const scanTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const loadSlots = () => {
-    setLoadError(null);
-    setDays(null);
-    fetch("/api/booking/slots")
-      .then((r) => r.json())
-      .then((data: { ok: boolean; days?: SlotDay[] }) => {
-        if (data.ok && data.days) {
-          setDays(data.days);
-          setActiveDay(0);
-          setSlot(null);
-        } else {
-          setLoadError("Die Termine lassen sich gerade nicht laden.");
-        }
-      })
-      .catch(() => setLoadError("Die Termine lassen sich gerade nicht laden."));
-  };
-
-  useEffect(loadSlots, []);
-  useEffect(() => () => {
-    if (scanTimerRef.current) clearTimeout(scanTimerRef.current);
-  }, []);
-
-  // Scroll-Hinweis der Tages-Leiste: aus, sobald alles sichtbar ist.
+  const [success, setSuccess] = useState<BookingResult | null>(null);
+  const loadAbortRef = useRef<AbortController | null>(null);
+  const bookingAbortRef = useRef<AbortController | null>(null);
   const daysRef = useRef<HTMLDivElement | null>(null);
   const [daysAtEnd, setDaysAtEnd] = useState(true);
-  const checkDaysEnd = (el: HTMLElement) =>
-    setDaysAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 4);
-  useEffect(() => {
-    const el = daysRef.current;
-    if (!el) return;
-    checkDaysEnd(el);
-    const ro = new ResizeObserver(() => checkDaysEnd(el));
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [days]);
 
-  /** Nach gültiger E-Mail: kurz „lesen", dann Name und Firma einsetzen. */
-  const autofillFrom = (value: string) => {
-    if (touchedRef.current.name && touchedRef.current.company) return;
-    if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(value)) return;
-    const derived = deriveFromEmail(value);
-    if (!derived) return;
-    if (scanTimerRef.current) clearTimeout(scanTimerRef.current);
-    setScan("scanning");
-    scanTimerRef.current = setTimeout(() => {
-      if (!touchedRef.current.name && derived.name) setName(derived.name);
-      if (!touchedRef.current.company && derived.company) setCompany(derived.company);
-      setScan("done");
-    }, 900);
+  const loadSlots = useCallback(async () => {
+    loadAbortRef.current?.abort();
+    const controller = new AbortController();
+    loadAbortRef.current = controller;
+    const timeout = window.setTimeout(() => controller.abort(), 12_000);
+
+    setLoading(true);
+    setLoadError(null);
+    setError(null);
+    try {
+      const response = await fetch("/api/booking/slots", {
+        cache: "no-store",
+        signal: controller.signal,
+      });
+      const data = (await response.json()) as SlotsResponse;
+      if (!response.ok || !data.ok || !Array.isArray(data.days)) {
+        throw new Error(data.error || "Die Termine lassen sich gerade nicht laden.");
+      }
+      if (loadAbortRef.current !== controller) return;
+      setDays(data.days);
+      setRequestMode(Boolean(data.requestMode));
+      setActiveDay(0);
+      setSlot(null);
+    } catch (loadFailure) {
+      if (loadAbortRef.current !== controller) return;
+      setDays([]);
+      setRequestMode(null);
+      setLoadError(
+        isAbortError(loadFailure)
+          ? "Das Laden dauert länger als erwartet. Bitte versuchen Sie es erneut."
+          : loadFailure instanceof Error
+            ? loadFailure.message
+            : "Die Termine lassen sich gerade nicht laden.",
+      );
+    } finally {
+      window.clearTimeout(timeout);
+      if (loadAbortRef.current === controller) {
+        loadAbortRef.current = null;
+        setLoading(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadSlots();
+    return () => {
+      const loadController = loadAbortRef.current;
+      loadAbortRef.current = null;
+      loadController?.abort();
+      const bookingController = bookingAbortRef.current;
+      bookingAbortRef.current = null;
+      bookingController?.abort();
+    };
+  }, [loadSlots]);
+
+  const checkDaysEnd = (element: HTMLElement) => {
+    setDaysAtEnd(element.scrollLeft + element.clientWidth >= element.scrollWidth - 4);
   };
 
-  const book = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!slot) {
-      setError("Bitte wählen Sie zuerst einen Termin.");
+  useEffect(() => {
+    const element = daysRef.current;
+    if (!element) return;
+    checkDaysEnd(element);
+    const observer = new ResizeObserver(() => checkDaysEnd(element));
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [days]);
+
+  async function book(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!slot || busy) {
+      if (!slot) setError("Bitte wählen Sie zuerst eine Zeit.");
       return;
     }
+
+    bookingAbortRef.current?.abort();
+    const controller = new AbortController();
+    bookingAbortRef.current = controller;
+    const formData = new FormData(event.currentTarget);
+    const timeout = window.setTimeout(() => controller.abort(), 30_000);
     setError(null);
     setBusy(true);
+
     try {
-      const res = await fetch("/api/booking/book", {
+      const response = await fetch("/api/booking/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({
           slotStart: slot,
           channel,
-          name,
-          email,
+          name: name.trim(),
+          email: email.trim(),
           company: company.trim() || undefined,
-          companySize: companySize || undefined,
-          industry: industry || undefined,
-          phone: channel === "telefon" ? phone : undefined,
+          phone: channel === "telefon" ? phone.trim() : undefined,
           dialogId,
           caseSummary,
-          agenda: agenda.trim() || undefined,
-          // Werbe-Herkunft mitgeben: Sie muss dauerhaft an der Buchung hängen,
-          // damit später die Conversion an Google zurückgemeldet werden kann.
+          agenda: suggestedAgenda?.trim() || undefined,
           sessionId: sessionId(),
           attr: captureAttribution(),
+          website: formData.get("website"),
         }),
       });
-      const data = (await res.json()) as { ok: boolean; mode?: string; message?: string; error?: string };
-      if (data.ok) {
-        setSuccess({ message: data.message ?? "Ihr Termin steht.", mode: data.mode ?? "bestätigt" });
+      const data = (await response.json()) as {
+        ok?: boolean;
+        mode?: "bestätigt" | "angefragt";
+        message?: string;
+        error?: string;
+      };
+
+      if (response.ok && data.ok) {
+        if (data.mode !== "bestätigt" && data.mode !== "angefragt") {
+          setError(
+            "Die Anfrage wurde vom Server angenommen, ihr Status konnte aber nicht eindeutig bestätigt werden. Bitte prüfen Sie Ihr Postfach oder schreiben Sie uns, bevor Sie erneut buchen.",
+          );
+          return;
+        }
+        const mode = data.mode;
+        const bookingResult: BookingResult = {
+          mode,
+          message:
+            data.message ||
+            (mode === "angefragt"
+              ? "Ihre Terminanfrage ist eingegangen und wird persönlich bestätigt."
+              : "Ihr Termin ist gebucht."),
+          slot,
+        };
+        setSuccess(bookingResult);
         onBooked?.();
-      } else if (res.status === 409) {
-        // Slot inzwischen weg: sauber abfangen, Liste neu laden (PROMPT.md §7).
-        setError(data.error ?? "Dieser Termin wurde gerade vergeben. Bitte wählen Sie einen anderen.");
-        loadSlots();
-      } else {
-        setError(data.error ?? "Die Buchung hat nicht geklappt. Bitte versuchen Sie es erneut.");
+        return;
       }
-    } catch {
-      setError("Keine Verbindung. Bitte versuchen Sie es erneut.");
+
+      if (response.status === 409) {
+        await loadSlots();
+        setError(data.error || "Diese Zeit ist nicht mehr verfügbar. Bitte wählen Sie eine andere.");
+        return;
+      }
+      setError(data.error || "Die Buchung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.");
+    } catch (bookingFailure) {
+      if (bookingAbortRef.current !== controller) return;
+      setError(
+        isAbortError(bookingFailure)
+          ? "Die Bestätigung dauert länger als erwartet. Ihre Anfrage kann trotzdem eingegangen sein. Bitte prüfen Sie Ihr Postfach oder schreiben Sie uns, bevor Sie erneut buchen."
+          : "Die Verbindung ist abgebrochen. Bitte versuchen Sie es erneut.",
+      );
     } finally {
-      setBusy(false);
+      window.clearTimeout(timeout);
+      if (bookingAbortRef.current === controller) {
+        bookingAbortRef.current = null;
+        setBusy(false);
+      }
     }
-  };
+  }
 
   if (success) {
     return (
-      <div className="booking">
+      <div className="booking booking-complete" role="status">
         <div className="booking-success">
-          <div className="check" aria-hidden>
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 6 9 17l-5-5" />
-            </svg>
-          </div>
+          <span className="booking-success-icon" aria-hidden="true">✓</span>
+          <p className="booking-kicker">
+            {success.mode === "angefragt" ? "Terminanfrage" : "Terminbestätigung"}
+          </p>
           <h3>{success.mode === "angefragt" ? "Anfrage eingegangen" : "Termin gebucht"}</h3>
-          <p style={{ marginBottom: 0 }}>{success.message}</p>
-          <ul className="booking-next">
-            <li>{success.mode === "angefragt" ? "Der Termin wird noch persönlich bestätigt." : "Der Termin wurde im Kalender angelegt."}</li>
-            <li>Ihre Prozessskizze dient als Ausgangspunkt für das Gespräch.</li>
-          </ul>
+          <p>{success.message}</p>
+          {success.slot && <p className="booking-success-time">{berlinDay(success.slot)}, {berlinTime(success.slot)} Uhr</p>}
+          <p className="booking-success-note">
+            {success.mode === "angefragt"
+              ? "Die gewählte Zeit ist erst nach der persönlichen Bestätigung verbindlich."
+              : "Ihre Prozessvorschau liegt als Ausgangspunkt für das Gespräch vor."}
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <form className="booking" onSubmit={book}>
-      <h3>Beratungsgespräch buchen</h3>
-      <p className="booking-lead">30 Minuten, kostenlos und unverbindlich.</p>
+    <form className="booking booking-compact" onSubmit={book}>
+      <div className="booking-header">
+        <p className="booking-kicker">Nächster Schritt</p>
+        <h3>Prozessgespräch vereinbaren</h3>
+        <p className="booking-lead">30 Minuten mit Moritz Schumacher. Kostenlos und unverbindlich.</p>
+      </div>
+
+      {loading && <p className="booking-loading" role="status">Freie Zeiten werden geladen …</p>}
 
       {loadError && (
-        <div className="form-error" role="alert">
-          {loadError}{" "}
-          <button type="button" className="btn btn-ghost" onClick={loadSlots} style={{ padding: "0.3rem 0.9rem", fontSize: "0.85rem" }}>
+        <div className="booking-load-error form-error" role="alert">
+          <p>{loadError}</p>
+          <button type="button" className="booking-retry btn btn-ghost" onClick={() => void loadSlots()}>
             Erneut laden
           </button>
+          <a href={`mailto:${SITE.email}`}>Oder per E-Mail an {SITE.email}</a>
         </div>
       )}
 
-      {!days && !loadError && <p>Termine werden geladen …</p>}
-
-      {days && days.length === 0 && (
-        <p>Aktuell sind keine Termine frei. Schreiben Sie Moritz direkt: <a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+      {!loading && !loadError && requestMode !== null && (
+        <div
+          className={`booking-mode-note ${requestMode ? "booking-mode-request" : "booking-mode-direct"}`}
+          id="booking-mode-note"
+          role="status"
+        >
+          <strong>{requestMode ? "Terminanfrage" : "Direkte Buchung"}</strong>
+          <span>
+            {requestMode
+              ? "Sie wählen eine Wunschzeit. Der Termin steht erst nach unserer persönlichen Bestätigung."
+              : "Die angezeigten Zeiten sind frei. Nach dem Absenden wird der Termin direkt gebucht."} Alle Zeiten gelten für Berlin.
+          </span>
+        </div>
       )}
 
-      {days && days.length > 0 && (
+      {error && !slot && (
+        <div className="booking-error form-error" role="alert">
+          <span>{error}</span>
+          <a href={`mailto:${SITE.email}`}>Direkt an {SITE.email} schreiben</a>
+        </div>
+      )}
+
+      {!loading && !loadError && days.length === 0 && (
+        <div className="booking-empty">
+          <p>Aktuell können wir keine Zeit anbieten.</p>
+          <a href={`mailto:${SITE.email}`}>Schreiben Sie direkt an {SITE.email}</a>
+        </div>
+      )}
+
+      {!loading && !loadError && days.length > 0 && (
         <>
-          {/* Schritt 1: Termin wählen — kostenlos, keine Dateneingabe.
-              Der Wrapper zeigt rechts einen Scroll-Hinweis, bis das Ende
-              der Leiste erreicht ist (Mobil: sonst wirken es wie 4 Tage). */}
-          <div className={`slot-days-wrap${daysAtEnd ? " at-end" : ""}`}>
-            <div
-              className="slot-days"
-              role="tablist"
-              aria-label="Tag wählen"
-              ref={daysRef}
-              onScroll={(e) => checkDaysEnd(e.currentTarget)}
-            >
-              {days.map((day, i) => (
+          <div className="booking-step">
+            <span className="booking-step-label">1 · Zeit wählen</span>
+            <div className={`slot-days-wrap${daysAtEnd ? " at-end" : ""}`}>
+              <div
+                className="slot-days"
+                role="group"
+                aria-label="Tag wählen"
+                ref={daysRef}
+                onScroll={(event) => checkDaysEnd(event.currentTarget)}
+              >
+                {days.map((day, index) => (
+                  <button
+                    key={day.date}
+                    type="button"
+                    aria-pressed={index === activeDay}
+                    className={`slot-day${index === activeDay ? " active" : ""}`}
+                    onClick={() => {
+                      setActiveDay(index);
+                      setSlot(null);
+                      setError(null);
+                    }}
+                  >
+                    {day.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="slot-times" role="group" aria-label={`Zeiten für ${days[activeDay]?.label ?? "den gewählten Tag"}`}>
+              {days[activeDay]?.slots.map((availableSlot) => (
                 <button
-                  key={day.date}
+                  key={availableSlot.startUtc}
                   type="button"
-                  role="tab"
-                  aria-selected={i === activeDay}
-                  className={`slot-day${i === activeDay ? " active" : ""}`}
+                  className={`slot-time${slot === availableSlot.startUtc ? " active" : ""}`}
                   onClick={() => {
-                    setActiveDay(i);
-                    setSlot(null);
+                    if (!slot) track("booking_slot_selected", { dialogId });
+                    setSlot(availableSlot.startUtc);
+                    setError(null);
                   }}
+                  aria-pressed={slot === availableSlot.startUtc}
                 >
-                  {day.label}
+                  {berlinTime(availableSlot.startUtc)}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="slot-times">
-            {days[activeDay]?.slots.map((s) => (
-              <button
-                key={s.startUtc}
-                type="button"
-                className={`slot-time${slot === s.startUtc ? " active" : ""}`}
-                onClick={() => {
-                  // Trichter: Die Slotwahl ist das Mikro-Commitment vor dem
-                  // Formular — hier trennt sich Interesse von Absicht.
-                  if (!slot) track("booking_slot_selected", { dialogId });
-                  setSlot(s.startUtc);
-                }}
-                aria-pressed={slot === s.startUtc}
-              >
-                {berlinTime(s.startUtc)}
-              </button>
-            ))}
-          </div>
-
-          {/* Schritt 2: erscheint erst nach der Slotwahl — das Mikro-Commitment steht. */}
           {slot && (
-            <div className="booking-confirm">
+            <div className="booking-contact" aria-describedby="booking-mode-note">
               <div className="booking-chosen">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="M20 6 9 17l-5-5" />
-                </svg>
-                <span>
-                  {berlinDay(slot)}, {berlinTime(slot)} Uhr
-                </span>
+                <span aria-hidden="true">✓</span>
+                <strong>{berlinDay(slot)}, {berlinTime(slot)} Uhr</strong>
+                <button type="button" onClick={() => setSlot(null)}>Ändern</button>
               </div>
 
-              {/* Zur gewählten Zeit gehört ein Gesprächspartner — ein Kopf
-                  plus AI, und genau das steht hier. Foto nur, wenn ein echtes
-                  hinterlegt ist (SITE.founder.photo); sonst Initialen. Ein
-                  gemaltes Platzhaltergesicht wirkte in den Persona-Tests wie
-                  eine Stockfoto-Agentur — also weg damit. */}
-              <div className="advisor advisor-chosen" role="group" aria-label="Gesprächspartner">
-                {SITE.founder.photo ? (
-                  <span className="advisor-photo">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={SITE.founder.photo} alt="" width={48} height={48} />
-                  </span>
-                ) : (
-                  <span className="advisor-photo advisor-initials" aria-hidden>{SITE.founder.initials}</span>
-                )}
-                <span className="advisor-text">
-                  <strong>{SITE.founder.name}</strong>
-                  <span className="advisor-role">prüft Ihren Prozess und den sinnvollen Pilotumfang</span>
-                </span>
-                <span className="advisor-picked" aria-hidden>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 6 9 17l-5-5" />
-                  </svg>
-                </span>
-              </div>
-
-              <div className="field">
-                <label htmlFor="booking-email">Ihre E-Mail</label>
-                <input
-                  id="booking-email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  maxLength={254}
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    autofillFrom(e.target.value);
-                  }}
-                  onBlur={() => autofillFrom(email)}
-                  placeholder="name@ihre-firma.de"
-                />
-              </div>
-
-              {scan === "scanning" && (
-                <div className="scan-note" role="status">
-                  <span className="scan-spark" aria-hidden>✦</span> KI liest Name und Firma aus der Adresse …
+              <span className="booking-step-label">2 · Kontaktdaten</span>
+              <div className="booking-fields">
+                <div className="field booking-field">
+                  <label htmlFor="booking-name">Name</label>
+                  <input id="booking-name" name="name" type="text" autoComplete="name" required minLength={2} maxLength={200} value={name} onChange={(event) => setName(event.target.value)} placeholder="Vor- und Nachname" />
                 </div>
-              )}
-              {scan === "done" && (
-                <div className="scan-note scan-note-done" role="status">
-                  <span className="scan-spark" aria-hidden>✦</span> Automatisch erkannt — bitte kurz prüfen.
+                <div className="field booking-field">
+                  <label htmlFor="booking-email">E-Mail</label>
+                  <input id="booking-email" name="email" type="email" autoComplete="email" inputMode="email" required maxLength={254} value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@unternehmen.de" />
                 </div>
-              )}
-
-              <div className="field">
-                <label htmlFor="booking-name">Ihr Name</label>
-                <input
-                  id="booking-name"
-                  type="text"
-                  autoComplete="name"
-                  required
-                  maxLength={200}
-                  className={scan === "scanning" ? "is-scanning" : scan === "done" ? "is-filled" : ""}
-                  value={name}
-                  onChange={(e) => {
-                    touchedRef.current.name = true;
-                    setName(e.target.value);
-                  }}
-                  placeholder="Vor- und Nachname"
-                />
-              </div>
-
-              <div className="field">
-                <label htmlFor="booking-company">Unternehmen</label>
-                <input
-                  id="booking-company"
-                  type="text"
-                  autoComplete="organization"
-                  maxLength={200}
-                  className={scan === "scanning" ? "is-scanning" : scan === "done" ? "is-filled" : ""}
-                  value={company}
-                  onChange={(e) => {
-                    touchedRef.current.company = true;
-                    setCompany(e.target.value);
-                  }}
-                  placeholder="Firma (optional)"
-                />
-              </div>
-
-              <div className="field-row">
-                <div className="field">
-                  <label htmlFor="booking-size">Firmengröße</label>
-                  <select
-                    id="booking-size"
-                    value={companySize}
-                    onChange={(e) => setCompanySize(e.target.value)}
-                  >
-                    <option value="">Bitte wählen</option>
-                    <option value="1–10">1–10 Mitarbeitende</option>
-                    <option value="11–50">11–50 Mitarbeitende</option>
-                    <option value="51–200">51–200 Mitarbeitende</option>
-                    <option value="201–500">201–500 Mitarbeitende</option>
-                    <option value="500+">Über 500 Mitarbeitende</option>
-                  </select>
-                </div>
-                <div className="field">
-                  <label htmlFor="booking-industry">Branche</label>
-                  <select
-                    id="booking-industry"
-                    value={industry}
-                    onChange={(e) => setIndustry(e.target.value)}
-                  >
-                    <option value="">Bitte wählen</option>
-                    <option>Maschinen- &amp; Anlagenbau</option>
-                    <option>Elektrotechnik</option>
-                    <option>Logistik &amp; Spedition</option>
-                    <option>Großhandel</option>
-                    <option>Einzelhandel</option>
-                    <option>Bauwesen &amp; Handwerk</option>
-                    <option>Dienstleistung</option>
-                    <option>IT &amp; Software</option>
-                    <option>Sonstige</option>
-                  </select>
+                <div className="field booking-field booking-field-wide">
+                  <label htmlFor="booking-company">Unternehmen <span className="booking-optional">optional</span></label>
+                  <input id="booking-company" name="company" type="text" autoComplete="organization" maxLength={200} value={company} onChange={(event) => setCompany(event.target.value)} placeholder="Unternehmen" />
                 </div>
               </div>
 
-              <div className="channel-row" role="radiogroup" aria-label="Gesprächskanal">
-                <button
-                  type="button"
-                  role="radio"
-                  aria-checked={channel === "video"}
-                  className={`channel-btn${channel === "video" ? " active" : ""}`}
-                  onClick={() => setChannel("video")}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d="m22 8-6 4 6 4V8Z" /><rect x="2" y="6" width="14" height="12" rx="2" />
-                  </svg>
-                  Online-Call
-                </button>
-                <button
-                  type="button"
-                  role="radio"
-                  aria-checked={channel === "telefon"}
-                  className={`channel-btn${channel === "telefon" ? " active" : ""}`}
-                  onClick={() => setChannel("telefon")}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92Z" />
-                  </svg>
-                  Telefon
-                </button>
-              </div>
+              <fieldset className="booking-channel">
+                <legend>Gesprächskanal</legend>
+                <div className="channel-row">
+                  <label className={`channel-btn${channel === "video" ? " active" : ""}`}>
+                    <input type="radio" name="channel" value="video" checked={channel === "video"} onChange={() => setChannel("video")} />
+                    Online-Call
+                  </label>
+                  <label className={`channel-btn${channel === "telefon" ? " active" : ""}`}>
+                    <input type="radio" name="channel" value="telefon" checked={channel === "telefon"} onChange={() => setChannel("telefon")} />
+                    Telefon
+                  </label>
+                </div>
+              </fieldset>
 
               {channel === "telefon" && (
-                <div className="field">
-                  <label htmlFor="booking-phone">Ihre Rufnummer</label>
-                  <input
-                    id="booking-phone"
-                    type="tel"
-                    autoComplete="tel"
-                    required
-                    maxLength={26}
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+49 …"
-                  />
+                <div className="field booking-field booking-phone">
+                  <label htmlFor="booking-phone">Rufnummer</label>
+                  <input id="booking-phone" name="phone" type="tel" autoComplete="tel" required maxLength={26} value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="+49 …" />
                 </div>
               )}
 
-              <div className="field">
-                <label htmlFor="booking-agenda">Besondere Fragen? (optional)</label>
-                <textarea
-                  id="booking-agenda"
-                  rows={2}
-                  maxLength={500}
-                  value={agenda}
-                  onChange={(e) => setAgenda(e.target.value)}
-                  placeholder="z. B. wie die Artikelnummern abgeglichen werden"
-                />
+              <div className="honeypot" aria-hidden="true">
+                <label htmlFor="booking-website">Website</label>
+                <input id="booking-website" name="website" tabIndex={-1} autoComplete="off" />
               </div>
 
-              {error && <div className="form-error" role="alert">{error}</div>}
+              {error && (
+                <div className="booking-error form-error" role="alert">
+                  <span>{error}</span>
+                  <a href={`mailto:${SITE.email}`}>Direkt an {SITE.email} schreiben</a>
+                </div>
+              )}
 
-              <button type="submit" className="btn btn-primary" disabled={busy} style={{ width: "100%" }}>
-                {busy ? "Wird gebucht …" : "Termin buchen"}
+              <button type="submit" className="booking-submit btn btn-primary" disabled={busy}>
+                {busy
+                  ? requestMode
+                    ? "Anfrage wird gesendet …"
+                    : "Termin wird gebucht …"
+                  : requestMode
+                    ? "Terminanfrage senden"
+                    : "Termin buchen"}
               </button>
-
-              {/* Einwilligung sichtbar am Knopf, nicht nur im Datenschutztext:
-                  Wer absendet, soll wissen, was mit den Angaben passiert. */}
               <p className="booking-consent">
-                Mit dem Absenden stimmen Sie der Speicherung Ihrer Angaben für die Terminorganisation zu.
-                Details: <a href="/datenschutz" target="_blank" rel="noopener">Datenschutz</a>.
-              </p>
-
-              <p className="booking-scarcity">
-                <strong>Im Gespräch klären wir:</strong> Automatisierbare Standardfälle, notwendige Freigaben,
-                Integrationen und den belastbaren Umfang eines Piloten.
+                Mit dem Absenden verarbeiten wir Ihre Angaben zur Terminorganisation. <a href="/datenschutz" target="_blank" rel="noopener noreferrer">Datenschutz</a>
               </p>
             </div>
           )}

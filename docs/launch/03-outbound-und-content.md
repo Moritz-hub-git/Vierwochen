@@ -6,6 +6,10 @@
 
 Nicht Reichweite kaufen, sondern zehn bis fünfzehn qualifizierte Gespräche zum Wedge führen. Fokus: Einkauf/Operations in Industrie- und B2B-KMU. Keine Arbeitgeberkontakte, vertraulichen Informationen oder Kundendaten verwenden.
 
+## Funnel-Ziel
+
+Jeder zulässige Link und jede spätere Anzeige führt zur Startseite und dort ins persistente Chat-Dock. Der Besucher gibt den Prozess ein, beantwortet höchstens drei Rückfragen und erhält eine konkrete Vorschau ohne E-Mail-Gate. Erst danach wird inline ein Termin angeboten. Der Conversion-Zielwert ist eine gebuchte oder — ohne konfigurierten Kalender — gespeicherte Terminanfrage mit verwertbarer Prozessskizze; ein Klick oder eine E-Mail-Adresse allein ist kein qualifizierter Lead.
+
 ## Persönliche Erstansprache (Entwurf)
 
 > Betreff: Auftragsbestätigungen im Einkauf
