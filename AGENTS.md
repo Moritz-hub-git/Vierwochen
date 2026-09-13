@@ -15,7 +15,9 @@ OpsDone is an AI-native process automation company. The public product is elimin
 - Next.js App Router, React, TypeScript; self-hosted fonts.
 - Public homepage and pages: `app/(site)`. Shared UI: `components/site`.
 - Five process definitions: `lib/processes.ts`; outcome calculation: `lib/potential.ts`.
-- Primary funnel: Ads → persistent ChatDock → `/api/chat` → at most three questions → concrete AI process preview without an email gate → inline booking via `/api/booking/*`.
+- Five concept landing pages: Ads → shared `BlueprintFunnel` → `/api/chat` → at most three adaptive questions → full Solution Blueprint (interactive app, process, deterministic workload/pricing scenario) → inline booking or requested blueprint email. The existing main site retains ChatDock.
+- `lib/blueprint.ts` owns deterministic estimates. Model output describes scope; numeric ROI is never taken from the model. Unknown workload remains unknown; scenario assumptions must be visible.
+- `/api/blueprint-email` sends only the server-stored final blueprint on explicit visitor request. No email gate and no automatic marketing enrollment.
 - The AI chat result is visible before contact details. Booking collects contact details only when the visitor chooses a slot; without `BOOKING_CALENDAR_ID`, the selected slot is an explicitly labeled request for manual confirmation.
 - `/api/process-check` and a possible direct form are secondary/fallback intake infrastructure; they must not be described as the primary launch funnel.
 - Chat dialogs and funnel events use Firestore when configured; the process preview must not be blocked by an email gate.

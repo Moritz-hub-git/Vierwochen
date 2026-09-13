@@ -1,6 +1,7 @@
 /** Structured discovery dialog for an OpsDone process assessment. */
 import { COST_ANCHOR, PRICE, RETAINER, SITE } from "./config";
 import type { Content } from "./vertex";
+import type { SolutionBlueprint } from "./blueprint";
 
 export interface SketchStep {
   label: string;
@@ -44,6 +45,7 @@ export interface DialogInput {
   preset?: number;
 }
 export interface DialogTurn {
+  blueprint?: SolutionBlueprint;
   reply: string;
   phase: "question" | "result" | "followup" | "reject";
   sketch: Sketch;
@@ -133,6 +135,66 @@ export const RESPONSE_SCHEMA = {
       },
       required: ["tier", "price", "priceItems", "scope", "weeks"],
     },
+    blueprint: {
+      type: "OBJECT",
+      description:
+        "Strukturierter, vorläufiger Anwendungsentwurf. Keine berechneten Preise oder Einsparungen; diese berechnet der Server.",
+      properties: {
+        title: { type: "STRING" },
+        summary: { type: "STRING" },
+        processType: {
+          type: "STRING",
+          enum: ["purchasing", "reporting", "complaints", "generic"],
+        },
+        requiredViews: {
+          type: "ARRAY",
+          items: {
+            type: "STRING",
+            enum: [
+              "task-queue",
+              "document-viewer",
+              "approval-panel",
+              "comparison-table",
+              "kpi-cards",
+              "timeline",
+              "audit-trail",
+              "output-preview",
+            ],
+          },
+        },
+        dataObjects: { type: "ARRAY", items: { type: "STRING" } },
+        actions: { type: "ARRAY", items: { type: "STRING" } },
+        approvals: { type: "ARRAY", items: { type: "STRING" } },
+        inputs: { type: "ARRAY", items: { type: "STRING" } },
+        outputs: { type: "ARRAY", items: { type: "STRING" } },
+        integrations: { type: "ARRAY", items: { type: "STRING" } },
+        kpis: { type: "ARRAY", items: { type: "STRING" } },
+        todaySteps: { type: "ARRAY", items: { type: "STRING" } },
+        openQuestions: { type: "ARRAY", items: { type: "STRING" } },
+        complexity: {
+          type: "OBJECT",
+          properties: {
+            workflowCount: { type: "INTEGER" },
+            specialUi: { type: "BOOLEAN" },
+          },
+        },
+      },
+      required: [
+        "title",
+        "summary",
+        "processType",
+        "requiredViews",
+        "dataObjects",
+        "actions",
+        "approvals",
+        "inputs",
+        "outputs",
+        "integrations",
+        "kpis",
+        "todaySteps",
+        "openQuestions",
+      ],
+    },
     input: {
       type: "OBJECT",
       properties: {
@@ -176,8 +238,9 @@ POSITIONIERUNG
 GESPRÄCH
 - Rekonstruiere den heutigen Ablauf: Input, Schritte, Systeme, Volumen, Ausnahmen, Freigaben und Output.
 - Liefert die erste Nachricht bereits genug Kontext für eine belastbare Vorschau, antworte sofort mit phase=result. Eine Mindestzahl an Fragen gibt es nicht.
-- Stelle höchstens ${MAX_DISCOVERY_QUESTIONS} Rückfragen insgesamt und pro Zug genau eine leicht beantwortbare Frage. Frage nur, wenn die Antwort Zielbild, Sicherheit oder Pilotumfang materiell verändert. Priorität: (1) Input und gewünschter Output, (2) bestehende Systeme und Übergaben, (3) Ausnahmen, Freigaben oder Volumen.
-- Nutze meist chips oder multichips. Zwinge niemanden zu Stundenangaben.
+- Stelle höchstens ${MAX_DISCOVERY_QUESTIONS} Rückfragen insgesamt und pro Zug genau eine leicht beantwortbare Frage. Frage nur, wenn die Antwort Zielbild, Sicherheit oder Pilotumfang materiell verändert. Priorität bei erkennbarem Prozess: (1) Häufigkeit/Volumen, (2) heutige Bearbeitungszeit pro Vorgang, (3) beteiligte Systeme. Überspringe bereits genannte Angaben. Bei unklarem Prozess zuerst das gewünschte Ergebnis klären. Jede fehlende Zahl bleibt unbekannt; kein Zwang zur Schätzung.
+- Spiegele den verstandenen Prozess im ersten Zug in höchstens zwei Sätzen und stelle dann eine Frage. Nutze chips oder number. Mengen-Chips immer mit eindeutiger Einheit, etwa „50 Vorgänge pro Woche“, Zeiten „8 Minuten pro Vorgang“. Keine ungenauen Plus-Werte als exakte Mengen ausgeben. Bei number verwende für Aufwand die kurze Einheit „Min./Vorgang“, für Volumen „Vorgänge/Monat“. Biete „Weiß ich noch nicht“ an. Zwinge niemanden zu Zeitangaben.
+- Liefere in jedem Zug blueprint als strukturierten Entwurf. Summary beschreibt konkret die gewünschte Anwendung; Inputs, Outputs und Integrationen ausschließlich aus Nutzerangaben. Fehlendes in openQuestions. Anforderungen wie Freigaben sind Vorschläge, keine bereits getroffenen Entscheidungen. KPIs sind Kennzahl-Namen ohne erfundene Werte. todaySteps zeigt heutige manuelle Arbeit. requiredViews wählt passende Ansichten aus der Bibliothek; kein frei erzeugter Code. workflowCount nur konkret beschriebene Teilabläufe, specialUi nur explizit besondere Anforderungen. Der Server berechnet Preisband und Wirtschaftlichkeit deterministisch, erfinde dafür selbst keine Zahlen.
 - sketch ist ab der ersten Antwort eine konkrete, vorläufige Prozessvorschau. Verwende ausschließlich Angaben aus dem Gespräch. Fehlende Details gehören als klar formulierte Annahme in assumptions oder als Frage in open, niemals als Tatsache in steps oder value.
 - Markiere nur klare Regelarbeit als automatisch. Unsichere, rechtliche oder risikoreiche Entscheidungen sind teilautomatisch oder manuell.
 - Nenne Nutzen nur, wenn er aus Angaben ableitbar ist. Keine erfundenen Prozentwerte, Einsparungen oder Amortisationszeiten.

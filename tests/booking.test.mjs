@@ -73,6 +73,10 @@ test("slots return 503 instead of unchecked availability when freeBusy fails", a
 function bookingRoute({ freeBusyFails = false, attendeeInvited = true } = {}) {
   let createEventCalls = 0;
   const route = compile("../app/api/booking/book/route.ts", {
+    "@/lib/booking": {
+      loadStoredBlueprint: async () => null,
+      blueprintSummary: () => "",
+    },
     "next/server": nextServer,
     "@google-cloud/firestore": {
       FieldValue: { serverTimestamp: () => "SERVER_TIME" },

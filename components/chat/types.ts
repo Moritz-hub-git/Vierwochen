@@ -1,3 +1,4 @@
+import type { SolutionBlueprint } from "@/lib/blueprint";
 /** Client-Typen — Spiegel des Server-Vertrags aus lib/dialog.ts. */
 
 export interface SketchStep {
@@ -21,7 +22,12 @@ export interface DialogResult {
   priceItems: { label: string; euro: number }[];
   scope: string[];
   weeks: { week: number; label: string }[];
-  savings?: { personDaysPerWeek: number; quote: string; annualEuro: number; basis: string };
+  savings?: {
+    personDaysPerWeek: number;
+    quote: string;
+    annualEuro: number;
+    basis: string;
+  };
 }
 
 export interface DialogInput {
@@ -36,6 +42,7 @@ export interface DialogInput {
 }
 
 export interface DialogTurn {
+  blueprint?: SolutionBlueprint;
   reply: string;
   /** followup: Nachgespräch nach dem Ergebnis — kann ein aktualisiertes result mitbringen. */
   phase: "question" | "result" | "followup" | "reject";

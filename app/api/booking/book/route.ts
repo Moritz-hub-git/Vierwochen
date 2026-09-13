@@ -14,6 +14,7 @@ import {
   createEvent,
   overlapsBusy,
 } from "@/lib/calendar";
+import { blueprintSummary, loadStoredBlueprint } from "@/lib/booking";
 import { BOOKING, SITE, contactEmail } from "@/lib/config";
 import { checkBusinessEmail } from "@/lib/email";
 import { cleanAttribution, recordEvent } from "@/lib/events";
@@ -162,6 +163,13 @@ export async function POST(req: Request) {
     typeof body.agenda === "string" ? body.agenda.trim().slice(0, 500) : "";
   const company =
     typeof body.company === "string" ? body.company.trim().slice(0, 200) : "";
+  const storedBlueprint =
+    typeof body.dialogId === "string"
+      ? await loadStoredBlueprint(body.dialogId)
+      : null;
+  const blueprintContext = storedBlueprint
+    ? blueprintSummary(storedBlueprint)
+    : "";
   const caseSummary =
     typeof body.caseSummary === "string" ? body.caseSummary.slice(0, 2000) : "";
   // Firmengröße/Branche: freies Feld aus einer festen Auswahl im Formular —
@@ -241,6 +249,11 @@ export async function POST(req: Request) {
             [companySize, industry].filter(Boolean).join(" / ") || "—",
           ],
           ["Fall", caseSummary || "—"],
+          [
+            "Blueprint",
+            blueprintContext ||
+              "Kein gespeicherter Blueprint; Gespräch anhand der Prozessbeschreibung.",
+          ],
           ["Agenda", agenda || "—"],
           [
             "Dialog-ID",
@@ -289,6 +302,7 @@ export async function POST(req: Request) {
               ? body.dialogId.slice(0, 64)
               : null,
           caseSummary: caseSummary || null,
+          blueprint: storedBlueprint,
           agenda: agenda || null,
           attr,
           sessionId: trackSessionId || null,
@@ -401,7 +415,9 @@ export async function POST(req: Request) {
       company: company || undefined,
       channel,
       phone: channel === "telefon" ? phone : undefined,
-      summaryOfCase: caseSummary || undefined,
+      summaryOfCase:
+        [caseSummary, blueprintContext].filter(Boolean).join("\n\n") ||
+        undefined,
       agenda: agenda || undefined,
     });
     if (bookingRef) {

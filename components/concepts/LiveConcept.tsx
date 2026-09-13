@@ -1,15 +1,10 @@
 "use client";
-
 import Link from "next/link";
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import Booking from "@/components/chat/Booking";
-import { Chips, MultiChips, Stepper } from "@/components/chat/Controls";
-import type { DialogTurn, Sketch, UiMessage } from "@/components/chat/types";
-import { captureAttribution, track } from "@/lib/track";
+import { useState } from "react";
+import BlueprintApp from "@/components/blueprint/BlueprintApp";
+import { buildBlueprint } from "@/lib/blueprint";
+import { startBlueprint } from "@/components/blueprint/BlueprintFunnel";
 import styles from "./live-concept.module.css";
-
-const MAX_CHARS = 1500;
-
 const EXAMPLES = {
   einkauf: {
     label: "Einkauf",
@@ -46,177 +41,45 @@ const EXAMPLES = {
   },
 } as const;
 
-type ExampleKey = keyof typeof EXAMPLES;
-
-function mark(automation: Sketch["steps"][number]["automation"]) {
-  if (automation === "automatisch") return "Automatisch";
-  if (automation === "teilautomatisch") return "Mit Prüfung";
-  return "Entscheidung durch Ihr Team";
-}
 
 export default function LiveConcept() {
-  const dialogId = useRef("");
-  const history = useRef<UiMessage[]>([]);
-  const pending = useRef(false);
-  const abort = useRef<AbortController | null>(null);
-  const resultRef = useRef<HTMLDivElement>(null);
-  const conversationEnd = useRef<HTMLDivElement>(null);
-  const [example, setExample] = useState<ExampleKey>("einkauf");
   const [draft, setDraft] = useState("");
-  const [messages, setMessages] = useState<UiMessage[]>([]);
-  const [turn, setTurn] = useState<DialogTurn | null>(null);
-  const [solution, setSolution] = useState<DialogTurn | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [bookingOpen, setBookingOpen] = useState(false);
-  const [booked, setBooked] = useState(false);
-  const started = messages.length > 0;
-
-  useEffect(() => {
-    captureAttribution();
-    return () => abort.current?.abort();
-  }, []);
-
-  const updateMessages = (next: UiMessage[]) => {
-    history.current = next;
-    setMessages(next);
-  };
-
-  const send = async (text: string, retry = false) => {
-    const value = text.trim().slice(0, MAX_CHARS);
-    if (!value || pending.current) return;
-    if (!dialogId.current) dialogId.current = crypto.randomUUID();
-    const clean = history.current.filter((message) => !message.error);
-    if (retry && clean.at(-1)?.role === "user") clean.pop();
-    const next: UiMessage[] = [...clean, { role: "user", display: value }];
-    updateMessages(next);
-    setDraft("");
-    setBusy(true);
-    setTurn(null);
-    pending.current = true;
-    track(clean.length ? "dialog_question" : "dialog_started", {
-      dialogId: dialogId.current,
-      meta: { turn: next.filter((message) => message.role === "user").length },
-    });
-
-    const controller = new AbortController();
-    abort.current = controller;
-    const timer = window.setTimeout(() => controller.abort(), 45_000);
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        signal: controller.signal,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          dialogId: dialogId.current,
-          messages: next.map((message) => ({
-            role: message.role,
-            content: message.raw ?? message.display,
-          })),
-        }),
-      });
-      const data = (await response.json()) as {
-        ok?: boolean;
-        turn?: DialogTurn;
-        error?: string;
-      };
-      if (!response.ok || !data.ok || !data.turn) {
-        throw new Error(
-          data.error || "Die Einschätzung ist gerade nicht erreichbar.",
-        );
-      }
-      const answer = data.turn;
-      updateMessages([
-        ...next,
-        {
-          role: "assistant",
-          display: answer.reply,
-          raw: JSON.stringify(answer),
-        },
-      ]);
-      setTurn(answer);
-      if (answer.sketch.steps.length) setSolution(answer);
-      if (answer.result) {
-        track("result_delivered", { dialogId: dialogId.current });
-        requestAnimationFrame(() =>
-          resultRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          }),
-        );
-      } else if (window.matchMedia("(max-width: 850px)").matches) {
-        requestAnimationFrame(() =>
-          conversationEnd.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          }),
-        );
-      }
-    } catch (error) {
-      updateMessages([
-        ...next,
-        {
-          role: "assistant",
-          display: controller.signal.aborted
-            ? "Die Antwort dauert gerade zu lange. Ihr Text bleibt erhalten."
-            : error instanceof Error
-              ? error.message
-              : "Keine Verbindung. Bitte versuchen Sie es erneut.",
-          error: true,
-        },
-      ]);
-    } finally {
-      window.clearTimeout(timer);
-      pending.current = false;
-      setBusy(false);
-      abort.current = null;
-    }
-  };
-
-  const onSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    void send(draft);
-  };
-
-  const questions = messages.filter((message) => {
-    try {
-      return JSON.parse(message.raw || "{}").phase === "question";
-    } catch {
-      return false;
-    }
-  }).length;
-  const lastError = messages.at(-1)?.error;
+  const [example, setExample] = useState<keyof typeof EXAMPLES>("einkauf");
   const active = EXAMPLES[example];
-  const sketch = solution?.sketch;
-  const summary = useMemo(
-    () =>
-      [
-        sketch?.title,
-        messages.find((message) => message.role === "user")?.display,
-      ]
-        .filter(Boolean)
-        .join(" — "),
-    [messages, sketch?.title],
+  const initialBlueprint = buildBlueprint(
+    {
+      processType:
+        example === "reporting"
+          ? "reporting"
+          : example === "reklamation"
+            ? "complaints"
+            : "purchasing",
+      title: active.title,
+      inputs: active.source.split(" · "),
+      outputs: [
+        example === "reporting" ? "Managementbericht" : "Geprüfter Vorgang",
+      ],
+      actions: ["Daten erfassen", "Abweichungen prüfen"],
+      approvals: [active.decision],
+    },
+    { title: active.title, steps: [], value: [], open: [], assumptions: [] },
+    "",
   );
-
   return (
     <div className={styles.page}>
-      <a className={styles.skip} href="#main">
-        Zum Inhalt
-      </a>
       <header className={styles.header}>
-        <Link href="/" className={styles.logo} aria-label="OpsDone Startseite">
-          <span aria-hidden="true">✦</span> OpsDone<i>.</i>
+        <Link href="/" className={styles.logo}>
+          ✦ OpsDone.
         </Link>
         <nav aria-label="Seitennavigation">
           <a href="#so-funktionierts">So funktioniert es</a>
           <a href="#zusammenarbeit">Zusammenarbeit</a>
           <a href="#fragen">Fragen</a>
-          <a className={styles.headerCta} href="#entwurf">
-            Prozess beschreiben
-          </a>
+          <button className={styles.headerCta} onClick={() => startBlueprint()}>
+            Blueprint erstellen
+          </button>
         </nav>
       </header>
-
       <main id="main">
         <section className={styles.hero} id="entwurf">
           <div className={styles.heroCopy}>
@@ -230,380 +93,112 @@ export default function LiveConcept() {
               Wir bauen die Software, die ihn erledigt.
             </p>
           </div>
-
           <div className={styles.workspace}>
             <section className={styles.intake} aria-labelledby="intake-title">
               <div className={styles.panelHead}>
                 <span>01</span>
                 <div>
                   <small>IHR PROZESS</small>
-                  <h2 id="intake-title">Beschreiben Sie Ihre Arbeit.</h2>
+                  <h2 id="intake-title">
+                    Ihr Solution Blueprint beginnt hier.
+                  </h2>
                 </div>
               </div>
-
-              {!started ? (
-                <div className={styles.start}>
-                  <label htmlFor="process-description">
-                    Welche Arbeit soll bei Ihnen verschwinden?
-                  </label>
-                  <p>
-                    Beschreiben Sie einen wiederkehrenden Ablauf. Konkrete
-                    Stichpunkte reichen.
-                  </p>
-                  <form onSubmit={onSubmit} className={styles.firstForm}>
-                    <textarea
-                      id="process-description"
-                      value={draft}
-                      onChange={(event) => setDraft(event.target.value)}
-                      maxLength={MAX_CHARS}
-                      rows={6}
-                      placeholder="Zum Beispiel: Wir vergleichen jeden Monat mehrere Excel-Dateien und bauen daraus unseren Managementbericht."
-                    />
-                    <div>
-                      <span>
-                        {draft.length} / {MAX_CHARS}
-                      </span>
-                      <button disabled={busy || !draft.trim()}>
-                        Entwurf starten <b>↗</b>
-                      </button>
-                    </div>
-                  </form>
-                  <div className={styles.starters}>
-                    <span>Oder mit einem Beispiel beginnen</span>
-                    <button
-                      onClick={() =>
-                        void send(
-                          "Wir gleichen Auftragsbestätigungen manuell mit Bestellungen ab.",
-                        )
-                      }
-                    >
-                      Auftragsbestätigungen prüfen
-                    </button>
-                    <button
-                      onClick={() =>
-                        void send(
-                          "Wir vergleichen jeden Monat mehrere Excel-Dateien und bauen daraus unseren Managementbericht.",
-                        )
-                      }
-                    >
-                      Managementbericht erstellen
-                    </button>
-                    <button
-                      onClick={() =>
-                        void send(
-                          "Wir bearbeiten Reklamationen aus E-Mails, Fotos und Lieferscheinen manuell.",
-                        )
-                      }
-                    >
-                      Reklamationen bearbeiten
+              <div className={styles.start}>
+                <label htmlFor="process-description">
+                  Welche wiederkehrende Arbeit kostet Ihr Team am meisten Zeit?
+                </label>
+                <p>
+                  Ihre Anwendung, Ihr neuer Ablauf und Ihr Potenzial. In wenigen
+                  Schritten – ohne E-Mail-Pflicht.
+                </p>
+                <form
+                  className={styles.firstForm}
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    startBlueprint(draft, true);
+                  }}
+                >
+                  <textarea
+                    id="process-description"
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    rows={5}
+                    maxLength={1500}
+                    placeholder="Zum Beispiel: Wir vergleichen jeden Monat mehrere Excel-Dateien und bauen daraus unseren Managementbericht."
+                  />
+                  <div>
+                    <span>Ca. 60–90 Sekunden</span>
+                    <button disabled={!draft.trim()}>
+                      Blueprint erstellen ↗
                     </button>
                   </div>
-                </div>
-              ) : (
-                <div className={styles.conversation}>
-                  <div
-                    className={styles.messages}
-                    role="log"
-                    aria-live="polite"
-                  >
-                    {messages.map((message, index) => (
-                      <div
-                        key={index}
-                        className={`${styles.message} ${message.role === "user" ? styles.user : styles.assistant} ${message.error ? styles.error : ""}`}
-                      >
-                        <small>
-                          {message.role === "user" ? "SIE" : "OPSDONE"}
-                        </small>
-                        <p>{message.display}</p>
-                      </div>
-                    ))}
-                    {busy && (
-                      <p className={styles.thinking} role="status">
-                        <span />
-                        <span />
-                        <span /> Prozess wird eingeordnet …
-                      </p>
-                    )}
-                  </div>
-
-                  {!busy && turn?.input && !turn.result && (
-                    <div className={styles.controls}>
-                      {turn.input.kind === "chips" && (
-                        <Chips
-                          options={turn.input.options || []}
-                          onPick={(value) => void send(value)}
-                        />
-                      )}
-                      {turn.input.kind === "multichips" && (
-                        <MultiChips
-                          options={turn.input.options || []}
-                          onSubmit={(value) => void send(value)}
-                        />
-                      )}
-                      {turn.input.kind === "number" && (
-                        <Stepper
-                          input={turn.input}
-                          onSubmit={(value) => void send(value)}
-                        />
-                      )}
-                    </div>
-                  )}
-
-                  {sketch && !turn?.result && (
-                    <a
-                      className={styles.mobilePreviewLink}
-                      href="#preview-title"
+                </form>
+                <div className={styles.starters}>
+                  <span>Oder mit einem Beispiel beginnen</span>
+                  {[
+                    [
+                      "Auftragsbestätigungen prüfen",
+                      "Wir vergleichen Auftragsbestätigungen aus E-Mail und PDF mit unseren Bestellungen.",
+                    ],
+                    [
+                      "Managementbericht erstellen",
+                      "Wir vergleichen jeden Monat mehrere Excel-Dateien und erstellen einen Managementbericht.",
+                    ],
+                    [
+                      "Reklamationen bearbeiten",
+                      "Wir bearbeiten Reklamationen aus E-Mails, Fotos und Lieferscheinen manuell.",
+                    ],
+                  ].map(([label, text]) => (
+                    <button
+                      key={label}
+                      onClick={() => startBlueprint(text, true)}
                     >
-                      <span>Entwurf aktualisiert</span>
-                      <b>{sketch.title}</b>
-                      <i aria-hidden="true">↓</i>
-                    </a>
-                  )}
-
-                  {lastError && !busy && (
-                    <div className={styles.errorActions}>
-                      <button
-                        className={styles.retry}
-                        onClick={() =>
-                          void send(
-                            messages
-                              .filter((message) => message.role === "user")
-                              .at(-1)?.display || "",
-                            true,
-                          )
-                        }
-                      >
-                        Erneut versuchen
-                      </button>
-                      <button
-                        className={styles.directBooking}
-                        onClick={() => setBookingOpen(true)}
-                      >
-                        Direkt zum Termin
-                      </button>
-                    </div>
-                  )}
-
-                  <div ref={conversationEnd} />
-
-                  {!turn?.result && (
-                    <form onSubmit={onSubmit} className={styles.composer}>
-                      <label htmlFor="process-answer">Ihre Antwort</label>
-                      <div>
-                        <textarea
-                          id="process-answer"
-                          rows={2}
-                          value={draft}
-                          maxLength={MAX_CHARS}
-                          onChange={(event) => setDraft(event.target.value)}
-                          placeholder="In eigenen Worten antworten …"
-                        />
-                        <button
-                          disabled={busy || !draft.trim()}
-                          aria-label="Antwort senden"
-                        >
-                          ↑
-                        </button>
-                      </div>
-                      <small>
-                        {questions
-                          ? `Rückfrage ${Math.min(questions, 3)} von höchstens 3 · `
-                          : ""}
-                        Bitte keine vertraulichen Daten eingeben.
-                      </small>
-                    </form>
-                  )}
+                      {label}
+                    </button>
+                  ))}
                 </div>
-              )}
+              </div>
             </section>
-
-            <section
-              className={styles.preview}
-              aria-labelledby="preview-title"
-              ref={resultRef}
-            >
+            <section className={styles.preview} aria-labelledby="preview-title">
               <div className={styles.panelHead}>
                 <span>02</span>
                 <div>
                   <small>IHRE SOFTWARE</small>
-                  <h2 id="preview-title">So könnte Ihre Lösung aussehen.</h2>
+                  <h2 id="preview-title">So könnte Ihre Anwendung aussehen.</h2>
                 </div>
               </div>
-              <div className={styles.disclaimer}>
-                <span>Vorläufiges Lösungskonzept</span> Noch keine fertige
+              <p className={styles.disclaimer}>
+                <strong>Vorläufiges Lösungskonzept.</strong> Noch keine fertige
                 Anwendung.
-              </div>
-
-              {!sketch ? (
-                <div className={styles.exampleArea}>
-                  <div
-                    className={styles.exampleTabs}
-                    role="tablist"
-                    aria-label="Beispielanwendungen"
-                  >
-                    {(Object.keys(EXAMPLES) as ExampleKey[]).map((key) => (
-                      <button
-                        key={key}
-                        role="tab"
-                        aria-selected={example === key}
-                        onClick={() => setExample(key)}
-                      >
-                        {EXAMPLES[key].label}
-                      </button>
-                    ))}
-                  </div>
-                  <p className={styles.exampleLabel}>BEISPIELANWENDUNG</p>
-                  <div className={styles.productShell}>
-                    <div className={styles.productTop}>
-                      <div>
-                        <span className={styles.productMark}>O</span>
-                        <b>{active.title}</b>
-                      </div>
-                      <span className={styles.live}>
-                        <i /> Vorgänge
-                      </span>
-                    </div>
-                    <div className={styles.productMeta}>
-                      <span>Datenquellen</span>
-                      <b>{active.source}</b>
-                    </div>
-                    <div className={styles.productRows}>
-                      {active.rows.map((row) => (
-                        <div key={row[0]}>
-                          <b>{row[0]}</b>
-                          <span>{row[1]}</span>
-                          <em>{row[2]}</em>
-                        </div>
-                      ))}
-                    </div>
-                    <div className={styles.decision}>
-                      <span>!</span>
-                      <div>
-                        <small>ENTSCHEIDUNG</small>
-                        <b>{active.decision}</b>
-                      </div>
-                      <span className={styles.openLabel}>Ansicht</span>
-                    </div>
-                  </div>
-                  <p className={styles.exampleNote}>
-                    Drei Beispiele dafür, wie unterschiedlich eine Anwendung
-                    aussehen kann. Ihr Entwurf richtet sich nach Ihrem Prozess.
-                  </p>
-                </div>
-              ) : (
-                <div className={styles.brief}>
-                  <p className={styles.briefKicker}>
-                    {turn?.result
-                      ? "ERSTER LÖSUNGSENTWURF"
-                      : "ENTWURF ENTSTEHT"}
-                  </p>
-                  <h3>{sketch.title}</h3>
-                  <p className={styles.origin}>
-                    Aus Ihren Angaben abgeleitet. Noch nicht persönlich geprüft.
-                  </p>
-                  <div className={styles.flow}>
-                    {sketch.steps.map((step, index) => (
-                      <div key={`${step.label}-${index}`}>
-                        <span>{String(index + 1).padStart(2, "0")}</span>
-                        <b>{step.label}</b>
-                        <em data-kind={step.automation}>
-                          {mark(step.automation)}
-                        </em>
-                      </div>
-                    ))}
-                  </div>
-                  <div className={styles.briefGrid}>
-                    <article>
-                      <small>GEWÜNSCHTES ERGEBNIS</small>
-                      {sketch.value.length ? (
-                        sketch.value.map((item) => <p key={item}>{item}</p>)
-                      ) : (
-                        <p>Wird im Gespräch konkretisiert.</p>
-                      )}
-                    </article>
-                    <article>
-                      <small>ANNAHMEN ZU DATEN UND ABLAUF</small>
-                      <p>Datenzugänge klären wir im Gespräch.</p>
-                      {sketch.assumptions.length ? (
-                        sketch.assumptions.map((item) => (
-                          <p key={item}>{item}</p>
-                        ))
-                      ) : (
-                        <p>Datenquellen werden gemeinsam geklärt.</p>
-                      )}
-                    </article>
-                    <article>
-                      <small>MÖGLICHE AUTOMATISIERUNG</small>
-                      {sketch.steps
-                        .filter((step) => step.automation !== "manuell")
-                        .map((item) => (
-                          <p key={item.label}>{item.label}</p>
-                        ))}
-                    </article>
-                    <article>
-                      <small>MENSCHLICHE ENTSCHEIDUNGEN</small>
-                      {sketch.steps
-                        .filter((step) => step.automation !== "automatisch")
-                        .map((item) => (
-                          <p key={item.label}>{item.label}</p>
-                        ))}
-                    </article>
-                  </div>
-                  <article className={styles.openQuestions}>
-                    <small>OFFENE INTEGRATIONS- UND PROZESSFRAGEN</small>
-                    {sketch.open.map((item) => (
-                      <p key={item}>{item}</p>
-                    ))}
-                  </article>
-                  {turn?.result && !booked && (
+              </p>
+              <div
+                className={styles.exampleTabs}
+                role="tablist"
+                aria-label="Beispielanwendungen"
+              >
+                {(Object.keys(EXAMPLES) as (keyof typeof EXAMPLES)[]).map(
+                  (key) => (
                     <button
-                      className={styles.bookButton}
-                      onClick={() => {
-                        setBookingOpen(true);
-                        track("booking_opened", { dialogId: dialogId.current });
-                      }}
+                      key={key}
+                      role="tab"
+                      aria-selected={example === key}
+                      onClick={() => setExample(key)}
                     >
-                      Entwurf gemeinsam prüfen <span>↗</span>
+                      {EXAMPLES[key].label}
                     </button>
-                  )}
-                  {booked && (
-                    <p className={styles.booked}>
-                      ✓ Details zu Ihrem nächsten Schritt finden Sie unten.
-                    </p>
-                  )}
-                </div>
-              )}
+                  ),
+                )}
+              </div>
+              <p className={styles.sectionKicker}>BEISPIELANWENDUNG</p>
+              <BlueprintApp blueprint={initialBlueprint} key={example} />
+              <p className={styles.exampleNote}>
+                Ihr Blueprint stellt passende Ansichten und Funktionen aus Ihrem
+                Prozess zusammen. Die Daten hier sind Beispiele.
+              </p>
             </section>
           </div>
-          <p className={styles.privacy}>
-            Ersteinschätzung ohne E-Mail-Adresse · Kontaktdaten erst bei einer
-            Terminwahl · <Link href="/datenschutz">Datenschutz</Link>
-          </p>
         </section>
-
-        {bookingOpen && (
-          <section
-            className={styles.bookingSection}
-            aria-label="Termin vereinbaren"
-          >
-            {!booked && (
-              <button
-                className={styles.bookingClose}
-                onClick={() => setBookingOpen(false)}
-                aria-label="Terminbereich schließen"
-              >
-                ×
-              </button>
-            )}
-            <Booking
-              dialogId={dialogId.current}
-              caseSummary={summary}
-              suggestedAgenda={sketch?.open[0]}
-              onBooked={() => setBooked(true)}
-            />
-          </section>
-        )}
-
         <section className={styles.explainer} id="so-funktionierts">
           <p className={styles.sectionKicker}>VOM PROZESS ZUM BETRIEB</p>
           <h2>Software, die sich an Ihre Arbeit anpasst.</h2>

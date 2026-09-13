@@ -95,7 +95,9 @@ export default function Booking({
       });
       const data = (await response.json()) as SlotsResponse;
       if (!response.ok || !data.ok || !Array.isArray(data.days)) {
-        throw new Error(data.error || "Die Termine lassen sich gerade nicht laden.");
+        throw new Error(
+          data.error || "Die Termine lassen sich gerade nicht laden.",
+        );
       }
       if (loadAbortRef.current !== controller) return;
       setDays(data.days);
@@ -135,7 +137,9 @@ export default function Booking({
   }, [loadSlots]);
 
   const checkDaysEnd = (element: HTMLElement) => {
-    setDaysAtEnd(element.scrollLeft + element.clientWidth >= element.scrollWidth - 4);
+    setDaysAtEnd(
+      element.scrollLeft + element.clientWidth >= element.scrollWidth - 4,
+    );
   };
 
   useEffect(() => {
@@ -213,10 +217,16 @@ export default function Booking({
 
       if (response.status === 409) {
         await loadSlots();
-        setError(data.error || "Diese Zeit ist nicht mehr verfügbar. Bitte wählen Sie eine andere.");
+        setError(
+          data.error ||
+            "Diese Zeit ist nicht mehr verfügbar. Bitte wählen Sie eine andere.",
+        );
         return;
       }
-      setError(data.error || "Die Buchung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.");
+      setError(
+        data.error ||
+          "Die Buchung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
+      );
     } catch (bookingFailure) {
       if (bookingAbortRef.current !== controller) return;
       setError(
@@ -237,17 +247,29 @@ export default function Booking({
     return (
       <div className="booking booking-complete" role="status">
         <div className="booking-success">
-          <span className="booking-success-icon" aria-hidden="true">✓</span>
+          <span className="booking-success-icon" aria-hidden="true">
+            ✓
+          </span>
           <p className="booking-kicker">
-            {success.mode === "angefragt" ? "Terminanfrage" : "Terminbestätigung"}
+            {success.mode === "angefragt"
+              ? "Terminanfrage"
+              : "Terminbestätigung"}
           </p>
-          <h3>{success.mode === "angefragt" ? "Anfrage eingegangen" : "Termin gebucht"}</h3>
+          <h3>
+            {success.mode === "angefragt"
+              ? "Anfrage eingegangen"
+              : "Termin gebucht"}
+          </h3>
           <p>{success.message}</p>
-          {success.slot && <p className="booking-success-time">{berlinDay(success.slot)}, {berlinTime(success.slot)} Uhr</p>}
+          {success.slot && (
+            <p className="booking-success-time">
+              {berlinDay(success.slot)}, {berlinTime(success.slot)} Uhr
+            </p>
+          )}
           <p className="booking-success-note">
             {success.mode === "angefragt"
               ? "Die gewählte Zeit ist erst nach der persönlichen Bestätigung verbindlich."
-              : "Ihre Prozessvorschau liegt als Ausgangspunkt für das Gespräch vor."}
+              : "Ihr Lösungsentwurf liegt als Ausgangspunkt für das Gespräch vor."}
           </p>
         </div>
       </div>
@@ -258,16 +280,27 @@ export default function Booking({
     <form className="booking booking-compact" onSubmit={book}>
       <div className="booking-header">
         <p className="booking-kicker">Nächster Schritt</p>
-        <h3>Prozessgespräch vereinbaren</h3>
-        <p className="booking-lead">30 Minuten mit Moritz Schumacher. Kostenlos und unverbindlich.</p>
+        <h3>Lassen Sie uns daraus Ihre Anwendung machen.</h3>
+        <p className="booking-lead">
+          30 Minuten · kostenlos · keine Vorbereitung nötig. Wir prüfen Prozess,
+          Systeme und Machbarkeit und konkretisieren Ihren Lösungsentwurf.
+        </p>
       </div>
 
-      {loading && <p className="booking-loading" role="status">Freie Zeiten werden geladen …</p>}
+      {loading && (
+        <p className="booking-loading" role="status">
+          Freie Zeiten werden geladen …
+        </p>
+      )}
 
       {loadError && (
         <div className="booking-load-error form-error" role="alert">
           <p>{loadError}</p>
-          <button type="button" className="booking-retry btn btn-ghost" onClick={() => void loadSlots()}>
+          <button
+            type="button"
+            className="booking-retry btn btn-ghost"
+            onClick={() => void loadSlots()}
+          >
             Erneut laden
           </button>
           <a href={`mailto:${SITE.email}`}>Oder per E-Mail an {SITE.email}</a>
@@ -284,7 +317,8 @@ export default function Booking({
           <span>
             {requestMode
               ? "Sie wählen eine Wunschzeit. Der Termin steht erst nach unserer persönlichen Bestätigung."
-              : "Die angezeigten Zeiten sind frei. Nach dem Absenden wird der Termin direkt gebucht."} Alle Zeiten gelten für Berlin.
+              : "Die angezeigten Zeiten sind frei. Nach dem Absenden wird der Termin direkt gebucht."}{" "}
+            Alle Zeiten gelten für Berlin.
           </span>
         </div>
       )}
@@ -299,7 +333,9 @@ export default function Booking({
       {!loading && !loadError && days.length === 0 && (
         <div className="booking-empty">
           <p>Aktuell können wir keine Zeit anbieten.</p>
-          <a href={`mailto:${SITE.email}`}>Schreiben Sie direkt an {SITE.email}</a>
+          <a href={`mailto:${SITE.email}`}>
+            Schreiben Sie direkt an {SITE.email}
+          </a>
         </div>
       )}
 
@@ -333,7 +369,11 @@ export default function Booking({
               </div>
             </div>
 
-            <div className="slot-times" role="group" aria-label={`Zeiten für ${days[activeDay]?.label ?? "den gewählten Tag"}`}>
+            <div
+              className="slot-times"
+              role="group"
+              aria-label={`Zeiten für ${days[activeDay]?.label ?? "den gewählten Tag"}`}
+            >
               {days[activeDay]?.slots.map((availableSlot) => (
                 <button
                   key={availableSlot.startUtc}
@@ -353,38 +393,95 @@ export default function Booking({
           </div>
 
           {slot && (
-            <div className="booking-contact" aria-describedby="booking-mode-note">
+            <div
+              className="booking-contact"
+              aria-describedby="booking-mode-note"
+            >
               <div className="booking-chosen">
                 <span aria-hidden="true">✓</span>
-                <strong>{berlinDay(slot)}, {berlinTime(slot)} Uhr</strong>
-                <button type="button" onClick={() => setSlot(null)}>Ändern</button>
+                <strong>
+                  {berlinDay(slot)}, {berlinTime(slot)} Uhr
+                </strong>
+                <button type="button" onClick={() => setSlot(null)}>
+                  Ändern
+                </button>
               </div>
 
               <span className="booking-step-label">2 · Kontaktdaten</span>
               <div className="booking-fields">
                 <div className="field booking-field">
                   <label htmlFor="booking-name">Name</label>
-                  <input id="booking-name" name="name" type="text" autoComplete="name" required minLength={2} maxLength={200} value={name} onChange={(event) => setName(event.target.value)} placeholder="Vor- und Nachname" />
+                  <input
+                    id="booking-name"
+                    name="name"
+                    type="text"
+                    autoComplete="name"
+                    required
+                    minLength={2}
+                    maxLength={200}
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    placeholder="Vor- und Nachname"
+                  />
                 </div>
                 <div className="field booking-field">
                   <label htmlFor="booking-email">E-Mail</label>
-                  <input id="booking-email" name="email" type="email" autoComplete="email" inputMode="email" required maxLength={254} value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@unternehmen.de" />
+                  <input
+                    id="booking-email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    inputMode="email"
+                    required
+                    maxLength={254}
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="name@unternehmen.de"
+                  />
                 </div>
                 <div className="field booking-field booking-field-wide">
-                  <label htmlFor="booking-company">Unternehmen <span className="booking-optional">optional</span></label>
-                  <input id="booking-company" name="company" type="text" autoComplete="organization" maxLength={200} value={company} onChange={(event) => setCompany(event.target.value)} placeholder="Unternehmen" />
+                  <label htmlFor="booking-company">
+                    Unternehmen{" "}
+                    <span className="booking-optional">optional</span>
+                  </label>
+                  <input
+                    id="booking-company"
+                    name="company"
+                    type="text"
+                    autoComplete="organization"
+                    maxLength={200}
+                    value={company}
+                    onChange={(event) => setCompany(event.target.value)}
+                    placeholder="Unternehmen"
+                  />
                 </div>
               </div>
 
               <fieldset className="booking-channel">
                 <legend>Gesprächskanal</legend>
                 <div className="channel-row">
-                  <label className={`channel-btn${channel === "video" ? " active" : ""}`}>
-                    <input type="radio" name="channel" value="video" checked={channel === "video"} onChange={() => setChannel("video")} />
+                  <label
+                    className={`channel-btn${channel === "video" ? " active" : ""}`}
+                  >
+                    <input
+                      type="radio"
+                      name="channel"
+                      value="video"
+                      checked={channel === "video"}
+                      onChange={() => setChannel("video")}
+                    />
                     Online-Call
                   </label>
-                  <label className={`channel-btn${channel === "telefon" ? " active" : ""}`}>
-                    <input type="radio" name="channel" value="telefon" checked={channel === "telefon"} onChange={() => setChannel("telefon")} />
+                  <label
+                    className={`channel-btn${channel === "telefon" ? " active" : ""}`}
+                  >
+                    <input
+                      type="radio"
+                      name="channel"
+                      value="telefon"
+                      checked={channel === "telefon"}
+                      onChange={() => setChannel("telefon")}
+                    />
                     Telefon
                   </label>
                 </div>
@@ -393,23 +490,44 @@ export default function Booking({
               {channel === "telefon" && (
                 <div className="field booking-field booking-phone">
                   <label htmlFor="booking-phone">Rufnummer</label>
-                  <input id="booking-phone" name="phone" type="tel" autoComplete="tel" required maxLength={26} value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="+49 …" />
+                  <input
+                    id="booking-phone"
+                    name="phone"
+                    type="tel"
+                    autoComplete="tel"
+                    required
+                    maxLength={26}
+                    value={phone}
+                    onChange={(event) => setPhone(event.target.value)}
+                    placeholder="+49 …"
+                  />
                 </div>
               )}
 
               <div className="honeypot" aria-hidden="true">
                 <label htmlFor="booking-website">Website</label>
-                <input id="booking-website" name="website" tabIndex={-1} autoComplete="off" />
+                <input
+                  id="booking-website"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
               </div>
 
               {error && (
                 <div className="booking-error form-error" role="alert">
                   <span>{error}</span>
-                  <a href={`mailto:${SITE.email}`}>Direkt an {SITE.email} schreiben</a>
+                  <a href={`mailto:${SITE.email}`}>
+                    Direkt an {SITE.email} schreiben
+                  </a>
                 </div>
               )}
 
-              <button type="submit" className="booking-submit btn btn-primary" disabled={busy}>
+              <button
+                type="submit"
+                className="booking-submit btn btn-primary"
+                disabled={busy}
+              >
                 {busy
                   ? requestMode
                     ? "Anfrage wird gesendet …"
@@ -419,7 +537,15 @@ export default function Booking({
                     : "Termin buchen"}
               </button>
               <p className="booking-consent">
-                Mit dem Absenden verarbeiten wir Ihre Angaben zur Terminorganisation. <a href="/datenschutz" target="_blank" rel="noopener noreferrer">Datenschutz</a>
+                Mit dem Absenden verarbeiten wir Ihre Angaben zur
+                Terminorganisation.{" "}
+                <a
+                  href="/datenschutz"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Datenschutz
+                </a>
               </p>
             </div>
           )}

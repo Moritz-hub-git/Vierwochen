@@ -5,10 +5,12 @@ import {
   buildFunnel,
   buildSources,
   loadBookings,
+  loadBlueprintRequests,
   loadCases,
   loadEvents,
   loadProcessChecks,
 } from "@/lib/events";
+import { blueprintSummary } from "@/lib/booking";
 import AdminLogin from "./AdminLogin";
 import s from "./admin.module.css";
 
@@ -71,12 +73,14 @@ export default async function AdminPage({
   const params = await searchParams;
   const days = Math.min(365, Math.max(1, Number(params.tage) || 30));
 
-  const [events, cases, bookings, processChecks] = await Promise.all([
-    loadEvents(days),
-    loadCases(200),
-    loadBookings(50),
-    loadProcessChecks(days, 200),
-  ]);
+  const [events, cases, bookings, processChecks, blueprintRequests] =
+    await Promise.all([
+      loadEvents(days),
+      loadCases(200),
+      loadBookings(50),
+      loadProcessChecks(days, 200),
+      loadBlueprintRequests(days),
+    ]);
 
   const funnel = buildFunnel(events);
   const sources = buildSources(events);
@@ -84,7 +88,8 @@ export default async function AdminPage({
     events.length > 0 ||
     cases.length > 0 ||
     bookings.length > 0 ||
-    processChecks.length > 0;
+    processChecks.length > 0 ||
+    blueprintRequests.length > 0;
 
   // Absprungstelle mit dem größten Verlust — die Stelle, an der es hakt.
   const worst = funnel
@@ -255,6 +260,62 @@ export default async function AdminPage({
                     <td>{check.deliveryStatus}</td>
                   </tr>
                 ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {blueprintRequests.length > 0 && (
+        <section className={s.section}>
+          <h2>Blueprint-E-Mail-Anfragen ({blueprintRequests.length})</h2>
+          <p className={s.hint}>
+            Offene Zustellungen stehen oben und bleiben auch außerhalb des
+            gewählten Zeitraums sichtbar. Diese Kontakte haben nur den Blueprint
+            angefordert; es liegt keine Marketing-Einwilligung vor. Bis zu 500
+            gespeicherte Anfragen werden berücksichtigt.
+          </p>
+          <div className={s.tableWrap}>
+            <table className={s.table}>
+              <thead>
+                <tr>
+                  <th>Eingang</th>
+                  <th>E-Mail</th>
+                  <th>Prozess</th>
+                  <th>Zustellung</th>
+                  <th>Blueprint</th>
+                </tr>
+              </thead>
+              <tbody>
+                {blueprintRequests.map((request) => {
+                  const summary = blueprintSummary(request.blueprint);
+                  return (
+                    <tr key={request.id}>
+                      <td>{dt(request.createdAt)}</td>
+                      <td className={s.mono}>{request.email}</td>
+                      <td className={s.wrapCell}>{request.title}</td>
+                      <td>
+                        {request.deliveryStatus === "sent" ? (
+                          "Versand bestätigt"
+                        ) : (
+                          <strong>Persönliche Zustellung erforderlich</strong>
+                        )}
+                      </td>
+                      <td className={s.wrapCell}>
+                        <details>
+                          <summary>Vollständigen Entwurf anzeigen</summary>
+                          <p style={{ whiteSpace: "pre-wrap" }}>{summary}</p>
+                          <small>Dialog: {request.dialogId}</small>
+                        </details>
+                        <a
+                          href={`mailto:${encodeURIComponent(request.email)}?subject=${encodeURIComponent("Ihr OpsDone Blueprint")}&body=${encodeURIComponent(summary + "\n\nDiese Nachricht erhalten Sie auf Ihren Wunsch. Keine Anmeldung zu Werbe-E-Mails.")}`}
+                        >
+                          E-Mail zur Zustellung vorbereiten
+                        </a>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

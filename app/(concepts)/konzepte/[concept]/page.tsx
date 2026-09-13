@@ -6,7 +6,7 @@ import Tailored from "@/components/concepts/Tailored";
 import BusinessCase from "@/components/concepts/BusinessCase";
 import People from "@/components/concepts/People";
 import LiveConcept from "@/components/concepts/LiveConcept";
-import ChatDock from "@/components/chat/ChatDock";
+import BlueprintFunnel from "@/components/blueprint/BlueprintFunnel";
 
 const concepts = {
   "arbeit-verschwindet": {
@@ -56,7 +56,7 @@ export default async function ConceptPage({
   return (
     <div className="concept-experience" data-concept={concept}>
       <Component />
-      {concept !== "loesungsentwurf" && <ChatDock />}
+      <BlueprintFunnel />
     </div>
   );
 }

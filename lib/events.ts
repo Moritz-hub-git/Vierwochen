@@ -27,13 +27,19 @@ export type EventType =
   | (typeof FUNNEL_STEPS)[number]["type"]
   | "dialog_question"
   | "lead_email"
-  | "rejected";
+  | "rejected"
+  | "booking_opened"
+  | "blueprint_email_opened"
+  | "blueprint_email_requested";
 
 const KNOWN_TYPES = new Set<string>([
   ...FUNNEL_STEPS.map((s) => s.type),
   "dialog_question",
   "lead_email",
   "rejected",
+  "booking_opened",
+  "blueprint_email_opened",
+  "blueprint_email_requested",
 ]);
 
 export function isEventType(value: unknown): value is EventType {
@@ -355,5 +361,39 @@ export async function loadProcessChecks(days: number, limit = 200): Promise<Proc
       };
     });
   }, "Prozess-Checks laden");
+  return rows ?? [];
+}
+
+export interface BlueprintRequestRow {
+  id: string;
+  dialogId: string;
+  email: string;
+  createdAt: Date | null;
+  title: string;
+  deliveryStatus: string;
+  blueprint: Record<string, unknown>;
+}
+
+/** Authenticated admin calls only. Unsent requests stay visible beyond the date filter. */
+export async function loadBlueprintRequests(days: number): Promise<BlueprintRequestRow[]> {
+  const cutoff = Date.now() - Math.max(1, days) * 24 * 3600 * 1000;
+  const rows = await safe(async (db) => {
+    // Equality-only query avoids a new composite-index dependency at launch.
+    const snap = await db.collection("leads").where("source", "==", "blueprint-email").limit(500).get();
+    return snap.docs.map(doc => {
+      const data = doc.data();
+      const blueprint = data.blueprint && typeof data.blueprint === "object" && !Array.isArray(data.blueprint) ? data.blueprint as Record<string, unknown> : {};
+      return {
+        id: doc.id,
+        dialogId: typeof data.dialogId === "string" ? data.dialogId : "",
+        email: typeof data.email === "string" ? data.email : "",
+        createdAt: data.createdAt?.toDate?.() ?? null,
+        title: typeof blueprint.title === "string" ? blueprint.title : "Lösungsentwurf",
+        deliveryStatus: typeof data.deliveryStatus === "string" ? data.deliveryStatus : "pending",
+        blueprint,
+      } satisfies BlueprintRequestRow;
+    }).filter(row => row.deliveryStatus !== "sent" || (row.createdAt?.getTime() ?? 0) >= cutoff)
+      .sort((a, b) => Number(a.deliveryStatus === "sent") - Number(b.deliveryStatus === "sent") || (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0));
+  }, "Blueprint-Zustellungen laden");
   return rows ?? [];
 }

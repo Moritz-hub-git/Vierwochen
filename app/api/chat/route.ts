@@ -9,6 +9,7 @@
  */
 import { after, NextResponse } from "next/server";
 import { FieldValue } from "@google-cloud/firestore";
+import { buildBlueprint } from "@/lib/blueprint";
 import { LIMITS } from "@/lib/config";
 import {
   ChatMessage,
@@ -142,46 +143,62 @@ export async function POST(req: Request) {
     const userText = sanitizedMessages
       .filter((m) => m.role === "user")
       .map((m) => m.content)
-      .join(" ");
+      .join("\n");
     const turn = ensureConverged(normalizeTurn(json, userText), {
       questionsAsked,
       userTurns,
     });
 
+    if (turn.phase !== "reject") {
+      const raw =
+        json && typeof json === "object"
+          ? (json as Record<string, unknown>)
+          : {};
+      turn.blueprint = buildBlueprint(raw.blueprint, turn.sketch, userText);
+    }
+
+    const persistence = dialogId
+      ? safe(
+          (db) =>
+            db
+              .collection("dialogs")
+              .doc(dialogId)
+              .set(
+                {
+                  messages: [
+                    ...sanitizedMessages,
+                    { role: "assistant", content: JSON.stringify(turn) },
+                  ],
+                  lastPhase: turn.phase,
+                  blueprint: turn.blueprint ?? null,
+                  blueprintVersion: turn.blueprint?.version ?? null,
+                  sketchTitle: turn.sketch.title,
+                  resultTier: turn.result?.tier ?? null,
+                  resultPrice: turn.result?.price ?? null,
+                  resultPersonDays:
+                    turn.result?.savings?.personDaysPerWeek ?? null,
+                  resultAnnualEuro: turn.result?.savings?.annualEuro ?? null,
+                  finishReason,
+                  repaired,
+                  ip,
+                  updatedAt: FieldValue.serverTimestamp(),
+                },
+                { merge: true },
+              ),
+          "Dialog speichern",
+        )
+      : Promise.resolve(null);
+    // Final blueprints must be available before booking or email can read them.
+    // Storage failure must not gate the ungated preview; delivery fails honestly separately.
+    const blueprintSaved =
+      turn.phase === "result" || turn.phase === "followup"
+        ? (await persistence) !== null
+        : false;
     after(async () => {
-      const persistence = dialogId
-        ? safe(
-            (db) =>
-              db
-                .collection("dialogs")
-                .doc(dialogId)
-                .set(
-                  {
-                    messages: [
-                      ...sanitizedMessages,
-                      { role: "assistant", content: JSON.stringify(turn) },
-                    ],
-                    lastPhase: turn.phase,
-                    sketchTitle: turn.sketch.title,
-                    resultTier: turn.result?.tier ?? null,
-                    resultPrice: turn.result?.price ?? null,
-                    resultPersonDays:
-                      turn.result?.savings?.personDaysPerWeek ?? null,
-                    resultAnnualEuro: turn.result?.savings?.annualEuro ?? null,
-                    finishReason,
-                    repaired,
-                    ip,
-                    updatedAt: FieldValue.serverTimestamp(),
-                  },
-                  { merge: true },
-                ),
-            "Dialog speichern",
-          )
-        : Promise.resolve(null);
       await Promise.all([persistence, runOpportunisticRetention()]);
     });
 
-    return NextResponse.json({ ok: true, turn });
+    return NextResponse.json({ ok: true, turn, blueprintSaved });
   } catch (err) {
     // Ursache vollständig loggen (PROMPT.md §5, Fallstricke).
     console.error("[chat] Modellaufruf fehlgeschlagen:", err);
