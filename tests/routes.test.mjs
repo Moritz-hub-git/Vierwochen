@@ -17,6 +17,12 @@ const routes = [
   "/impressum",
   "/datenschutz",
   "/agb",
+  "/konzepte",
+  "/konzepte/arbeit-verschwindet",
+  "/konzepte/massarbeit",
+  "/konzepte/business-case",
+  "/konzepte/menschen",
+  "/konzepte/loesungsentwurf",
 ];
 test(
   "all public pages have working content, one H1 and OpsDone metadata",

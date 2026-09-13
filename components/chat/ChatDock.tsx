@@ -24,6 +24,7 @@ export default function ChatDock() {
   const previewSeen = useRef(false);
   const abort = useRef<AbortController | null>(null);
   const dialogId = useRef("");
+  const submitFromPage = useRef<(text: string) => void>(() => {});
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState<UiMessage[]>([]);
@@ -125,8 +126,11 @@ export default function ChatDock() {
           : "")
       );
     };
-    const launch = (e: Event) =>
-      show((e as CustomEvent<{ text?: string }>).detail?.text);
+    const launch = (e: Event) => {
+      const detail = (e as CustomEvent<{ text?: string; submit?: boolean }>).detail;
+      show(detail?.text);
+      if (detail?.submit && detail.text?.trim()) submitFromPage.current(detail.text);
+    };
     const click = (e: MouseEvent) => {
       if (
         e.defaultPrevented ||
@@ -237,6 +241,7 @@ export default function ChatDock() {
       abort.current = null;
     }
   };
+  submitFromPage.current = (text) => { void send(text); };
   const lastError = messages.at(-1)?.error;
   const questions = messages.filter((m) => {
     try {
@@ -255,7 +260,7 @@ export default function ChatDock() {
   return (
     <>
       {!hidden && !open && (
-        <aside className="ai-dock" aria-label="KI-Prozess-Check">
+        <aside className="ai-dock" aria-label="Ihren Prozess beschreiben">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -281,7 +286,7 @@ export default function ChatDock() {
             </button>
           </form>
           <p>
-            KI-Prozess-Check <span>·</span> Vorschau ohne E-Mail <span>·</span>{" "}
+            Ihr Lösungsentwurf <span>·</span> Ohne E-Mail-Pflicht <span>·</span>{" "}
             Kostenlos
           </p>
         </aside>
@@ -303,7 +308,7 @@ export default function ChatDock() {
             </span>
             <div>
               <strong id="chat-title">Ihr Prozess. Weitergedacht.</strong>
-              <small>OpsDone · KI-Prozess-Check</small>
+              <small>OpsDone · Ihre Anwendung beginnt hier</small>
             </div>
           </div>
           <div className="ai-chat-actions">
@@ -356,8 +361,8 @@ export default function ChatDock() {
                 </h2>
                 <p>
                   Beschreiben Sie einen wiederkehrenden Ablauf. Mit bis zu drei
-                  Rückfragen entsteht eine erste Vorschau: was automatisch
-                  laufen könnte und wo Ihr Team entscheidet.
+                  Rückfragen entsteht ein vorläufiger Lösungsentwurf: welche
+                  Arbeit Ihre Anwendung übernehmen könnte und wo Ihr Team entscheidet.
                 </p>
                 <div className="ai-starters">
                   {STARTERS.map((s) => (

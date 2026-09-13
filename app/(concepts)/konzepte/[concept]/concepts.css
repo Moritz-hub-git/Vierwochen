@@ -1,0 +1,25 @@
+.concept-experience {
+  --concept-accent: #244be0;
+}
+.concept-experience[data-concept="arbeit-verschwindet"] {
+  --concept-accent: #c74a29;
+}
+.concept-experience[data-concept="massarbeit"] {
+  --concept-accent: #345d4c;
+}
+.concept-experience[data-concept="business-case"] {
+  --concept-accent: #121714;
+}
+.concept-experience .ai-dock button,
+.concept-experience .ai-composer button {
+  background: var(--concept-accent);
+}
+.concept-experience .ai-orb {
+  color: var(--concept-accent);
+}
+.concept-experience .ai-dock form {
+  border-color: #d6d5ce;
+}
+.concept-experience .ai-dock form:focus-within {
+  border-color: var(--concept-accent);
+}
