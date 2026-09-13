@@ -9,8 +9,10 @@ Four illustrative scenarios: invoice verification, management reporting, order h
 
 ## Implementation
 
-`components/site/LandingProduct.tsx` owns the selector and scenario content. Its exported `ProcessScene` renders the shared source → process → decision composition. Each scenario has a distinct result visual and inspectable evidence. This is the basis for a later chat solution view; no runtime interface generation is claimed.
+`components/site/LandingProduct.tsx` owns the selector and scenario content. The reusable `ProcessScene` in `ShowcaseScenes.tsx` renders the result interface. Desktop uses a 40/60 comparison: manual documents and follow-ups on the left, the prepared result in an Opsrid application on the right. `ShowcaseIcon.tsx` provides a consistent 24-unit SVG icon family with 1.65-unit rounded strokes. Each scenario has a distinct result visual and inspectable evidence. This is the basis for a later chat solution view; no runtime interface generation is claimed.
 
-The carousel advances every ten seconds while visible, pauses on hover or interaction, supports keyboard navigation and respects reduced motion. Mobile pills scroll horizontally; source cards become a row above processing and results.
+The carousel advances every ten seconds while visible, pauses on hover or interaction, supports keyboard navigation and respects reduced motion. Mobile pills scroll horizontally; the before and after panels stack vertically with an explicit transition arrow.
 
 The contextual call to action sends the selected process description to the existing ChatDock via `opsrid:chat`. It does not request contact details or create a lead itself.
+
+The revised comparison removes the three-column technical workflow and long explanatory intro. Invoice matching, reporting, stock availability and case evidence each have their own result composition. Mobbin was attempted on 13 September 2026 but returned a paid-plan requirement; no Mobbin screenshots were accessed.

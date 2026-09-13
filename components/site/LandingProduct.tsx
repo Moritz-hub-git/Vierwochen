@@ -2,12 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import s from "./Showcase.module.css";
+import Icon from "./ShowcaseIcon";
+import { ManualWork, ProcessScene, visualCopy } from "./ShowcaseScenes";
 
 const examples = [
   {
     id: "invoice",
     label: "Rechnungen prüfen",
-    icon: "≡",
     area: "FINANZEN",
     title: "Aus einer Rechnung wird ein geprüfter Vorgang.",
     description:
@@ -33,7 +34,6 @@ const examples = [
   {
     id: "report",
     label: "Reporting erstellen",
-    icon: "▥",
     area: "CONTROLLING",
     title: "Aus vielen Dateien wird ein entscheidungsreifer Bericht.",
     description:
@@ -63,7 +63,6 @@ const examples = [
   {
     id: "order",
     label: "Aufträge abwickeln",
-    icon: "↗",
     area: "VERTRIEB & OPERATIONS",
     title: "Aus einer Anfrage wird ein durchgängig geführter Auftrag.",
     description:
@@ -93,7 +92,6 @@ const examples = [
   {
     id: "case",
     label: "Reklamationen lösen",
-    icon: "◇",
     area: "SERVICE & QUALITÄT",
     title: "Aus verstreuten Nachweisen wird ein lösbarer Fall.",
     description:
@@ -119,168 +117,6 @@ const examples = [
 ] as const;
 
 export type ShowcaseProcess = (typeof examples)[number];
-
-/** A reusable solution scene: source documents → work performed → human decision. */
-export function ProcessScene({ process }: { process: ShowcaseProcess }) {
-  const [expanded, setExpanded] = useState(false);
-  return (
-    <div className={s.scene}>
-      <div className={s.sceneHeader}>
-        <span className={s.brand}>
-          Opsrid<span>.</span>
-        </span>
-        <span className={s.scenePath}>
-          Arbeitsplatz <span>/</span> {process.area}
-        </span>
-        <span className={s.exampleBadge}>Beispielanwendung</span>
-      </div>
-      <div className={s.canvas}>
-        <div className={s.sourceColumn}>
-          <span className={s.caption}>IHRE DATEN</span>
-          {process.files.map((file, i) => (
-            <div className={s.source} key={file}>
-              <span className={s.documentIcon}>
-                {i === 0 ? "≡" : i === 1 ? "▦" : "▤"}
-              </span>
-              <div>
-                <b>{file}</b>
-                <small>{["Eingang", "Referenz", "Nachweis"][i]}</small>
-              </div>
-              <span className={s.sourceDot} />
-            </div>
-          ))}
-        </div>
-        <div className={s.engine}>
-          <span className={s.engineOrb}>✳</span>
-          <span className={s.caption}>IHRE PROZESSLOGIK</span>
-          <h4>Arbeit übernommen.</h4>
-          <div className={s.stepList}>
-            {process.steps.map((step) => (
-              <div key={step}>
-                <span>✓</span>
-                {step}
-              </div>
-            ))}
-          </div>
-          <div className={s.rule}>
-            <span>◇</span> Nach Ihren Regeln
-          </div>
-        </div>
-        <div className={s.result}>
-          <div className={s.resultTop}>
-            <span className={s.caption}>IHR ERGEBNIS</span>
-            <span className={s.ready}>Zur Entscheidung</span>
-          </div>
-          <h4>{process.result}</h4>
-          {process.id === "report" ? (
-            <div className={s.reportVisual}>
-              <div className={s.chartLabel}>
-                Ergebnisentwicklung <small>Beispieldaten</small>
-              </div>
-              <div className={s.bars}>
-                {[42, 62, 53, 76, 68, 90].map((h, i) => (
-                  <div key={i}>
-                    <i style={{ height: h + "%" }} />
-                    <small>
-                      {["Apr", "Mai", "Jun", "Jul", "Aug", "Sep"][i]}
-                    </small>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : process.id === "order" ? (
-            <div className={s.orderVisual}>
-              <div>
-                <span>01</span>
-                <b>Anfrage erfasst</b>
-                <i>✓</i>
-              </div>
-              <div>
-                <span>02</span>
-                <b>Konditionen geprüft</b>
-                <i>✓</i>
-              </div>
-              <div>
-                <span>03</span>
-                <b>Lieferoption abstimmen</b>
-                <i>↗</i>
-              </div>
-            </div>
-          ) : process.id === "case" ? (
-            <div className={s.caseVisual}>
-              <div className={s.parcel}>
-                ◇<span>Lieferung zugeordnet</span>
-              </div>
-              <div>
-                <b>Nachweise vollständig</b>
-                <span>Kundenmeldung ✓</span>
-                <span>Lieferbeleg ✓</span>
-                <span>Schadensbeschreibung ✓</span>
-              </div>
-            </div>
-          ) : (
-            <div className={s.invoiceVisual}>
-              <div>
-                <span>Position</span>
-                <span>Bestellung</span>
-                <span>Rechnung</span>
-              </div>
-              <div>
-                <b>01 · Material</b>
-                <span>240,00 €</span>
-                <span>240,00 € ✓</span>
-              </div>
-              <div>
-                <b>02 · Versand</b>
-                <span>18,00 €</span>
-                <span>18,00 € ✓</span>
-              </div>
-              <div className={s.highlight}>
-                <b>03 · Service</b>
-                <span>120,00 €</span>
-                <span>145,00 € ↗</span>
-              </div>
-            </div>
-          )}
-          <p>{process.detail}</p>
-          <button
-            className={s.decisionButton}
-            onClick={() => setExpanded(!expanded)}
-            aria-expanded={expanded}
-          >
-            {expanded ? "Details schließen" : process.decision}
-            <span>{expanded ? "−" : "↗"}</span>
-          </button>
-        </div>
-      </div>
-      {expanded && (
-        <div className={s.evidence}>
-          <span className={s.evidenceIcon}>◇</span>
-          <div>
-            <b>{process.evidence}</b>
-            <p>{process.note}</p>
-          </div>
-          <dl>
-            <div>
-              <dt>{process.values[0]}</dt>
-              <dd>{process.values[1]}</dd>
-            </div>
-            <div>
-              <dt>{process.values[2]}</dt>
-              <dd>{process.values[3]}</dd>
-            </div>
-          </dl>
-        </div>
-      )}
-      <div className={s.sceneFooter}>
-        <span>
-          <i /> Erfassung und Prüfung durch die Anwendung
-        </span>
-        <span>◇ Freigabe durch Ihr Team</span>
-      </div>
-    </div>
-  );
-}
 
 export default function LandingProduct() {
   const [active, setActive] = useState(0);
@@ -375,7 +211,7 @@ export default function LandingProduct() {
                 }
               }}
             >
-              <span aria-hidden="true">{item.icon}</span>
+              <Icon name={item.id} />
               {item.label}
             </button>
           ))}
@@ -389,7 +225,7 @@ export default function LandingProduct() {
           }
           onClick={() => setPaused(!paused)}
         >
-          {paused ? "▷" : "Ⅱ"}
+          <Icon name={paused ? "play" : "pause"} />
         </button>
       </div>
       <div
@@ -398,56 +234,44 @@ export default function LandingProduct() {
         aria-labelledby={"tab-" + process.id}
         className={s.stage}
       >
-        <div key={process.id} className={s.transition}>
-          <div className={s.intro}>
-            <div>
-              <span className={s.eyebrow}>
-                {process.area} <i /> BEISPIEL{" "}
-                {String(active + 1).padStart(2, "0")}
-              </span>
-              <h3>{process.title}</h3>
-            </div>
-            <p>{process.description}</p>
-          </div>
+        <div key={process.id} className={s.comparison}>
           <div className={s.before}>
-            <div className={s.beforeLabel}>
-              <span>VORHER</span>
-              <b>Ihr Team verbindet die Schritte.</b>
-            </div>
-            <div className={s.manualSteps}>
-              {process.before.map((step, i) => (
-                <div key={step}>
-                  <small>0{i + 1}</small>
-                  <span>{step}</span>
-                  {i < 3 && <i>→</i>}
-                </div>
-              ))}
-            </div>
+            <header className={s.halfHeader}>
+              <span className={s.beforeBadge}>VORHER</span>
+              <h3>{visualCopy[process.id].before}</h3>
+              <p>Ihr Team erledigt die Arbeit dazwischen.</p>
+            </header>
+            <ManualWork process={process} />
           </div>
-          <div className={s.afterLabel}>
-            <span>MIT OPSRID</span>
-            <b>Ihre Anwendung übernimmt den Ablauf.</b>
-            <span className={s.line} />
-            <small>So könnte Ihre Lösung aussehen</small>
+          <div className={s.bridge} aria-hidden="true">
+            <Icon name="arrow" />
           </div>
-          <ProcessScene key={process.id} process={process} />
-          <div className={s.bottom}>
-            <div>
-              <span className={s.bottomIcon}>↗</span>
-              <b>{process.outcome}</b>
-            </div>
-            <button
-              onClick={() =>
-                window.dispatchEvent(
-                  new CustomEvent("opsrid:chat", {
-                    detail: { text: process.prompt, submit: true },
-                  }),
-                )
-              }
-            >
-              So einen Prozess haben wir auch <span>→</span>
-            </button>
+          <div className={s.after}>
+            <header className={s.halfHeader}>
+              <span className={s.afterBadge}>
+                <Icon name="check" />
+                MIT OPSRID
+              </span>
+              <h3>{visualCopy[process.id].after}</h3>
+              <p>Ihre Software übernimmt. Sie entscheiden.</p>
+            </header>
+            <ProcessScene key={process.id} process={process} />
           </div>
+        </div>
+        <div className={s.bottom}>
+          <p>{visualCopy[process.id].summary}</p>
+          <button
+            onClick={() =>
+              window.dispatchEvent(
+                new CustomEvent("opsrid:chat", {
+                  detail: { text: process.prompt, submit: true },
+                }),
+              )
+            }
+          >
+            Das möchte ich für meinen Prozess
+            <Icon name="arrow" />
+          </button>
         </div>
       </div>
       <p className={s.disclaimer}>
