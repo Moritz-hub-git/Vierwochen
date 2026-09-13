@@ -38,7 +38,7 @@ export default function PrivacyPage() {
           <h2>3. AI-first Prozessdialog</h2>
           <p>
             Der primäre Einstieg ist das persistente Chat-Dock. Wenn Sie eine
-            Beschreibung absenden, verarbeitet OpsDone den eingegebenen
+            Beschreibung absenden, verarbeitet Opsrid den eingegebenen
             Prozess und den bisherigen Gesprächsverlauf, um höchstens drei
             Rückfragen und anschließend eine konkrete, unverbindliche
             Prozessvorschau zu erzeugen. Ein E-Mail-Gate ist für die Vorschau

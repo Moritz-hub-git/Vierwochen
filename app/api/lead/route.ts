@@ -221,7 +221,7 @@ export async function POST(req: Request) {
   const message = sent
     ? `Die Einschätzung wurde an ${check.email} gesendet.`
     : ownerNotified
-      ? "Ihre Anfrage wurde an OpsDone zugestellt. Die Einschätzung konnte nicht automatisch versandt werden."
+      ? "Ihre Anfrage wurde an Opsrid zugestellt. Die Einschätzung konnte nicht automatisch versandt werden."
       : "Ihre Anfrage wurde gespeichert. Die Einschätzung konnte nicht automatisch versandt werden.";
   return NextResponse.json({
     ok: true,

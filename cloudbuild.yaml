@@ -1,4 +1,4 @@
-# OpsDone uses the existing Cloud Run infrastructure. Deploy a reviewable
+# Opsrid uses the existing Cloud Run infrastructure. Deploy a reviewable
 # revision without moving production traffic. Existing secrets/env are preserved.
 steps:
   - id: build
@@ -26,10 +26,10 @@ steps:
       - --region=europe-west3
       - --service-account=vierwochen-app@$PROJECT_ID.iam.gserviceaccount.com
       - --no-traffic
-      - --tag=opsdone-preview
+      - --tag=opsrid-preview
       - --update-env-vars=GOOGLE_CLOUD_PROJECT=$PROJECT_ID,SITE_LIVE=${_SITE_LIVE},NEXT_PUBLIC_SITE_URL=${_SITE_URL},NEXT_PUBLIC_CONTACT_EMAIL=${_CONTACT_EMAIL}
 substitutions:
-  _SITE_URL: https://opsdone.de
+  _SITE_URL: https://opsrid.com
   _CONTACT_EMAIL: hallo@vierwochen.de
   _SITE_LIVE: "0"
 options:

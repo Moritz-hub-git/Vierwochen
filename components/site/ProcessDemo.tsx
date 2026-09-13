@@ -28,7 +28,7 @@ export default function ProcessDemo() {
         </div>
         <div className="automation-node">
           <Mark />
-          <span>OpsDone</span>
+          <span>Opsrid</span>
           <span className="processing-label">Prüfen & abgleichen</span>
         </div>
         <div className="check-panel">

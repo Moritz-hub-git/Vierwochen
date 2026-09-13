@@ -9,7 +9,7 @@
 import { cookies } from "next/headers";
 import { env } from "./config";
 
-export const ADMIN_COOKIE = "opsdone_admin";
+export const ADMIN_COOKIE = "opsrid_admin";
 const LEGACY_ADMIN_COOKIE = "vw_admin";
 
 export async function sha256Hex(text: string): Promise<string> {

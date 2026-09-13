@@ -125,7 +125,7 @@ export default function PotentialCalculator() {
             <b>{number(result.beforeHours, 1)} Std.</b>
           </div>
           <div>
-            <span>Mit OpsDone*</span>
+            <span>Mit Opsrid*</span>
             <div>
               <i
                 style={{

@@ -2,7 +2,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Arrow, Mark } from "./Icons";
+import { Arrow } from "./Icons";
+import { SITE } from "@/lib/config";
 export default function Header() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -31,9 +32,8 @@ export default function Header() {
       </a>
       <header className="site-header">
         <div className="container nav-inner">
-          <Link href="/" className="wordmark" aria-label="OpsDone Startseite">
-            <Mark />
-            OpsDone<span className="wordmark-dot">.</span>
+          <Link href="/" className="wordmark" aria-label={`${SITE.name} Startseite`}>
+            {SITE.name}<span className="wordmark-dot">.</span>
           </Link>
           <nav
             ref={nav}
@@ -41,24 +41,21 @@ export default function Header() {
             id="main-navigation"
             aria-label="Hauptnavigation"
           >
-            <Link href="/prozesse" onClick={() => setOpen(false)}>
-              Prozesse
+            <Link href="/#beispiel" onClick={() => setOpen(false)}>
+              Anwendung
             </Link>
             <Link href="/#vorgehen" onClick={() => setOpen(false)}>
-              So arbeiten wir
+              Vorgehen
             </Link>
-            <Link href="/#potenzial" onClick={() => setOpen(false)}>
-              Ihr Potenzial
-            </Link>
-            <Link href="/unternehmen" onClick={() => setOpen(false)}>
-              Über OpsDone
+            <Link href="/sicherheit" onClick={() => setOpen(false)}>
+              Sicherheit
             </Link>
             <Link className="mobile-nav-cta" href="/prozess-check">
-              Prozess-Check starten <Arrow />
+              Prozess beschreiben <Arrow />
             </Link>
           </nav>
           <Link className="button button-primary nav-cta" href="/prozess-check">
-            Prozess-Check starten <Arrow />
+            Prozess beschreiben <Arrow />
           </Link>
           <button
             ref={menuButton}

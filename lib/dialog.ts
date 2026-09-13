@@ -1,4 +1,4 @@
-/** Structured discovery dialog for an OpsDone process assessment. */
+/** Structured discovery dialog for an Opsrid process assessment. */
 import { COST_ANCHOR, PRICE, RETAINER, SITE } from "./config";
 import type { Content } from "./vertex";
 import type { SolutionBlueprint } from "./blueprint";

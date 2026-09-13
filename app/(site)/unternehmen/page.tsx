@@ -6,7 +6,7 @@ import styles from "../prozesse/process.module.css";
 export const metadata: Metadata = {
   title: "Unternehmen",
   description:
-    "OpsDone baut AI-native Prozessautomationen für wiederkehrende operative Arbeit auf bestehenden Unternehmenssystemen.",
+    "Opsrid baut individuelle Prozesssoftware für wiederkehrende operative Arbeit auf bestehenden Unternehmenssystemen.",
   alternates: { canonical: "/unternehmen" },
 };
 
@@ -18,7 +18,7 @@ export default function CompanyPage() {
           <p className="eyebrow">Unternehmen</p>
           <h1>Wir bauen Prozesse, die ihre Routinearbeit selbst erledigen.</h1>
           <p className="section-intro">
-            OpsDone ist ein Unternehmen für AI-native Process Automation. Wir
+            Opsrid entwickelt individuelle Prozesssoftware. Wir
             verbinden Dokumente, Regeln und bestehende Systeme zu einem Ablauf,
             in dem Standardfälle automatisch laufen und Menschen die Ausnahmen
             bearbeiten.
@@ -44,7 +44,7 @@ export default function CompanyPage() {
             <p>
               In vielen Unternehmen übertragen Menschen Informationen zwischen
               E-Mail, PDF, Excel, ERP und Portalen. Klassische Software macht
-              einzelne Schritte schneller. OpsDone setzt am gesamten Vorgang an:
+              einzelne Schritte schneller. Opsrid setzt am gesamten Vorgang an:
               vom Eingang bis zu einem verwertbaren Ergebnis.
             </p>
             <p>

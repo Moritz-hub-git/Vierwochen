@@ -1,13 +1,13 @@
-# OpsDone repository
+# Opsrid repository
 
-OpsDone is an AI-native process automation company. The public product is eliminated manual work, delivered as a scoped implementation and managed operation. Keep existing customer systems, expose uncertainty, and route business decisions to people.
+Opsrid builds and operates individual process software that eliminates manual work. Keep existing customer systems, expose uncertainty, and route business decisions to people.
 
 ## Product and language
 
 - German public copy, English master claim: **Work eliminated.**
 - Do not restore the old app-agency, four-week guarantee, developer-day or hourly billing positioning.
 - Examples must be labeled as examples; no invented clients, metrics, certifications or integrations.
-- The target domain is `opsdone.de`. The transitional contact address is configured in `lib/config.ts`; do not invent a verified new mailbox.
+- The target domain is `opsrid.com`. The transitional contact address is configured in `lib/config.ts`; do not invent a verified new mailbox.
 - Missing operator details in legal pages are deliberate pending owner input.
 
 ## Architecture
@@ -15,7 +15,7 @@ OpsDone is an AI-native process automation company. The public product is elimin
 - Next.js App Router, React, TypeScript; self-hosted fonts.
 - Public homepage and pages: `app/(site)`. Shared UI: `components/site`.
 - Five process definitions: `lib/processes.ts`; outcome calculation: `lib/potential.ts`.
-- Five concept landing pages: Ads → shared `BlueprintFunnel` → `/api/chat` → at most three adaptive questions → full Solution Blueprint (interactive app, process, deterministic workload/pricing scenario) → inline booking or requested blueprint email. The existing main site retains ChatDock.
+- One public landing page: Ads → persistent `ChatDock` → `/api/chat` → at most three adaptive questions → concrete process preview without an email gate → inline booking.
 - `lib/blueprint.ts` owns deterministic estimates. Model output describes scope; numeric ROI is never taken from the model. Unknown workload remains unknown; scenario assumptions must be visible.
 - `/api/blueprint-email` sends only the server-stored final blueprint on explicit visitor request. No email gate and no automatic marketing enrollment.
 - The AI chat result is visible before contact details. Booking collects contact details only when the visitor chooses a slot; without `BOOKING_CALENDAR_ID`, the selected slot is an explicitly labeled request for manual confirmation.
@@ -32,6 +32,6 @@ Check desktop and mobile navigation, persistent Dock behavior, three-question li
 
 ## Deployment
 
-`cloudbuild.yaml` reuses the existing `vierwochen` infrastructure and deploys a tagged `opsdone-preview` revision with no production traffic change. Preserve existing Cloud Run secrets and environment values. Public URL/contact and `SITE_LIVE` must be passed at build time because static metadata/client configuration are baked into the image. Promotion and DNS mapping are separate release steps.
+`cloudbuild.yaml` reuses the existing `vierwochen` infrastructure and deploys a tagged `opsrid-preview` revision with no production traffic change. Preserve existing Cloud Run secrets and environment values. Public URL/contact and `SITE_LIVE` must be passed at build time because static metadata/client configuration are baked into the image. Promotion and DNS mapping are separate release steps.
 
 Business launch documents live in `docs/launch`; the exact original brief is `docs/COMPANY-STRATEGY.md`.

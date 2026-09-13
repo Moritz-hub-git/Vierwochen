@@ -30,7 +30,7 @@ export const processes: ProcessDefinition[] = [
       "Preise, Mengen und Liefertermine aus Lieferantenbelegen gegen Bestellung und ERP prüfen.",
     headline: "Schluss mit manuellen Auftragsbestätigungen.",
     description:
-      "OpsDone liest eingehende Auftragsbestätigungen, gleicht die relevanten Positionen mit Ihrer Bestellung ab und verarbeitet klare Standardfälle. Ihr Einkauf sieht nur noch Abweichungen, die eine Entscheidung brauchen.",
+      "Opsrid liest eingehende Auftragsbestätigungen, gleicht die relevanten Positionen mit Ihrer Bestellung ab und verarbeitet klare Standardfälle. Ihr Einkauf sieht nur noch Abweichungen, die eine Entscheidung brauchen.",
     metaDescription:
       "Auftragsbestätigungen automatisch prüfen: Preise, Mengen, Artikel und Liefertermine mit Bestellung und ERP abgleichen – bestehende Systeme bleiben.",
     pains: [
@@ -109,7 +109,7 @@ export const processes: ProcessDefinition[] = [
     headline:
       "Angebote vorbereiten, bevor Routinearbeit den Vertrieb ausbremst.",
     description:
-      "OpsDone erfasst Anforderungen aus Anfragen und Ausschreibungen, prüft die Vollständigkeit, ergänzt freigegebene Produkt- und Preisinformationen und erstellt einen Angebotsentwurf. Ihr Team entscheidet über Konditionen und Sonderfälle.",
+      "Opsrid erfasst Anforderungen aus Anfragen und Ausschreibungen, prüft die Vollständigkeit, ergänzt freigegebene Produkt- und Preisinformationen und erstellt einen Angebotsentwurf. Ihr Team entscheidet über Konditionen und Sonderfälle.",
     metaDescription:
       "Angebotsbearbeitung automatisieren: Anfragen und RFQs erfassen, Anforderungen prüfen und Angebotsentwürfe aus bestehenden Produkt- und Preisdaten erstellen.",
     pains: [
@@ -163,7 +163,7 @@ export const processes: ProcessDefinition[] = [
     ],
     questions: [
       {
-        question: "Erstellt OpsDone verbindliche Angebote?",
+        question: "Erstellt Opsrid verbindliche Angebote?",
         answer:
           "Nur wenn Regeln und Vollmachten das ausdrücklich erlauben. Üblicherweise entsteht ein prüfbarer Entwurf; Preise, Sonderkonditionen und die finale Freigabe bleiben beim Vertrieb.",
       },
@@ -187,7 +187,7 @@ export const processes: ProcessDefinition[] = [
       "Reklamationen klassifizieren, Informationen zusammenführen und Dokumentation sowie Antwort vorbereiten.",
     headline: "Reklamationen automatisch vorbereiten. Ihr Team entscheidet.",
     description:
-      "OpsDone strukturiert Kundenmeldungen und Anhänge, ergänzt Produkt- und Falldaten, sucht nach vereinbarten Mustern und bereitet Dokumentation, Maßnahmen und Kundenantwort vor. Fachliche Bewertung und Freigabe bleiben beim Qualitätsmanagement.",
+      "Opsrid strukturiert Kundenmeldungen und Anhänge, ergänzt Produkt- und Falldaten, sucht nach vereinbarten Mustern und bereitet Dokumentation, Maßnahmen und Kundenantwort vor. Fachliche Bewertung und Freigabe bleiben beim Qualitätsmanagement.",
     metaDescription:
       "Reklamationsbearbeitung und 8D-Vorbereitung automatisieren: Fälle klassifizieren, Daten sammeln, ähnliche Fälle finden und Dokumentation vorbereiten.",
     pains: [
@@ -243,7 +243,7 @@ export const processes: ProcessDefinition[] = [
       {
         question: "Trifft die Automation Qualitätsentscheidungen?",
         answer:
-          "Kritische fachliche Bewertungen bleiben bei Ihrem Team. OpsDone erledigt die vorbereitende Arbeit und leitet Fälle anhand vereinbarter Regeln weiter.",
+          "Kritische fachliche Bewertungen bleiben bei Ihrem Team. Opsrid erledigt die vorbereitende Arbeit und leitet Fälle anhand vereinbarter Regeln weiter.",
       },
       {
         question: "Kann ein 8D-Bericht vollständig erzeugt werden?",
@@ -265,7 +265,7 @@ export const processes: ProcessDefinition[] = [
       "Daten aus Excel, ERP und Fachberichten sammeln, validieren und in bestehende Reports überführen.",
     headline: "Monatsreporting ohne Copy-Paste.",
     description:
-      "OpsDone sammelt definierte Datenquellen, prüft Vollständigkeit und Plausibilität, berechnet Kennzahlen und aktualisiert Berichtsvorlagen. Verantwortliche prüfen Abweichungen und geben die finale Aussage frei.",
+      "Opsrid sammelt definierte Datenquellen, prüft Vollständigkeit und Plausibilität, berechnet Kennzahlen und aktualisiert Berichtsvorlagen. Verantwortliche prüfen Abweichungen und geben die finale Aussage frei.",
     metaDescription:
       "Management-Reporting automatisieren: Daten aus Excel und ERP sammeln, validieren, Kennzahlen berechnen und PowerPoint- oder Excel-Berichte aktualisieren.",
     pains: [
@@ -321,7 +321,7 @@ export const processes: ProcessDefinition[] = [
       {
         question: "Müssen wir unser BI-System wechseln?",
         answer:
-          "Nein. OpsDone kann vorhandene Exporte, Datenbanken und Vorlagen verbinden. Die bestehenden Systeme und das gewohnte Berichtsformat können bleiben.",
+          "Nein. Opsrid kann vorhandene Exporte, Datenbanken und Vorlagen verbinden. Die bestehenden Systeme und das gewohnte Berichtsformat können bleiben.",
       },
       {
         question: "Schreibt die KI Management-Kommentare?",
@@ -343,7 +343,7 @@ export const processes: ProcessDefinition[] = [
       "Dokumente und Stammdaten prüfen, fehlende Angaben nachfordern und einen freigabefertigen Datensatz vorbereiten.",
     headline: "Neue Lieferanten ohne E-Mail-Pingpong onboarden.",
     description:
-      "OpsDone erfasst Formulare, Zertifikate und Stammdaten, prüft sie gegen Ihre Anforderungen und fordert klar definierte fehlende Informationen nach. Einkauf, Compliance und Fachbereich erhalten einen vollständigen Vorgang zur Freigabe.",
+      "Opsrid erfasst Formulare, Zertifikate und Stammdaten, prüft sie gegen Ihre Anforderungen und fordert klar definierte fehlende Informationen nach. Einkauf, Compliance und Fachbereich erhalten einen vollständigen Vorgang zur Freigabe.",
     metaDescription:
       "Lieferanten-Onboarding automatisieren: Stammdaten und Zertifikate prüfen, fehlende Angaben nachfordern und freigabefertige Lieferantendatensätze vorbereiten.",
     pains: [
@@ -397,7 +397,7 @@ export const processes: ProcessDefinition[] = [
     ],
     questions: [
       {
-        question: "Legt OpsDone Lieferanten direkt im ERP an?",
+        question: "Legt Opsrid Lieferanten direkt im ERP an?",
         answer:
           "Das ist möglich, wenn Schnittstelle, Rollen und Freigaberegeln es erlauben. Häufig startet der erste Schritt mit einem geprüften, freigabefertigen Datensatz.",
       },

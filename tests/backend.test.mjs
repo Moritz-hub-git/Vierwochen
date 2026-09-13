@@ -3,7 +3,7 @@ import test from "node:test";
 
 const baseUrl = process.env.TEST_BASE_URL;
 const integration = {
-  skip: baseUrl ? false : "Set TEST_BASE_URL to a local OpsDone server.",
+  skip: baseUrl ? false : "Set TEST_BASE_URL to a local Opsrid server.",
 };
 
 let requestNumber = 1;

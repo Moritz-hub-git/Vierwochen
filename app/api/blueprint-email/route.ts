@@ -108,9 +108,9 @@ export async function POST(req: Request) {
   }
   const delivered = await sendMail({
     to: email.email,
-    subject: `Ihr OpsDone Blueprint`,
+    subject: `Ihr Opsrid Blueprint`,
     html: ownerNoticeHtml({
-      heading: "Ihr OpsDone Blueprint",
+      heading: "Ihr Opsrid Blueprint",
       rows: [
         ["Ihr Lösungsentwurf", summary],
         [

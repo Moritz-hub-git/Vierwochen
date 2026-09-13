@@ -109,7 +109,7 @@ export default function ProcessShowcase() {
               className="text-link"
               onClick={() =>
                 window.dispatchEvent(
-                  new CustomEvent("opsdone:chat", {
+                  new CustomEvent("opsrid:chat", {
                     detail: { text: ex.prompt },
                   }),
                 )
@@ -138,7 +138,7 @@ export default function ProcessShowcase() {
                 <span className="ai-orb" aria-hidden="true">
                   ✳
                 </span>
-                <strong>OpsDone</strong>
+                <strong>Opsrid</strong>
                 <span>PROCESS AUTOMATION</span>
               </div>
               {ex.steps.map((s, i) => (

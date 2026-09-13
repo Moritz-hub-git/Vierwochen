@@ -1,8 +1,8 @@
 {
-  "name": "opsdone",
+  "name": "opsrid",
   "version": "1.0.0",
   "private": true,
-  "description": "OpsDone — AI-native Process Automation. Work eliminated.",
+  "description": "Opsrid — individuelle Prozesssoftware. Work eliminated.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 export const runtime = "edge";
-export const alt = "OpsDone — Work eliminated. AI-native Process Automation.";
+export const alt = "Opsrid — Work eliminated. Individuelle Prozesssoftware.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export default function Image() {
@@ -19,7 +19,7 @@ export default function Image() {
         }}
       >
         <div style={{ display: "flex", fontSize: 30, fontWeight: 700 }}>
-          ▣ OpsDone.
+          Opsrid.
         </div>
         <div
           style={{
@@ -43,7 +43,7 @@ export default function Image() {
             color: "#707b9b",
           }}
         >
-          AI-native Process Automation · opsdone.de
+          Individuelle Prozesssoftware · opsrid.com
         </div>
       </div>
     ),

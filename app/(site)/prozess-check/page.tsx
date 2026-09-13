@@ -5,7 +5,7 @@ import { processes } from "@/lib/processes";
 export const metadata: Metadata = {
   title: "Kostenloser Prozess-Check",
   description:
-    "Welcher manuelle Prozess kann entfallen? Prüfen Sie mit OpsDone Aufwand, Automatisierungspotenzial und einen sinnvollen Pilot. Kostenlos und unverbindlich.",
+    "Welcher manuelle Prozess kann entfallen? Prüfen Sie mit Opsrid Aufwand, Umsetzungspotenzial und einen sinnvollen Pilot. Kostenlos und unverbindlich.",
   alternates: { canonical: "/prozess-check" },
 };
 export default async function ProcessCheck({
@@ -64,7 +64,7 @@ export default async function ProcessCheck({
           <span className="founder-avatar">MS</span>
           <div>
             <strong>Direkt mit Moritz Schumacher</strong>
-            <p>Gründer von OpsDone · Ihr Ansprechpartner</p>
+            <p>Gründer von Opsrid · Ihr Ansprechpartner</p>
           </div>
         </div>
       </div>

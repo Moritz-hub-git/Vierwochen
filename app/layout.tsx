@@ -19,15 +19,15 @@ const display = localFont({
 });
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
-  title: { default: "OpsDone — Work eliminated.", template: "%s — OpsDone" },
+  title: { default: "Opsrid — Work eliminated.", template: "%s — Opsrid" },
   description:
-    "OpsDone automatisiert wiederkehrende Geschäftsprozesse auf bestehenden Systemen. Standardfälle laufen automatisch. Ihr Team entscheidet bei Ausnahmen.",
+    "Opsrid übernimmt wiederkehrende Prozessarbeit und baut dafür eine individuelle Geschäftsanwendung.",
   openGraph: {
     type: "website",
     locale: "de_DE",
-    siteName: "OpsDone",
-    title: "OpsDone — Work eliminated.",
-    description: "Die Routine erledigt sich. Ihr Team macht den Unterschied.",
+    siteName: "Opsrid",
+    title: "Opsrid — Work eliminated.",
+    description: "Ihr Prozess wird zu einer Anwendung, die die Arbeit übernimmt.",
     images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
   },
   twitter: { card: "summary_large_image" },
@@ -39,7 +39,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#fafbff",
+  themeColor: "#f4f4fd",
 };
 export default function RootLayout({
   children,

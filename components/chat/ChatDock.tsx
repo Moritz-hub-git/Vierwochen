@@ -34,6 +34,7 @@ export default function ChatDock() {
   const [busy, setBusy] = useState(false);
   const [directBooking, setDirectBooking] = useState(false);
   const [booked, setBooked] = useState(false);
+  const [dockFocused, setDockFocused] = useState(false);
   const hidden = ["/impressum", "/datenschutz", "/agb", "/zugang"].includes(
     pathname,
   );
@@ -47,9 +48,9 @@ export default function ChatDock() {
     setDirectBooking(booking);
     if (text) setDraft(text);
     if (!modal.current?.open) {
-      if (!window.history.state?.opsdoneChat)
+      if (!window.history.state?.opsridChat)
         window.history.pushState(
-          { ...window.history.state, opsdoneChat: true },
+          { ...window.history.state, opsridChat: true },
           "",
           window.location.href,
         );
@@ -62,11 +63,11 @@ export default function ChatDock() {
   const close = () => {
     modal.current?.close();
     setOpen(false);
-    if (window.history.state?.opsdoneChat) window.history.back();
+    if (window.history.state?.opsridChat) window.history.back();
   };
   useEffect(() => {
     const onBack = () => {
-      if (!window.history.state?.opsdoneChat) {
+      if (!window.history.state?.opsridChat) {
         modal.current?.close();
         setOpen(false);
       }
@@ -157,7 +158,7 @@ export default function ChatDock() {
       }
     };
     document.addEventListener("click", click, true);
-    window.addEventListener("opsdone:chat", launch);
+    window.addEventListener("opsrid:chat", launch);
     const url = new URL(location.href);
     if (
       (pathname === "/prozess-check" && !url.searchParams.has("formular")) ||
@@ -166,7 +167,7 @@ export default function ChatDock() {
       show(fromUrl(url), pathname === "/termin");
     return () => {
       document.removeEventListener("click", click, true);
-      window.removeEventListener("opsdone:chat", launch);
+      window.removeEventListener("opsrid:chat", launch);
     };
   }, [pathname, show]);
 
@@ -260,7 +261,25 @@ export default function ChatDock() {
   return (
     <>
       {!hidden && !open && (
-        <aside className="ai-dock" aria-label="Ihren Prozess beschreiben">
+        <aside
+          className={`ai-dock ${dockFocused ? "is-focused" : ""}`}
+          aria-label="Ihren Prozess beschreiben"
+        >
+          <div className="ai-dock-hints" aria-hidden={!dockFocused}>
+            {STARTERS.map((starter) => (
+              <button
+                key={starter}
+                type="button"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => {
+                  show();
+                  void send(starter);
+                }}
+              >
+                {starter}
+              </button>
+            ))}
+          </div>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -280,6 +299,8 @@ export default function ChatDock() {
               onChange={(e) => setDraft(e.target.value)}
               maxLength={MAX_CHARS}
               placeholder="Welcher Prozess kostet Sie gerade am meisten Zeit?"
+              onFocus={() => setDockFocused(true)}
+              onBlur={() => setDockFocused(false)}
             />
             <button type="submit" aria-label="Prozess-Check starten">
               ↗
@@ -308,7 +329,7 @@ export default function ChatDock() {
             </span>
             <div>
               <strong id="chat-title">Ihr Prozess. Weitergedacht.</strong>
-              <small>OpsDone · Ihre Anwendung beginnt hier</small>
+              <small>Opsrid · Ihre Anwendung beginnt hier</small>
             </div>
           </div>
           <div className="ai-chat-actions">
@@ -386,7 +407,7 @@ export default function ChatDock() {
                   className={"ai-message " + m.role + (m.error ? " error" : "")}
                 >
                   {m.role === "assistant" && (
-                    <span className="ai-message-label">OPSDONE AI</span>
+                    <span className="ai-message-label">OPSRID AI</span>
                   )}
                   <p>{m.display}</p>
                 </div>

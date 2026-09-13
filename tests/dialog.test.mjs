@@ -28,8 +28,8 @@ vm.runInNewContext(code, {
         notice: "Laufzeit laut Angebot",
       },
       SITE: {
-        name: "OpsDone",
-        category: "AI-native Process Automation",
+        name: "Opsrid",
+        category: "Individuelle Prozesssoftware",
         founder: { name: "Moritz Schumacher" },
       },
     };

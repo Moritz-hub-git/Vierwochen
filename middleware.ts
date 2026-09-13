@@ -27,7 +27,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const cookie = req.cookies.get("opsdone_access")?.value ?? req.cookies.get("vw_access")?.value;
+  const cookie = req.cookies.get("opsrid_access")?.value ?? req.cookies.get("vw_access")?.value;
   if (cookie && cookie === (await sha256Hex(password.trim()))) {
     return NextResponse.next();
   }

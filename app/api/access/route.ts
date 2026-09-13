@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     );
   }
   const res = NextResponse.json({ ok: true });
-  res.cookies.set("opsdone_access", await sha256Hex(password), {
+  res.cookies.set("opsrid_access", await sha256Hex(password), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",

@@ -308,7 +308,7 @@ export default async function AdminPage({
                           <small>Dialog: {request.dialogId}</small>
                         </details>
                         <a
-                          href={`mailto:${encodeURIComponent(request.email)}?subject=${encodeURIComponent("Ihr OpsDone Blueprint")}&body=${encodeURIComponent(summary + "\n\nDiese Nachricht erhalten Sie auf Ihren Wunsch. Keine Anmeldung zu Werbe-E-Mails.")}`}
+                          href={`mailto:${encodeURIComponent(request.email)}?subject=${encodeURIComponent("Ihr Opsrid Blueprint")}&body=${encodeURIComponent(summary + "\n\nDiese Nachricht erhalten Sie auf Ihren Wunsch. Keine Anmeldung zu Werbe-E-Mails.")}`}
                         >
                           E-Mail zur Zustellung vorbereiten
                         </a>

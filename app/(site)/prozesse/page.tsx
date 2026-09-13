@@ -6,7 +6,7 @@ import styles from "./process.module.css";
 export const metadata: Metadata = {
   title: "Prozesse automatisieren",
   description:
-    "Konkrete Geschäftsprozesse mit AI-native Process Automation automatisieren – auf bestehenden Systemen, mit Menschen für Ausnahmen und Entscheidungen.",
+    "Konkrete Geschäftsprozesse mit individueller Prozesssoftware übernehmen – auf bestehenden Systemen, mit Menschen für Ausnahmen und Entscheidungen.",
   alternates: { canonical: "/prozesse" },
 };
 
@@ -18,7 +18,7 @@ export default function ProcessesPage() {
           <p className="eyebrow">Prozessbibliothek</p>
           <h1>Automatisierung beginnt mit einem konkreten Prozess.</h1>
           <p className="section-intro">
-            OpsDone automatisiert wiederkehrende operative Arbeit vom Eingang
+            Opsrid übernimmt wiederkehrende operative Arbeit vom Eingang
             bis zum Ergebnis. Ihre bestehenden Systeme bleiben. Menschen greifen
             ein, wenn eine Ausnahme, Freigabe oder echte Entscheidung ansteht.
           </p>
@@ -89,7 +89,7 @@ export default function ProcessesPage() {
           <p className="eyebrow">No system replacement</p>
           <h2>Ihr ERP, CRM und Microsoft 365 bleiben.</h2>
           <p>
-            OpsDone ergänzt eine Automatisierungsschicht über den Systemen, die
+            Opsrid ergänzt eine Prozessanwendung über den Systemen, die
             Ihr Unternehmen bereits nutzt. Zuerst wählen wir den einfachsten
             belastbaren Anschluss: Dateien und E-Mail, dann APIs und
             Connectoren, bei Bedarf eine kontrollierte Bedienautomation.

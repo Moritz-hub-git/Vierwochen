@@ -377,7 +377,7 @@ export function buildBlueprint(
       : sketch.steps.map((s) => s.label),
     futureSteps: [
       inputs.join(" / ") || "Prozesseingang",
-      "Individuelle OpsDone Anwendung",
+      "Individuelle Opsrid Anwendung",
       "Standardfälle nach geprüften Regeln · Ausnahmen zur Entscheidung",
       outputs.join(" / ") || "Geprüftes Ergebnis",
     ],

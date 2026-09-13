@@ -1,22 +1,21 @@
 import Link from "next/link";
-import { Mark } from "./Icons";
+import { SITE } from "@/lib/config";
 export default function Footer() {
   return (
     <footer className="site-footer">
       <div className="container footer-grid">
         <div>
           <Link href="/" className="wordmark">
-            <Mark />
-            OpsDone<span className="wordmark-dot">.</span>
+            {SITE.name}<span className="wordmark-dot">.</span>
           </Link>
           <p>
-            AI-native Process Automation.
+            Individuelle Prozesssoftware.
             <br />
             Operations. Done.
           </p>
         </div>
         <div>
-          <h2>Arbeit eliminieren</h2>
+          <h2>Beispielprozesse</h2>
           <Link href="/prozesse/auftragsbestaetigungen">
             Auftragsbestätigungen
           </Link>
@@ -28,7 +27,7 @@ export default function Footer() {
           </Link>
         </div>
         <div>
-          <h2>OpsDone</h2>
+          <h2>{SITE.name}</h2>
           <Link href="/unternehmen">Unternehmen</Link>
           <Link href="/sicherheit">Sicherheit & Kontrolle</Link>
           <Link href="/#vorgehen">Zusammenarbeit</Link>
@@ -36,7 +35,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="container footer-bottom">
-        <span>© {new Date().getFullYear()} OpsDone</span>
+        <span>© {new Date().getFullYear()} {SITE.name}</span>
         <span>Work eliminated.</span>
         <nav aria-label="Rechtliches">
           <Link href="/impressum">Impressum</Link>

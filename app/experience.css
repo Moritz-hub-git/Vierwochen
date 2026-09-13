@@ -1,12 +1,12 @@
-/* OpsDone: a calm product surface with an always available AI entry. */
+/* Opsrid: a calm product surface with an always available AI entry. */
 :root {
-  --bg: #fcfcfe;
-  --text: #202331;
-  --text-soft: #636776;
-  --text-muted: #6c7180;
-  --border: #e5e7ee;
-  --accent: #425de8;
-  --accent-soft: #eef1ff;
+  --bg: #f4f4fd;
+  --text: #18182f;
+  --text-soft: #5f627c;
+  --text-muted: #737690;
+  --border: #dfdeea;
+  --accent: #5a4cf3;
+  --accent-soft: #eceaff;
   --font-grotesk: var(--font-display);
 }
 body {
@@ -43,12 +43,12 @@ summary:focus-visible {
   display: none;
 }
 .site-header {
-  background: rgba(252, 252, 254, 0.92);
-  border-bottom: 1px solid rgba(229, 231, 238, 0.65);
+  background: rgba(250, 250, 255, 0.88);
+  border-bottom: 1px solid rgba(46, 45, 76, 0.08);
   backdrop-filter: blur(18px);
 }
 .wordmark {
-  letter-spacing: -1.4px;
+  letter-spacing: -1.2px;
   font-weight: 800;
 }
 .wordmark svg {
@@ -69,11 +69,11 @@ summary:focus-visible {
 }
 .button-primary {
   background: var(--accent);
-  box-shadow: 0 3px 7px #425de815;
+  box-shadow: 0 5px 16px #5a4cf32b;
   color: white;
 }
 .button-primary:hover {
-  background: #324ed5;
+  background: #4436d8;
 }
 .button-secondary {
   background: white;
@@ -469,43 +469,91 @@ summary:focus-visible {
   justify-content: center;
   width: 32px;
   height: 32px;
-  color: #4f65dd;
+  color: #5a4cf3;
   font-size: 27px;
   flex-shrink: 0;
 }
 .ai-dock {
   position: fixed;
   z-index: 60;
-  bottom: max(15px, env(safe-area-inset-bottom));
+  bottom: max(14px, env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
   width: min(780px, calc(100% - 32px));
+  transition: transform 220ms ease;
 }
 .ai-dock:before {
   content: "";
   position: absolute;
-  inset: -20px -36px -25px;
-  background: radial-gradient(ellipse, #fbfcffeb 20%, #fbfcff00 73%);
+  inset: -24px -42px -26px;
+  background: radial-gradient(ellipse, #f4f4fdf2 22%, #f4f4fd00 73%);
   z-index: -1;
   pointer-events: none;
+}
+.ai-dock.is-focused:before {
+  inset: -330px -90px -40px;
+  background: linear-gradient(to top, #f4f4fd 43%, #f4f4fdea 66%, transparent);
+}
+.ai-dock-hints {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  max-height: 0;
+  padding: 0 7px;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: max-height 260ms ease, opacity 180ms ease, transform 220ms ease, margin 220ms ease;
+}
+.ai-dock.is-focused .ai-dock-hints {
+  max-height: 260px;
+  margin-bottom: 11px;
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.ai-dock-hints button {
+  max-width: min(590px, 100%);
+  padding: 11px 17px;
+  border: 1px solid #deddea;
+  border-radius: 999px;
+  color: #4d4e68;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 10px 24px rgba(36, 33, 81, 0.09);
+  font-size: 12px;
+  font-weight: 620;
+  line-height: 1.45;
+  text-align: left;
+}
+.ai-dock-hints button:hover {
+  border-color: #8f86ef;
+  color: #3f34c8;
+  transform: translateY(-1px);
 }
 .ai-dock form {
   display: flex;
   align-items: center;
   gap: 10px;
   background: #fff;
-  border: 1px solid #dfe4f0;
-  border-radius: 19px;
-  padding: 9px 10px 9px 20px;
+  border: 1px solid #d8d6e8;
+  border-radius: 999px;
+  padding: 8px 9px 8px 19px;
   box-shadow:
-    0 6px 32px #26375e16,
-    0 1px 4px #26375e0a;
+    0 15px 42px rgba(35, 31, 83, 0.14),
+    0 2px 6px rgba(35, 31, 83, 0.05);
+  transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
 }
 .ai-dock form:focus-within {
-  border-color: #8798e9;
+  border-color: #8f86ef;
+  transform: translateY(-2px);
   box-shadow:
-    0 0 0 4px #425de80b,
-    0 8px 30px #26375e15;
+    0 0 0 4px rgba(90, 76, 243, 0.08),
+    0 20px 44px rgba(35, 31, 83, 0.18);
 }
 .ai-dock input {
   flex: 1;
@@ -513,14 +561,14 @@ summary:focus-visible {
   border: 0;
   background: none;
   outline: none;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text);
   padding: 8px 0;
 }
 .ai-dock input::placeholder {
   color: #7b8294;
 }
-.ai-dock button,
+.ai-dock form button,
 .ai-composer button {
   display: grid;
   place-items: center;
@@ -528,15 +576,15 @@ summary:focus-visible {
   width: 42px;
   height: 42px;
   border: 0;
-  background: var(--accent);
+  background: #5a4cf3;
   color: white;
-  border-radius: 12px;
+  border-radius: 50%;
   font-size: 25px;
 }
 .ai-dock p {
   text-align: center;
   font-size: 9px;
-  color: #69738b;
+  color: #74758d;
   margin-top: 7px;
 }
 .ai-dock p span {
@@ -551,7 +599,7 @@ summary:focus-visible {
   padding: 0;
   border: 0;
   color: var(--text);
-  background: #fcfcfe;
+  background: #f8f8fd;
   overflow: hidden;
 }
 .ai-dialog[open] {
@@ -559,7 +607,7 @@ summary:focus-visible {
   flex-direction: column;
 }
 .ai-dialog::backdrop {
-  background: #f8faff;
+  background: #f4f4fd;
 }
 .ai-chat-header {
   display: flex;
@@ -779,7 +827,7 @@ summary:focus-visible {
 }
 .ai-composer-wrap {
   padding: 12px 24px max(16px, env(safe-area-inset-bottom));
-  background: #fcfcfe;
+  background: #f8f8fd;
   border-top: 1px solid #f0f2f7;
   flex-shrink: 0;
 }
@@ -1469,10 +1517,20 @@ summary:focus-visible {
     width: calc(100% - 22px);
     bottom: max(10px, env(safe-area-inset-bottom));
   }
+  .ai-dock.is-focused .ai-dock-hints {
+    max-height: 210px;
+  }
+  .ai-dock-hints button {
+    padding: 9px 13px;
+    font-size: 10px;
+  }
+  .ai-dock-hints button:nth-child(n + 3) {
+    display: none;
+  }
   .ai-dock form {
     gap: 7px;
     padding: 8px 8px 8px 13px;
-    border-radius: 16px;
+    border-radius: 999px;
   }
   .ai-dock .ai-orb {
     display: none;

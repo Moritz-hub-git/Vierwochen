@@ -65,7 +65,7 @@ export function blueprintSummary(blueprint: Record<string, unknown>): string {
     `Kennzahlen der Anwendung: ${list(blueprint.kpis)}`,
     `Menschliche Entscheidungen: ${list(blueprint.approvals) || "Freigaberegeln zu klären"}`,
     `Heute: ${list(blueprint.todaySteps)}`,
-    `Mit OpsDone: ${list(blueprint.futureSteps)}`,
+    `Mit Opsrid: ${list(blueprint.futureSteps)}`,
     `Volumen: ${number(metrics.monthlyVolume, " Vorgänge / Monat")}`,
     `Heutiger Aufwand je Vorgang: ${number(metrics.minutesPerCase, " Minuten")}`,
     `Heutiger manueller Aufwand: ${number(metrics.annualHours, " Stunden / Jahr")}`,

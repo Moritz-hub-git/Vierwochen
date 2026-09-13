@@ -1,8 +1,8 @@
-# OpsDone
+# Opsrid
 
-**AI-native Process Automation — Work eliminated.**
+**Individuelle Prozesssoftware — Work eliminated.**
 
-OpsDone baut und betreibt schlanke Automationen für wiederkehrende operative Arbeit im Mittelstand. Der erste empfohlene Keil sind Lieferanten-Auftragsbestätigungen: E-Mail/PDF kommt an, Standardfälle werden gegen Bestellung und ERP geprüft, nur Abweichungen gehen an den Einkauf. Der AI-first-Erstkontakt auf `opsdone.de` führt vom persistenten Chat-Dock über höchstens drei Rückfragen zu einer konkreten Prozessvorschau und anschließend inline zur Terminbuchung. Die öffentliche Kontaktadresse bleibt bis zur Bestätigung `hallo@vierwochen.de` als Übergangswert.
+Opsrid baut und betreibt individuelle Geschäftsanwendungen, die wiederkehrende operative Arbeit übernehmen. Der Erstkontakt auf `opsrid.com` führt vom persistenten Chat-Dock über höchstens drei Rückfragen zu einer konkreten Prozessvorschau und anschließend inline zur Terminbuchung. Die öffentliche Kontaktadresse bleibt bis zur Bestätigung `hallo@vierwochen.de` als Übergangswert.
 
 Die operative Planung steht in [`docs/launch/00-START-HIER.md`](./docs/launch/00-START-HIER.md). Die ursprüngliche Strategie wurde unverändert in [`docs/COMPANY-STRATEGY.md`](./docs/COMPANY-STRATEGY.md) archiviert. Aussagen mit dem Status „Fakt“ beziehen sich auf dieses Repository oder ausdrücklich belegte Angaben; „Annahme“ bleibt bis zur Validierung offen.
 
@@ -15,7 +15,7 @@ Die operative Planung steht in [`docs/launch/00-START-HIER.md`](./docs/launch/00
 - **Google Calendar**: freie Slots werden geprüft und Buchungen angelegt, wenn `BOOKING_CALENDAR_ID` gesetzt ist. Ohne diese Variable werden Buchungsanfragen gespeichert und manuell bestätigt.
 - **Schutzmechanismen**: maximal drei Rückfragen im öffentlichen Chat, Zeichen- und Zuglimits, Rate-Limits pro IP, optionale Vorschau-Sperre, Admin-Export und Bereinigung nach den Aufbewahrungsfristen.
 
-Der Frontend-Auftritt ist auf OpsDone umgestellt. `opsdone.de` ist die Ziel-Domain; die Betreiberangaben und die endgültige Kontaktadresse sind noch offen. Die vorhandene Infrastruktur und die wiederverwendbaren Backend-Bausteine bleiben die technische Basis.
+Der Frontend-Auftritt ist auf Opsrid umgestellt. `opsrid.com` ist die Ziel-Domain; die Betreiberangaben und die endgültige Kontaktadresse sind noch offen. Die vorhandene Infrastruktur und die wiederverwendbaren Backend-Bausteine bleiben die technische Basis.
 
 ## Lokal entwickeln
 
@@ -38,7 +38,7 @@ Die vollständige kommentierte Vorlage liegt in [`.env.example`](./.env.example)
 
 ## Auslieferung
 
-Der vorhandene [`cloudbuild.yaml`](./cloudbuild.yaml) baut das Docker-Image, pusht es in die bestehende Artifact Registry und erstellt eine mit `opsdone-preview` markierte Revision auf Cloud Run, ohne den bisherigen Produktionstraffic umzuschalten. Bestehende Umgebungsvariablen und Geheimnisse bleiben erhalten. Domain, Kontaktadresse und Indexierungsstatus werden bereits beim Docker-Build gesetzt. Er legt keine Ressourcen an. Vor dem Livegang müssen Betreiber, Domain, Mailversand, Backend-Variablen und der öffentliche Smoke-Test anhand der Checkliste bestätigt werden. Ein grüner Build beweist weder eine funktionierende Kalenderberechtigung noch die rechtliche Vollständigkeit der Website.
+Der vorhandene [`cloudbuild.yaml`](./cloudbuild.yaml) baut das Docker-Image, pusht es in die bestehende Artifact Registry und erstellt eine mit `opsrid-preview` markierte Revision auf Cloud Run, ohne den bisherigen Produktionstraffic umzuschalten. Bestehende Umgebungsvariablen und Geheimnisse bleiben erhalten. Domain, Kontaktadresse und Indexierungsstatus werden bereits beim Docker-Build gesetzt. Er legt keine Ressourcen an. Vor dem Livegang müssen Betreiber, Domain, Mailversand, Backend-Variablen und der öffentliche Smoke-Test anhand der Checkliste bestätigt werden. Ein grüner Build beweist weder eine funktionierende Kalenderberechtigung noch die rechtliche Vollständigkeit der Website.
 
 ## Wichtige Pfade
 
@@ -57,7 +57,7 @@ Der vorhandene [`cloudbuild.yaml`](./cloudbuild.yaml) baut das Docker-Image, pus
 
 ## Inhaltliche Leitplanke
 
-OpsDone verkauft einen messbaren Prozessoutput und die dadurch entfallende manuelle Arbeit. Die fünf dokumentierten Start-Use-Cases sind Auftragsbestätigungen, RFQ-/Angebotsvorbereitung, Reklamationen/8D, Management-Reporting und Lieferanten-Onboarding. Auf der Website werden sie als Beispiele und Hypothesen behandelt, solange keine Kundenvalidierung vorliegt. Outreach-Texte in `docs/launch/03-outbound-und-content.md` sind Entwürfe und werden nicht automatisch versendet. Der Funnel und seine Messpunkte stehen in [`docs/launch/00-START-HIER.md`](./docs/launch/00-START-HIER.md).
+Opsrid verkauft einen messbaren Prozessoutput und die dadurch entfallende manuelle Arbeit. Die fünf dokumentierten Start-Use-Cases sind Auftragsbestätigungen, RFQ-/Angebotsvorbereitung, Reklamationen/8D, Management-Reporting und Lieferanten-Onboarding. Auf der Website werden sie als Beispiele und Hypothesen behandelt, solange keine Kundenvalidierung vorliegt. Outreach-Texte in `docs/launch/03-outbound-und-content.md` sind Entwürfe und werden nicht automatisch versendet. Der Funnel und seine Messpunkte stehen in [`docs/launch/00-START-HIER.md`](./docs/launch/00-START-HIER.md).
 
 Für die operative Arbeit: [Prozess-Aufnahme](./docs/launch/09-PROZESS-AUFNAHME.md) und [leere Lead-Pipeline-Vorlage](./docs/launch/LEAD-PIPELINE-TEMPLATE.csv).
 

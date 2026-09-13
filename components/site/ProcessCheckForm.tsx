@@ -175,7 +175,7 @@ export default function ProcessCheckForm({
       <label className="form-consent">
         <input type="checkbox" name="consent" required />
         <span>
-          OpsDone darf mich zu dieser Anfrage kontaktieren. Hinweise zur
+          Opsrid darf mich zu dieser Anfrage kontaktieren. Hinweise zur
           Verarbeitung meiner Angaben stehen in der{" "}
           <Link href="/datenschutz">Datenschutzerklärung</Link>. *
         </span>
@@ -184,7 +184,7 @@ export default function ProcessCheckForm({
         <div className="form-error" role="alert">
           {error}
           <br />
-          <a href={`mailto:${contactEmail}?subject=OpsDone%20Prozess-Check`}>
+          <a href={`mailto:${contactEmail}?subject=Opsrid%20Prozess-Check`}>
             Direkt per E-Mail anfragen
           </a>
         </div>

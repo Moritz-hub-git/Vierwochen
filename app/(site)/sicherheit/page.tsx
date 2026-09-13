@@ -6,7 +6,7 @@ import styles from "../prozesse/process.module.css";
 export const metadata: Metadata = {
   title: "Sicherheit & Datenschutz",
   description:
-    "Wie OpsDone Prozessautomationen mit Datenminimierung, Rollen, Protokollierung, sicheren Zugängen und kontrollierten Freigaben plant.",
+    "Wie Opsrid Prozessanwendungen mit Datenminimierung, Rollen, Protokollierung, sicheren Zugängen und kontrollierten Freigaben plant.",
   alternates: { canonical: "/sicherheit" },
 };
 
@@ -45,7 +45,7 @@ export default function SecurityPage() {
           <p className="eyebrow">Sicherheit & Datenschutz</p>
           <h1>Automation braucht klare Grenzen.</h1>
           <p className="section-intro">
-            OpsDone plant Datenflüsse, Zugriffe, Ausnahmen und Betrieb gemeinsam
+            Opsrid plant Datenflüsse, Zugriffe, Ausnahmen und Betrieb gemeinsam
             mit Prozess und IT. Diese Seite beschreibt unsere Grundsätze. Die
             verbindliche Ausgestaltung steht im jeweiligen Angebot und
             Sicherheitskonzept.
@@ -123,7 +123,7 @@ export default function SecurityPage() {
             <article className="feature-card">
               <h3>Verwalteter Betrieb</h3>
               <p>
-                Alternativ kann ein Betrieb durch OpsDone vereinbart werden.
+                Alternativ kann ein Betrieb durch Opsrid vereinbart werden.
                 Region, Unterauftragnehmer, Servicezeiten und Exit werden vorab
                 dokumentiert.
               </p>
@@ -157,7 +157,7 @@ export default function SecurityPage() {
               <li>Betrieb, Monitoring, Backup und Exit vereinbaren</li>
             </ul>
             <p>
-              OpsDone behauptet derzeit keine allgemeine Zertifizierung.
+              Opsrid behauptet derzeit keine allgemeine Zertifizierung.
               Benötigt Ihr Einkauf Nachweise, einen AV-Vertrag, eine
               Lieferantenselbstauskunft oder Antworten auf einen
               Security-Fragebogen, klären wir das vor dem Angebot.

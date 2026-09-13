@@ -7,12 +7,12 @@ export function env(name: string): string | undefined {
 const configuredPublicUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
 const publicUrl = (() => {
   try {
-    const candidate = new URL(configuredPublicUrl || "https://opsdone.de");
+    const candidate = new URL(configuredPublicUrl || "https://opsrid.com");
     return candidate.protocol === "http:" || candidate.protocol === "https:"
       ? candidate.toString().replace(/\/$/, "")
-      : "https://opsdone.de";
+      : "https://opsrid.com";
   } catch {
-    return "https://opsdone.de";
+    return "https://opsrid.com";
   }
 })();
 const publicContact = process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim() || "hallo@vierwochen.de";
@@ -22,21 +22,21 @@ export function contactEmail(): string {
   return env("CONTACT_EMAIL") ?? env("MAIL_SENDER") ?? publicContact;
 }
 
-/** The OpsDone domain is confirmed; the legacy mailbox remains a fallback until a new mailbox is verified. */
+/** The Opsrid domain is confirmed; the legacy mailbox remains a fallback until a new mailbox is verified. */
 export const SITE = {
-  name: "OpsDone",
+  name: "Opsrid",
   markA: "Ops",
-  markB: "Done",
+  markB: "rid",
   domain: (() => {
     try {
       return new URL(publicUrl).hostname;
     } catch {
-      return "opsdone.de";
+      return "opsrid.com";
     }
   })(),
   url: publicUrl.replace(/\/$/, ""),
   claim: "Work eliminated.",
-  category: "AI-native Process Automation",
+  category: "Individuelle Prozesssoftware",
   owner: "Moritz Schumacher",
   /** Ansprechpartner — sichtbar auf der Landing, nicht erst im Formular. */
   founder: {
