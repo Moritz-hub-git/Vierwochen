@@ -38,7 +38,7 @@ export default function Home() {
         <div className={s.heroInner}>
           <p className={s.kicker}>INDIVIDUELLE PROZESSSOFTWARE</p>
           <h1>
-            Beschreiben Sie Ihren Prozess.
+            Ihr Prozess.
             <span>Von AI-Software erledigt.</span>
           </h1>
           <p className={s.lead}>
