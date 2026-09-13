@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import s from "./Showcase.module.css";
 import Icon from "./ShowcaseIcon";
 import { ManualWork, ProcessScene, visualCopy } from "./ShowcaseScenes";
+import InvoiceComparison from "./InvoiceComparison";
 
 const examples = [
   {
@@ -157,9 +158,12 @@ export default function LandingProduct() {
   const running = !paused && !hover && !reduced && visible;
   useEffect(() => {
     if (!running) return;
-    const timer = window.setInterval(() => {
-      if (!document.hidden) setActive((a) => (a + 1) % examples.length);
-    }, 10000);
+    const timer = window.setInterval(
+      () => {
+        if (!document.hidden) setActive((a) => (a + 1) % examples.length);
+      },
+      active === 0 ? 20000 : 10000,
+    );
     return () => clearInterval(timer);
   }, [running, active]);
   const process = examples[active];
@@ -234,30 +238,34 @@ export default function LandingProduct() {
         aria-labelledby={"tab-" + process.id}
         className={s.stage}
       >
-        <div key={process.id} className={s.comparison}>
-          <div className={s.before}>
-            <header className={s.halfHeader}>
-              <span className={s.beforeBadge}>VORHER</span>
-              <h3>{visualCopy[process.id].before}</h3>
-              <p>Ihr Team erledigt die Arbeit dazwischen.</p>
-            </header>
-            <ManualWork process={process} />
+        {process.id === "invoice" ? (
+          <InvoiceComparison process={process} />
+        ) : (
+          <div key={process.id} className={s.comparison}>
+            <div className={s.before}>
+              <header className={s.halfHeader}>
+                <span className={s.beforeBadge}>VORHER</span>
+                <h3>{visualCopy[process.id].before}</h3>
+                <p>Ihr Team erledigt die Arbeit dazwischen.</p>
+              </header>
+              <ManualWork process={process} />
+            </div>
+            <div className={s.bridge} aria-hidden="true">
+              <Icon name="arrow" />
+            </div>
+            <div className={s.after}>
+              <header className={s.halfHeader}>
+                <span className={s.afterBadge}>
+                  <Icon name="check" />
+                  MIT OPSRID
+                </span>
+                <h3>{visualCopy[process.id].after}</h3>
+                <p>Ihre Software übernimmt. Sie entscheiden.</p>
+              </header>
+              <ProcessScene key={process.id} process={process} />
+            </div>
           </div>
-          <div className={s.bridge} aria-hidden="true">
-            <Icon name="arrow" />
-          </div>
-          <div className={s.after}>
-            <header className={s.halfHeader}>
-              <span className={s.afterBadge}>
-                <Icon name="check" />
-                MIT OPSRID
-              </span>
-              <h3>{visualCopy[process.id].after}</h3>
-              <p>Ihre Software übernimmt. Sie entscheiden.</p>
-            </header>
-            <ProcessScene key={process.id} process={process} />
-          </div>
-        </div>
+        )}
         <div className={s.bottom}>
           <p>{visualCopy[process.id].summary}</p>
           <button

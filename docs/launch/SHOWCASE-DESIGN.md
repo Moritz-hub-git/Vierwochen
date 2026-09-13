@@ -16,3 +16,7 @@ The carousel advances every ten seconds while visible, pauses on hover or intera
 The contextual call to action sends the selected process description to the existing ChatDock via `opsrid:chat`. It does not request contact details or create a lead itself.
 
 The revised comparison removes the three-column technical workflow and long explanatory intro. Invoice matching, reporting, stock availability and case evidence each have their own result composition. Mobbin was attempted on 13 September 2026 but returned a paid-plan requirement; no Mobbin screenshots were accessed.
+
+## Invoice flow prototype
+
+The owner approved an invoice-only prototype of paired process flows. `InvoiceComparison.tsx` now compares the same three source documents through manual matching/follow-up versus software checking, a standard path and a human exception path. The application is revealed on demand below both flows. Other scenarios retain the preceding layout pending design feedback. The invoice slide stays visible for twenty seconds; other slides retain ten seconds. Connector animation has its own pause control and respects reduced motion.
