@@ -48,3 +48,6 @@ Domain-Anbindung, Betreiberangaben, erreichbarer Kontakteingang, Kalender oder v
 - Rechner 650 × 8 Minuten ergibt 86,7 Stunden; dieser Ausgangswert erscheint im Chat.
 - Beispielansichten und Entscheidungsschaltflächen verändern lokalen Demostatus. Sie lösen keine fachlichen Aktionen in Kundensystemen aus.
 - Fehlerfall des Inline-Dialogs zeigt den erhaltenen Prozess, Wiederholung und direkten Termineinstieg.
+- Zusätzlich echter KI-Dialog auf der getaggten Vorschau mit einem neutralen Reporting-Beispiel geprüft: dynamischer Entwurf zu drei Excel-Quellen, Plan-/Vorjahresabgleich, PDF-Bericht und Freigabe durch die Controlling-Leitung. Keine Live-Buchung und keine Kontaktdaten übermittelt.
+
+Implementierung: Commit `099e158` auf `codex/opsdone-rebrand`. Finale Preview-Pipeline: Cloud Build `adb056b8-782f-4d11-a6b8-f9f45692c313`. Vorschau: `https://opsdone-preview---vierwochen-mlik6uuoxa-ey.a.run.app/konzepte`.
