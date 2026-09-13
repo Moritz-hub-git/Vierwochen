@@ -38,27 +38,35 @@ export default function Home() {
         <div className={s.heroInner}>
           <p className={s.kicker}>INDIVIDUELLE PROZESSSOFTWARE</p>
           <h1>
-            Work <span>eliminated.</span>
+            Beschreiben Sie Ihren Prozess.
+            <span>Von AI-Software erledigt.</span>
           </h1>
           <p className={s.lead}>
             Geben Sie uns Ihren Prozess. Wir bauen die Anwendung, die ihn
             erledigt.
           </p>
-          <div className={s.actions}>
-            <Link href="/prozess-check" className={s.primaryAction}>
-              Prozess beschreiben <Arrow />
-            </Link>
-            <a href="#beispiel" className={s.secondaryAction}>
-              Anwendung ansehen <span aria-hidden="true">↓</span>
-            </a>
-          </div>
-          <p className={s.microcopy}>
-            Bis zu drei kurze Fragen · Vorschau ohne E-Mail-Adresse
-          </p>
-          <div className={s.promiseRow} aria-label="Grundprinzipien">
-            <span><Check /> Für Ihren Prozess gebaut</span>
-            <span><Check /> Ihre Systeme bleiben</span>
-            <span><Check /> Klare menschliche Freigaben</span>
+          <div className={s.promiseRow} aria-label="Ihre Vorteile">
+            <span>
+              <Check />
+              <span>
+                <b>Für Ihren Prozess gebaut</b>
+                <small>Keine starre Standardsoftware</small>
+              </span>
+            </span>
+            <span>
+              <Check />
+              <span>
+                <b>Ihre Systeme bleiben</b>
+                <small>Die Anwendung verbindet, was da ist</small>
+              </span>
+            </span>
+            <span>
+              <Check />
+              <span>
+                <b>Betrieb aus einer Hand</b>
+                <small>Entwicklung, Betrieb und Verbesserung</small>
+              </span>
+            </span>
           </div>
         </div>
       </section>

@@ -43,9 +43,10 @@ summary:focus-visible {
   display: none;
 }
 .site-header {
-  background: rgba(250, 250, 255, 0.88);
-  border-bottom: 1px solid rgba(46, 45, 76, 0.08);
+  background: rgba(250, 250, 255, 0.91);
+  border-bottom: 0;
   backdrop-filter: blur(18px);
+  box-shadow: none;
 }
 .wordmark {
   letter-spacing: -1.2px;

@@ -12,10 +12,11 @@
 
 .hero {
   position: relative;
-  padding: clamp(82px, 9vw, 132px) 24px 72px;
+  padding: clamp(45px, 4vw, 60px) 24px 72px;
   background:
-    radial-gradient(52rem 28rem at 8% 0%, rgba(90, 76, 243, 0.17), transparent 64%),
-    radial-gradient(44rem 27rem at 93% 4%, rgba(255, 117, 104, 0.14), transparent 62%),
+    linear-gradient(180deg, #fafaff 0%, rgba(250, 250, 255, 0.92) 7%, transparent 30%),
+    radial-gradient(52rem 28rem at 8% 24%, rgba(90, 76, 243, 0.17), transparent 64%),
+    radial-gradient(44rem 27rem at 93% 25%, rgba(255, 117, 104, 0.14), transparent 62%),
     linear-gradient(180deg, #fafaff 0%, #f4f4fd 100%);
 }
 
@@ -47,34 +48,28 @@
 .hero h1 {
   max-width: 1000px;
   margin: 0 auto;
-  font-size: clamp(62px, 9.3vw, 128px);
+  font-size: clamp(53px, 6.5vw, 92px);
   font-weight: 760;
-  line-height: 0.92;
-  letter-spacing: -0.078em;
+  line-height: 0.98;
+  letter-spacing: -0.067em;
 }
 
 .hero h1 span {
+  display: block;
+  margin-top: 5px;
   color: var(--home-violet);
 }
 
 .lead {
   max-width: 670px;
-  margin: 31px auto 0;
+  margin: 20px auto 0;
   color: #4e526e;
   font-size: clamp(18px, 2vw, 23px);
   line-height: 1.55;
   letter-spacing: -0.025em;
 }
 
-.actions {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 34px;
-}
-
-.primaryAction,
-.secondaryAction {
+.primaryAction {
   display: inline-flex;
   min-height: 51px;
   align-items: center;
@@ -100,42 +95,54 @@
   box-shadow: 0 14px 34px rgba(90, 76, 243, 0.29);
 }
 
-.secondaryAction {
-  border: 1px solid rgba(43, 43, 72, 0.13);
-  color: var(--home-ink);
-  background: rgba(255, 255, 255, 0.72);
-}
-
-.secondaryAction:hover {
-  transform: translateY(-2px);
-  background: white;
-}
-
-.microcopy {
-  margin: 13px 0 0;
-  color: #7d8098;
-  font-size: 10px;
-}
-
 .promiseRow {
-  display: flex;
-  justify-content: center;
-  gap: 31px;
-  margin-top: 43px;
-  color: #5e617c;
-  font-size: 11px;
-  font-weight: 620;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: min(910px, 100%);
+  margin: 20px auto 0;
 }
 
-.promiseRow span {
-  display: inline-flex;
+.promiseRow > span {
+  display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 13px;
+  min-height: 74px;
+  padding: 13px 16px;
+  border: 1px solid rgba(47, 44, 91, 0.11);
+  border-radius: 16px;
+  color: #4d4f69;
+  background: rgba(255, 255, 255, 0.66);
+  box-shadow: 0 9px 30px rgba(40, 35, 88, 0.05);
+  text-align: left;
 }
 
 .promiseRow svg {
-  width: 14px;
+  width: 22px;
+  height: 22px;
+  padding: 4px;
+  border-radius: 50%;
   color: var(--home-violet);
+  background: #eceaff;
+}
+
+.promiseRow b,
+.promiseRow small {
+  display: block;
+}
+
+.promiseRow b {
+  color: #33344d;
+  font-size: 11px;
+  font-weight: 720;
+  line-height: 1.4;
+}
+
+.promiseRow small {
+  margin-top: 3px;
+  color: #85869b;
+  font-size: 9px;
+  line-height: 1.45;
 }
 
 .productSection,
@@ -651,8 +658,8 @@
   }
 
   .hero h1 {
-    font-size: clamp(58px, 20vw, 79px);
-    line-height: 0.91;
+    font-size: clamp(46px, 13vw, 62px);
+    line-height: 0.97;
   }
 
   .hero h1 span {
@@ -664,18 +671,15 @@
     font-size: 16px;
   }
 
-  .actions {
-    flex-direction: column;
-    align-items: stretch;
-    width: min(330px, 100%);
-    margin: 28px auto 0;
+  .promiseRow {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-top: 31px;
   }
 
-  .promiseRow {
-    flex-wrap: wrap;
-    gap: 10px 16px;
-    margin-top: 31px;
-    font-size: 9px;
+  .promiseRow > span {
+    min-height: 64px;
+    padding: 11px 14px;
   }
 
   .productSection,
@@ -766,8 +770,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .primaryAction,
-  .secondaryAction {
+  .primaryAction {
     transition: none;
   }
 }
