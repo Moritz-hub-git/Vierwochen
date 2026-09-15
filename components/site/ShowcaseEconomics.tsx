@@ -191,7 +191,7 @@ export function EconomicsShowcase() {
               <span>Sensitivität · NPV in Mio. €</span>
             </header>
             <div className={s.sensitivityLabels}>
-              <span>Strompreis</span>
+              <span>Preis Δ</span>
               <span>Negativer Kapitalwert</span>
               <span>Positiver Kapitalwert</span>
             </div>

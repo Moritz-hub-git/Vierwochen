@@ -2389,7 +2389,8 @@
   }
   .sensitivityLabels {
     font-size: 11px;
-    grid-template-columns: 42px 1fr 1fr;
+    grid-template-columns: 48px 1fr 1fr;
+    gap: 8px;
   }
   .sensitivityRow {
     grid-template-columns: 36px 1fr 30px;
