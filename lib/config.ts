@@ -1,90 +1,82 @@
-/**
- * Zentrale Konfiguration und Konstanten.
- *
- * Annahmen (PROMPT.md erlaubt keine Rückfragen, §0):
- * - Preislogik (§6 ist im Auftrag leer): drei Stufen, an den auf der Seite
- *   gezeigten Ankern ausgerichtet. Die teuerste Stufe steht zuerst (Preisanker, §2.4).
- * - Limits der Kostenbremse (§8) sind bewusst konservativ gewählt.
- */
+/** Zentrale, umgebungsabhängige Konfiguration. */
+export function env(name: string): string | undefined {
+  const v = process.env[name];
+  return v && v.trim() !== "" ? v.trim() : undefined;
+}
 
-/**
- * Marke — EINE Konstante, die alles speist (Rücksprache 2026-09-08).
- *
- * Entscheidung: „vierwochen" statt „neoapp.studio". Gründe aus dem
- * Vollreview: (1) „neoapp" ist in der eigenen Kategorie nicht besitzbar —
- * die neoapps GmbH ist seit 20+ Jahren Software-Dienstleister in DACH
- * (Markenrisiko, Klasse 42); (2) „vierwochen" ist der Benefit selbst und
- * damit distinktiv; (3) Domain, Mail und Kalender laufen bereits auf
- * vierwochen.de. Wer die Marke wechseln will, ändert hier — und nur hier.
- */
+const configuredPublicUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+const publicUrl = (() => {
+  try {
+    const candidate = new URL(configuredPublicUrl || "https://opsrid.com");
+    return candidate.protocol === "http:" || candidate.protocol === "https:"
+      ? candidate.toString().replace(/\/$/, "")
+      : "https://opsrid.com";
+  } catch {
+    return "https://opsrid.com";
+  }
+})();
+const publicContact = process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim() || "hallo@vierwochen.de";
+
+/** Server-side delivery address; may differ from the public contact address. */
+export function contactEmail(): string {
+  return env("CONTACT_EMAIL") ?? env("MAIL_SENDER") ?? publicContact;
+}
+
+/** The Opsrid domain is confirmed; the legacy mailbox remains a fallback until a new mailbox is verified. */
 export const SITE = {
-  name: "vierwochen",
-  /** Wortmarke in der Navigation: Text vor und nach dem Akzentzeichen. */
-  markA: "vier",
-  markB: "wochen",
-  domain: "vierwochen.de",
-  url: "https://vierwochen.de",
-  claim: "Ihre Software. In vier Wochen live.",
+  name: "Opsrid",
+  markA: "Ops",
+  markB: "rid",
+  domain: (() => {
+    try {
+      return new URL(publicUrl).hostname;
+    } catch {
+      return "opsrid.com";
+    }
+  })(),
+  url: publicUrl.replace(/\/$/, ""),
+  claim: "Work eliminated.",
+  category: "Individuelle Prozesssoftware",
   owner: "Moritz Schumacher",
   /** Ansprechpartner — sichtbar auf der Landing, nicht erst im Formular. */
   founder: {
     name: "Moritz Schumacher",
     initials: "MS",
-    /** Herkunft, belegbar (PROMPT.md §10) — keine Firmennamen, keine Interna. */
-    role: "Vorstandsreferent und Programm-Manager in einem börsennotierten Industrieunternehmen, zuletzt verantwortlich dafür, KI-Anwendungsfälle zu finden und produktiv zu stellen.",
-    facts: [
-      "Reporting-Aufwand in einem SDAX-Unternehmen von über 32 auf rund 6 Stunden pro Zyklus gesenkt",
-      "Rund 30 KI-Anwendungsfälle mit Fachbereichen identifiziert, zwei im Produktivbetrieb",
-      "Drei eigene iOS-Apps im App Store — inklusive Backend, Datenbank, KI-Anbindung und Betrieb",
-    ],
+    role: "Verantwortlich für Analyse, Umsetzung und Betrieb Ihrer Prozessautomation.",
+    facts: [] as string[],
     /** PLATZHALTER — vom Gründer zu setzen. Leer = Link wird nicht gerendert. */
     linkedin: "",
     /** PLATZHALTER — echtes Foto unter /public/moritz.jpg ablegen und hier eintragen. */
     photo: "",
   },
-  /** Kontakt — PLATZHALTER, bis das Impressum vollständig ist. Leer = nicht gerendert. */
-  email: "hallo@vierwochen.de",
-  phone: "",
+  email: publicContact,
+  phone: process.env.NEXT_PUBLIC_CONTACT_PHONE?.trim() ?? "",
 } as const;
 
-/**
- * Preise (Rücksprache 2026-09-08, Vollreview: fünf unabhängige Gutachten).
- *
- * Boden 12.500 € statt 9.500 €: Mit Kick-off-Workshop, zweiter Rate nur bei
- * Abnahme, 24 Monaten Gewährleistung und Begleitung bis zum Betrieb lag
- * 9.500 € unter den Vollkosten jedes bezahlten zweiten Kopfes — der Preis
- * hätte das erklärte Ziel (nicht allein bleiben) rechnerisch ausgeschlossen.
- * Decke 35.000 €: mehr entsteht nicht in vier Wochen; darüber wird der
- * Umfang kleiner geschnitten, nicht der Preis erhöht.
- */
+/** Unverbindliche Leitplanken; der konkrete Preis folgt aus dem Prozess-Scope. */
 export const PRICE = {
-  floor: 12500,
-  ceiling: 35000,
+  /** Unverbindlicher Einstieg für einen klar begrenzten Pilotprozess. */
+  floor: 5000,
+  /** Typischer Implementierungskorridor; der tatsächliche Preis hängt vom Scope ab. */
+  ceiling: 30000,
   /** Netto, zzgl. USt. — steht an jeder Preisstelle. */
   vatNote: "netto zzgl. USt.",
 } as const;
 
-/**
- * Betrieb als Standard, nicht als Fußnote: die einzige Einnahme im Modell,
- * die ohne neue Verkaufsarbeit wiederkommt. Monatlich kündbar.
- */
+/** Managed Automation wird monatlich anhand des vereinbarten Betriebsumfangs kalkuliert. */
 export const RETAINER = {
-  basic: { name: "Betrieb", monthly: 290, includes: "Hosting, Updates, Sicherheitsupdates, Überwachung rund um die Uhr" },
-  plus: { name: "Betrieb + Weiterentwicklung", monthly: 990, includes: "wie Betrieb, plus ein Änderungstag pro Monat" },
-  notice: "monatlich kündbar",
+  basic: { name: "Managed Automation", monthly: 0, includes: "Überwachung, Fehlerbehandlung und laufende Pflege im vereinbarten Umfang" },
+  plus: { name: "Managed Automation + Ausbau", monthly: 0, includes: "Betrieb sowie priorisierte Weiterentwicklung im vereinbarten Umfang" },
+  monthlyLabel: "monatlich nach Prozessvolumen, Integrationen und Service-Level kalkuliert",
+  notice: "Laufzeit und Kündigung werden im Angebot festgelegt",
 } as const;
 
-/** Gewährleistung: beim Werkvertrag gesetzlich 24 Monate (§ 634a BGB) — das
- *  ist mehr, als die Seite vorher mit „12 Monate Garantie" versprach. */
+/** Legacy export retained for pages that still describe contract terms. */
 export const WARRANTY_MONTHS = 24;
 
-/** Die eine Risiko-Umkehr-Zusage — überall wortgleich (Seite, Karte, AGB). */
-export const ACCEPTANCE_PROMISE = "Besteht die Abnahme nicht, entfällt die zweite Rate.";
+/** Scope statement retained under the legacy export name. */
+export const ACCEPTANCE_PROMISE = "Pilot, Abnahmekriterien und Betriebsumfang werden vor Projektstart schriftlich festgelegt.";
 
-
-/* Die alten Preisstufen (System/Werkzeug/Pilot ab 9.500 €) sind gestrichen:
-   Der Preis entsteht seit dem Vollreview bottom-up aus PRICE.floor plus
-   Bausteinen (lib/dialog.ts, Abschnitt „So rechnest du den Preis"). */
 
 /**
  * Grundlage des Kostenankers (PROMPT.md §2.4). Bewusst im Code und nicht im
@@ -99,7 +91,7 @@ export const COST_ANCHOR = {
 } as const;
 
 export const PRICE_DISCLAIMER =
-  "Unverbindliche Ersteinschätzung, kein Angebot. Alle Beträge netto zzgl. USt.";
+  "Unverbindliche Ersteinschätzung, kein Angebot. Umsetzung typischerweise 5.000–30.000 €, abhängig vom Scope; Managed Automation monatlich nach Umfang. Alle Beträge netto zzgl. USt.";
 
 /** Kostenbremse (PROMPT.md §8): Limits für die offene Modellschnittstelle. */
 export const LIMITS = {
@@ -201,11 +193,6 @@ export const BOOKING = {
  * (next.config.ts) zugleich. Vorher steckte noindex an vier Stellen.
  */
 export const IS_LIVE = process.env.SITE_LIVE === "1";
-
-export function env(name: string): string | undefined {
-  const v = process.env[name];
-  return v && v.trim() !== "" ? v.trim() : undefined;
-}
 
 export const VERTEX = {
   get project() {

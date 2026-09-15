@@ -2,8 +2,8 @@
  * Freie Termine (PROMPT.md §7): reguläre Slots berechnen, dann Belegungen aus
  * Google Calendar (freeBusy) und aus der eigenen Datenbank herausfiltern.
  *
- * Fällt die Kalenderprüfung aus, werden die Slots trotzdem geliefert — die
- * Buchung prüft erneut und fängt Konflikte sauber ab. Der Funnel bricht nie.
+ * Konfigurierte Kalender müssen erfolgreich geprüft sein. Bei einem Fehler
+ * liefern wir keine scheinbar freien, tatsächlich ungeprüften Termine.
  */
 import { NextResponse } from "next/server";
 import { bookingCalendarId, busyIntervals, overlapsBusy } from "@/lib/calendar";
@@ -15,7 +15,11 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const days = candidateSlots();
   if (days.length === 0) {
-    return NextResponse.json({ ok: true, requestMode: !bookingCalendarId(), days: [] });
+    return NextResponse.json({
+      ok: true,
+      requestMode: !bookingCalendarId(),
+      days: [],
+    });
   }
 
   const windowStart = days[0].slots[0].startUtc;
@@ -33,7 +37,7 @@ export async function GET() {
       return snap.docs
         .filter((d) => d.data().status !== "storniert")
         .map((d) => d.data().slotStart as string);
-    }, "Buchungen lesen")) ?? []
+    }, "Buchungen lesen")) ?? [],
   );
 
   // Belegte Zeiten aus Google Calendar (nur wenn ein Kalender konfiguriert ist).
@@ -42,7 +46,15 @@ export async function GET() {
     try {
       busy = await busyIntervals(windowStart, windowEnd);
     } catch (err) {
-      console.error("[slots] freeBusy fehlgeschlagen — liefere Slots ohne Kalenderprüfung:", err);
+      console.error("[slots] freeBusy fehlgeschlagen:", err);
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "Die Terminverfügbarkeit kann gerade nicht geprüft werden. Bitte versuchen Sie es später erneut.",
+        },
+        { status: 503 },
+      );
     }
   }
 
@@ -51,7 +63,8 @@ export async function GET() {
       date: day.date,
       label: day.label,
       slots: day.slots.filter(
-        (s) => !booked.has(s.startUtc) && !overlapsBusy(s.startUtc, s.endUtc, busy)
+        (s) =>
+          !booked.has(s.startUtc) && !overlapsBusy(s.startUtc, s.endUtc, busy),
       ),
     }))
     .filter((day) => day.slots.length > 0);

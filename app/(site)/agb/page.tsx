@@ -1,134 +1,112 @@
 import type { Metadata } from "next";
-import { BrandPage } from "@/components/v/BrandNav";
-import { ACCEPTANCE_PROMISE, SITE, WARRANTY_MONTHS } from "@/lib/config";
-import s from "@/components/v/brandnav.module.css";
+import { SITE } from "@/lib/config";
 
-export const metadata: Metadata = { title: "Allgemeine Geschäftsbedingungen" };
+export const metadata: Metadata = {
+  title: "Allgemeine Geschäftsbedingungen",
+  alternates: { canonical: "/agb" },
+};
 
-/**
- * Strukturierter Entwurf (PROMPT.md §11): Geltung nur gegenüber Unternehmern,
- * Festpreis, Vier-Wochen-Zusage, 50/50-Zahlung, Eigentumsübergang,
- * Gewährleistung (WARRANTY_MONTHS), Haftungsbegrenzung, Vertraulichkeit.
- * Die Abnahme-Zusage ist wortgleich mit der Seite (ACCEPTANCE_PROMISE).
- */
-export default function Agb() {
+export default function TermsPage() {
   return (
-    <BrandPage>
-      {/* Entwurf — vor Verwendung anwaltlich prüfen. */}
-      <h1>Allgemeine Geschäftsbedingungen</h1>
-
-      <h2>§ 1 Geltungsbereich</h2>
-      <p>
-        Diese Bedingungen gelten für alle Verträge über die Entwicklung von
-        Individualsoftware zwischen {SITE.owner}, handelnd unter {SITE.name}{" "}
-        (nachfolgend „Auftragnehmer"), und dem jeweiligen Auftraggeber. Das
-        Angebot richtet sich ausschließlich an Unternehmer im Sinne von § 14 BGB,
-        juristische Personen des öffentlichen Rechts und öffentlich-rechtliche
-        Sondervermögen. Verbraucher sind vom Angebot ausgeschlossen.
-        Entgegenstehende Einkaufsbedingungen des Auftraggebers gelten nur, soweit
-        ihnen schriftlich zugestimmt wurde.
-      </p>
-
-      <h2>§ 2 Vertragsgegenstand und Festangebot</h2>
-      <p>
-        Grundlage jedes Auftrags ist ein schriftliches Festangebot, das Umfang,
-        Abnahmekriterien, Festpreis und Liefertermin benennt. Ersteinschätzungen
-        auf der Website (Preisspannen, Lösungsskizzen) sind unverbindlich und kein
-        Angebot. Änderungen des Umfangs während der Umsetzung werden schriftlich
-        vereinbart; geringfügige Kurskorrekturen innerhalb des vereinbarten Umfangs
-        sind eingeschlossen.
-      </p>
-
-      <h2>§ 3 Vier-Wochen-Zusage</h2>
-      <p>
-        Der Auftragnehmer stellt das Werk innerhalb von vier Wochen ab
-        Auftragserteilung und Bereitstellung der vereinbarten Mitwirkungsleistungen
-        zur Abnahme bereit. Verzögerungen, die auf fehlende Mitwirkung des
-        Auftraggebers zurückgehen, verlängern die Frist entsprechend. Die Folgen
-        einer nicht bestandenen Abnahme regelt § 5.
-      </p>
-
-      <h2>§ 4 Vergütung und Zahlung</h2>
-      <p>
-        Es gilt der im Festangebot genannte Festpreis, netto zuzüglich gesetzlicher
-        Umsatzsteuer. Die Zahlung erfolgt zu 50 % bei Auftragserteilung (erste
-        Rate) und zu 50 % nach erfolgreicher Abnahme (zweite Rate). Der Betrieb
-        der Software (Hosting, Pflege, Weiterentwicklung) ist nicht Teil des
-        Festpreises und wird, falls beauftragt, monatlich berechnet und ist
-        monatlich kündbar.
-      </p>
-
-      <h2>§ 5 Abnahme</h2>
-      <p>
-        Die Abnahme erfolgt gegen die im Festangebot vereinbarten Kriterien. Der
-        Auftraggeber prüft innerhalb von fünf Arbeitstagen nach Bereitstellung.
-        Wesentliche Mängel werden dokumentiert; der Auftragnehmer erhält eine
-        angemessene Nachfrist zur Behebung. Unwesentliche Mängel berechtigen nicht
-        zur Verweigerung der Abnahme, werden jedoch im Rahmen der Gewährleistung
-        behoben. {ACCEPTANCE_PROMISE.replace(/\.$/, "")} (50 % des Festpreises);
-        die erste Rate wird nicht erstattet.
-      </p>
-
-      <h2>§ 6 Rechte am Werk, Daten und Zugängen</h2>
-      <p>
-        Mit vollständiger Zahlung gehen das Eigentum am Quellcode sowie die
-        ausschließlichen, zeitlich und räumlich unbeschränkten Nutzungsrechte am
-        Werk auf den Auftraggeber über. Sämtliche Daten und Zugänge (Repositories,
-        Cloud-Projekte, Datenbanken) werden dem Auftraggeber übertragen oder auf
-        dessen Konten geführt. Vorbestehende, allgemein einsetzbare Komponenten und
-        Werkzeuge des Auftragnehmers bleiben davon unberührt; an ihnen erhält der
-        Auftraggeber ein einfaches, unbeschränktes Nutzungsrecht. Das Repository
-        wird ab Projektbeginn in der Organisation des Auftraggebers geführt oder
-        dorthin gespiegelt. Scheitert die Abnahme endgültig (§ 5), verbleibt der
-        bis dahin entstandene Quellcode beim Auftraggeber; er erhält daran ein
-        einfaches, zeitlich und räumlich unbeschränktes Nutzungsrecht.
-      </p>
-
-      <h2>§ 7 Gewährleistung</h2>
-      <p>
-        Die Gewährleistungsfrist beträgt {WARRANTY_MONTHS} Monate ab Abnahme
-        (§ 634a BGB). Der Auftragnehmer behebt Mängel, die den vereinbarten
-        Umfang betreffen, in dieser Zeit kostenfrei. Nachbesserung setzt voraus,
-        dass die Software seit der Abnahme nicht durch Dritte verändert wurde;
-        andernfalls nur, soweit der Mangel nicht auf diese Änderung
-        zurückzuführen ist.
-      </p>
-
-      <h2>§ 8 Haftung</h2>
-      <p>
-        Der Auftragnehmer haftet unbeschränkt bei Vorsatz und grober Fahrlässigkeit
-        sowie bei Verletzung von Leben, Körper und Gesundheit. Bei einfacher
-        Fahrlässigkeit haftet er nur für die Verletzung wesentlicher
-        Vertragspflichten, begrenzt auf den vertragstypischen, vorhersehbaren
-        Schaden, höchstens jedoch auf die Höhe des Auftragswerts. Die Haftung für
-        mittelbare Schäden, entgangenen Gewinn und Datenverlust, der bei
-        ordnungsgemäßer Datensicherung vermeidbar gewesen wäre, ist ausgeschlossen.
-        Die Haftung nach dem Produkthaftungsgesetz bleibt unberührt.
-      </p>
-
-      <h2>§ 9 Vertraulichkeit</h2>
-      <p>
-        Beide Parteien behandeln alle im Rahmen der Zusammenarbeit bekannt
-        gewordenen Geschäfts- und Betriebsgeheimnisse dauerhaft vertraulich. Der
-        Auftragnehmer nennt den Auftraggeber nicht als Referenz und legt keine
-        Projektinhalte offen, es sei denn, der Auftraggeber stimmt schriftlich zu.
-      </p>
-
-      <h2>§ 10 Mitwirkung des Auftraggebers</h2>
-      <p>
-        Der Auftraggeber benennt eine entscheidungsbefugte Ansprechperson, stellt
-        benötigte Informationen, Testdaten und Zugänge rechtzeitig bereit und nimmt
-        an den wöchentlichen Abstimmungen teil.
-      </p>
-
-      <h2>§ 11 Schlussbestimmungen</h2>
-      <p>
-        Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des
-        UN-Kaufrechts. Gerichtsstand ist, soweit zulässig,{" "}
-        <span className={s.placeholder}>PLATZHALTER: Gerichtsstand</span>. Sollten
-        einzelne Bestimmungen unwirksam sein, bleibt der Vertrag im Übrigen
-        wirksam.
-      </p>
-    </BrandPage>
+    <main id="main" className="legal-page">
+      <section className="page-hero">
+        <div className="container prose">
+          <p className="eyebrow">Rechtliches · Entwurf</p>
+          <h1>Allgemeine Geschäftsbedingungen</h1>
+          <p>
+            <strong>
+              Dieser Entwurf ist noch nicht für den Vertragsschluss freigegeben
+              und muss vor Verwendung rechtlich geprüft werden.
+            </strong>
+          </p>
+          <h2>§ 1 Geltungsbereich</h2>
+          <p>
+            Diese Bedingungen gelten für Verträge zwischen {SITE.owner},
+            handelnd unter {SITE.name} (nachfolgend „Auftragnehmer“), und
+            Unternehmern im Sinne des § 14 BGB über Analyse, Entwicklung,
+            Einführung oder Betrieb individueller Prozessautomationen.
+            Abweichende Bedingungen des Auftraggebers gelten nur, wenn sie
+            ausdrücklich vereinbart wurden.
+          </p>
+          <h2>§ 2 Vertragsgegenstand</h2>
+          <p>
+            Leistungsumfang, Prozessgrenzen, Datenquellen, Integrationen,
+            menschliche Freigaben, Abnahmekriterien, Zeitplan und Vergütung
+            werden im jeweiligen Angebot beschrieben. Angaben auf dieser Website
+            und Ergebnisse des Prozess-Checks sind unverbindliche
+            Ersteinschätzungen. Sie sind kein Angebot und keine Zusage eines
+            bestimmten Automatisierungsgrads.
+          </p>
+          <h2>§ 3 Mitwirkung</h2>
+          <p>
+            Der Auftraggeber stellt die vereinbarten Ansprechpersonen,
+            Prozessinformationen, Testfälle, Daten und Zugänge rechtzeitig
+            bereit und trifft notwendige fachliche Entscheidungen. Verzögerungen
+            oder Mehraufwand infolge fehlender Mitwirkung werden gemeinsam
+            bewertet und schriftlich geregelt.
+          </p>
+          <h2>§ 4 Vergütung und Änderungen</h2>
+          <p>
+            Vergütung, Fälligkeit und gegebenenfalls laufende Betriebsentgelte
+            ergeben sich aus dem Angebot. Änderungen an Prozessumfang,
+            Integrationen oder Abnahmekriterien werden vor Umsetzung in Textform
+            festgehalten und können Zeitplan und Vergütung ändern.
+          </p>
+          <h2>§ 5 Abnahme</h2>
+          <p>
+            Soweit ein Werk geschuldet wird, erfolgt die Abnahme anhand der
+            vorab vereinbarten Kriterien und Testfälle. Der Auftraggeber meldet
+            wesentliche Abweichungen nachvollziehbar innerhalb der vereinbarten
+            Prüffrist. Rechte bei Mängeln und die Folgen einer ausbleibenden
+            oder fehlgeschlagenen Abnahme richten sich nach Vertrag und Gesetz.
+          </p>
+          <h2>§ 6 Betrieb und Automationsgrenzen</h2>
+          <p>
+            Produktivbetrieb, Servicezeiten, Monitoring, Backup,
+            Wiederherstellung und Reaktionswege sind nur geschuldet, soweit sie
+            beauftragt wurden. Automatische Entscheidungen und Aktionen sind auf
+            die vereinbarten Regeln und Berechtigungen begrenzt. Der
+            Auftraggeber bleibt für fachliche Freigaben und die rechtliche
+            Zulässigkeit seiner Prozesse und Datenverarbeitung verantwortlich,
+            soweit nicht ausdrücklich etwas anderes vereinbart ist.
+          </p>
+          <h2>§ 7 Rechte, Daten und Drittkomponenten</h2>
+          <p>
+            Nutzungsrechte am individuell geschaffenen Werk, Herausgabe von Code
+            und Dokumentation sowie Zugriff auf Betriebsdaten werden im Angebot
+            geregelt. Vorbestehende Komponenten, Open-Source-Software und
+            Dienste Dritter bleiben ihren jeweiligen Lizenz- und
+            Nutzungsbedingungen unterworfen. Daten des Auftraggebers bleiben
+            dessen Daten.
+          </p>
+          <h2>§ 8 Gewährleistung und Haftung</h2>
+          <p>
+            Gewährleistung und Haftung richten sich nach den individuellen
+            Vertragsregelungen und den zwingenden gesetzlichen Vorschriften.
+            Eine Haftungsbegrenzung soll vor Verwendung dieser AGB rechtlich
+            geprüft und passend zu Leistungsbild, Versicherungsschutz und
+            Betriebsrisiko formuliert werden; dieser Entwurf enthält bewusst
+            keine erfundene Deckung oder pauschale Haftungszusage.
+          </p>
+          <h2>§ 9 Vertraulichkeit und Datenschutz</h2>
+          <p>
+            Beide Parteien behandeln vertrauliche Informationen der jeweils
+            anderen Partei geschützt. Soweit der Auftragnehmer personenbezogene
+            Daten im Auftrag verarbeitet, schließen die Parteien vor Beginn der
+            Verarbeitung eine Vereinbarung gemäß Art. 28 DSGVO. Weitere
+            Sicherheits- und Löschanforderungen werden projektbezogen
+            vereinbart.
+          </p>
+          <h2>§ 10 Schlussbestimmungen</h2>
+          <p>
+            Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss
+            des UN-Kaufrechts. Ein Gerichtsstand wird nur vereinbart, soweit
+            dies gesetzlich zulässig und im Vertrag wirksam festgelegt ist. Die
+            vollständige Anbieteranschrift und eine finale Gerichtsstandregelung
+            sind vor Veröffentlichung dieses Entwurfs zu ergänzen.
+          </p>
+        </div>
+      </section>
+    </main>
   );
 }

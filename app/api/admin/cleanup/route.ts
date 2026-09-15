@@ -33,11 +33,17 @@ async function authorized(req: Request): Promise<boolean> {
 
 export async function POST(req: Request) {
   if (!(await authorized(req))) {
-    return NextResponse.json({ ok: false, error: "Zugang erforderlich." }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "Zugang erforderlich." },
+      { status: 401 },
+    );
   }
   const report = await runRetention();
   if (!report) {
-    return NextResponse.json({ ok: false, error: "Keine Datenbank konfiguriert." }, { status: 503 });
+    return NextResponse.json(
+      { ok: false, error: "Keine Datenbank konfiguriert." },
+      { status: 503 },
+    );
   }
   return NextResponse.json({ ok: report.errors.length === 0, report });
 }

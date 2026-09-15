@@ -52,7 +52,12 @@ export default function AdminLogin() {
             {error}
           </div>
         )}
-        <button type="submit" className="btn btn-primary" disabled={busy} style={{ width: "100%" }}>
+        <button
+          type="submit"
+          className="btn btn-primary"
+          disabled={busy}
+          style={{ width: "100%" }}
+        >
           {busy ? "Prüfe …" : "Anmelden"}
         </button>
       </form>

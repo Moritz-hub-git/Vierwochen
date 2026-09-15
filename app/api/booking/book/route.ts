@@ -8,17 +8,33 @@
  */
 import { NextResponse } from "next/server";
 import { FieldValue } from "@google-cloud/firestore";
-import { bookingCalendarId, busyIntervals, createEvent, overlapsBusy } from "@/lib/calendar";
-import { BOOKING, SITE } from "@/lib/config";
+import {
+  bookingCalendarId,
+  busyIntervals,
+  createEvent,
+  overlapsBusy,
+} from "@/lib/calendar";
+import { blueprintSummary, loadStoredBlueprint } from "@/lib/booking";
+import { BOOKING, SITE, contactEmail } from "@/lib/config";
 import { checkBusinessEmail } from "@/lib/email";
 import { cleanAttribution, recordEvent } from "@/lib/events";
 import { firestore, safe } from "@/lib/firestore";
-import { bookingConfirmationHtml, bookingMailSubject, ownerNoticeHtml, sendMail } from "@/lib/mail";
-import { clientIp } from "@/lib/ratelimit";
+import {
+  bookingConfirmationHtml,
+  bookingMailSubject,
+  ownerNoticeHtml,
+  sendMail,
+} from "@/lib/mail";
+import {
+  checkPersistentDailyLimit,
+  checkWindowLimit,
+  clientIp,
+} from "@/lib/ratelimit";
 import { formatBerlinDateTime, isValidSlotStart } from "@/lib/slots";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
+const MAX_BODY_CHARS = 24_000;
 
 interface BookRequest {
   slotStart?: string;
@@ -34,6 +50,7 @@ interface BookRequest {
   agenda?: string;
   sessionId?: string;
   attr?: unknown;
+  website?: string;
 }
 
 function bad(status: number, error: string) {
@@ -41,29 +58,86 @@ function bad(status: number, error: string) {
 }
 
 export async function POST(req: Request) {
+  const ip = clientIp(req);
+  if (!checkWindowLimit(`booking:${ip}`, 8, 15 * 60_000)) {
+    return bad(
+      429,
+      "Zu viele Buchungsversuche. Bitte versuchen Sie es später erneut.",
+    );
+  }
+  if (!(await checkPersistentDailyLimit("booking", ip, 30))) {
+    return bad(
+      429,
+      "Das Tageslimit ist erreicht. Bitte versuchen Sie es morgen erneut.",
+    );
+  }
   let body: BookRequest;
   try {
-    body = (await req.json()) as BookRequest;
+    const declaredLength = Number(req.headers.get("content-length") ?? 0);
+    if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_CHARS) {
+      return bad(413, "Die Anfrage ist zu groß.");
+    }
+    const rawBody = await req.text();
+    if (rawBody.length > MAX_BODY_CHARS) {
+      return bad(413, "Die Anfrage ist zu groß.");
+    }
+    const parsed: unknown = JSON.parse(rawBody);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return bad(400, "Ungültige Anfrage.");
+    }
+    body = parsed as BookRequest;
   } catch {
     return bad(400, "Ungültige Anfrage.");
+  }
+
+  const stringFields = [
+    "email",
+    "name",
+    "channel",
+    "phone",
+    "company",
+    "companySize",
+    "industry",
+    "slotStart",
+    "dialogId",
+    "caseSummary",
+    "agenda",
+    "sessionId",
+    "website",
+  ] as const;
+  for (const field of stringFields) {
+    const value = body[field];
+    if (value !== undefined && value !== null && typeof value !== "string") {
+      return bad(400, "Ungültige Anfrage.");
+    }
+  }
+  if (typeof body.website === "string" && body.website.trim()) {
+    return bad(400, "Anfrage abgelehnt.");
   }
 
   // --- Validierung ---
   // Nur Syntax, kein Freemail-Gate (Audit CA-H4): Wer einen Termin bucht, hat
   // sich bereits entschieden — Gründer vor der Gründung haben keine
   // Firmenadresse, und die soll sie nicht aussperren.
-  const emailCheck = checkBusinessEmail(body.email ?? "", { allowFreemail: true });
+  const emailCheck = checkBusinessEmail(body.email ?? "", {
+    allowFreemail: true,
+  });
   if (!emailCheck.ok) {
     return bad(
       422,
-      `Das sieht nicht wie eine gültige E-Mail-Adresse aus. Alternativ erreichen Sie Moritz direkt unter ${SITE.email}.`
+      `Das sieht nicht wie eine gültige E-Mail-Adresse aus. Alternativ erreichen Sie Moritz direkt unter ${SITE.email}.`,
     );
   }
   const name = (body.name ?? "").trim();
   if (name.length < 2 || name.length > 200) {
     return bad(422, "Bitte geben Sie Ihren Namen an.");
   }
-  const channel = body.channel === "telefon" ? "telefon" : body.channel === "video" ? "video" : null;
+  const channel =
+    body.channel === "telefon"
+      ? "telefon"
+      : body.channel === "video"
+        ? "video"
+        : null;
   if (!channel) {
     return bad(422, "Bitte wählen Sie Videocall oder Telefon.");
   }
@@ -73,24 +147,44 @@ export async function POST(req: Request) {
   }
   const slotStart = body.slotStart ?? "";
   if (!isValidSlotStart(slotStart)) {
-    return bad(409, "Dieser Termin ist nicht mehr verfügbar. Bitte wählen Sie einen anderen.");
+    return bad(
+      409,
+      "Dieser Termin ist nicht mehr verfügbar. Bitte wählen Sie einen anderen.",
+    );
   }
   const startMs = Date.parse(slotStart);
-  const slotEnd = new Date(startMs + BOOKING.durationMinutes * 60_000).toISOString();
+  const slotEnd = new Date(
+    startMs + BOOKING.durationMinutes * 60_000,
+  ).toISOString();
   const slotStartIso = new Date(startMs).toISOString();
   // Agenda-Frage (optional): erhöht Vorbereitung und Erscheinen, weil der
   // Nutzer sich vor dem Termin schon auf ein Thema festgelegt hat.
-  const agenda = typeof body.agenda === "string" ? body.agenda.trim().slice(0, 500) : "";
-  const company = typeof body.company === "string" ? body.company.trim().slice(0, 200) : "";
-  const caseSummary = typeof body.caseSummary === "string" ? body.caseSummary.slice(0, 2000) : "";
+  const agenda =
+    typeof body.agenda === "string" ? body.agenda.trim().slice(0, 500) : "";
+  const company =
+    typeof body.company === "string" ? body.company.trim().slice(0, 200) : "";
+  const storedBlueprint =
+    typeof body.dialogId === "string"
+      ? await loadStoredBlueprint(body.dialogId)
+      : null;
+  const blueprintContext = storedBlueprint
+    ? blueprintSummary(storedBlueprint)
+    : "";
+  const caseSummary =
+    typeof body.caseSummary === "string" ? body.caseSummary.slice(0, 2000) : "";
   // Firmengröße/Branche: freies Feld aus einer festen Auswahl im Formular —
   // trotzdem nur als kurze Zeichenkette übernehmen, kein Freitext-Risiko.
-  const companySize = typeof body.companySize === "string" ? body.companySize.trim().slice(0, 40) : "";
-  const industry = typeof body.industry === "string" ? body.industry.trim().slice(0, 60) : "";
+  const companySize =
+    typeof body.companySize === "string"
+      ? body.companySize.trim().slice(0, 40)
+      : "";
+  const industry =
+    typeof body.industry === "string" ? body.industry.trim().slice(0, 60) : "";
   // Werbe-Herkunft dauerhaft an der Buchung: Grundlage für die spätere
   // Rückmeldung an Google Ads (gclid, 90-Tage-Fenster).
   const attr = cleanAttribution(body.attr);
-  const trackSessionId = typeof body.sessionId === "string" ? body.sessionId.slice(0, 64) : "";
+  const trackSessionId =
+    typeof body.sessionId === "string" ? body.sessionId.slice(0, 64) : "";
 
   // Erfolg serverseitig zählen — verlässlicher als ein Browser-Ereignis, das
   // beim Schließen des Tabs verloren gehen kann.
@@ -98,17 +192,27 @@ export async function POST(req: Request) {
     void recordEvent({
       type: "booked",
       sessionId: trackSessionId || `booking-${slotStartIso}`,
-      dialogId: typeof body.dialogId === "string" ? body.dialogId.slice(0, 64) : null,
+      dialogId:
+        typeof body.dialogId === "string" ? body.dialogId.slice(0, 64) : null,
       path: "/api/booking/book",
       attr,
-      meta: { mode, channel, hasCompany: company !== "", companySize, industry },
+      meta: {
+        mode,
+        channel,
+        hasCompany: company !== "",
+        companySize,
+        industry,
+      },
     });
   };
 
   // Bestätigungsmail nach erfolgreicher Buchung — nachgelagert und ohne die
   // Antwort zu verzögern; ein Fehlschlag bricht den Funnel nie.
-  const queueConfirmationMail = (mode: "bestätigt" | "angefragt", meetLink?: string) => {
-    void sendMail({
+  const sendBookingMails = async (
+    mode: "bestätigt" | "angefragt",
+    meetLink?: string,
+  ) => {
+    const confirmation = sendMail({
       to: emailCheck.email,
       subject: bookingMailSubject(mode, formatBerlinDateTime(slotStartIso)),
       html: bookingConfirmationHtml({
@@ -122,28 +226,50 @@ export async function POST(req: Request) {
         mode,
         meetLink,
       }),
-    }).catch((err) => console.warn("[booking] Bestätigungsmail fehlgeschlagen:", err));
+    });
     // Owner-Benachrichtigung: Moritz soll jede Buchung sofort im Postfach
     // haben, auch wenn er gerade nicht in Firestore oder den Kalender schaut.
-    void sendMail({
-      to: SITE.email,
+    const ownerNotice = sendMail({
+      to: contactEmail(),
       subject: `Neue Terminbuchung (${mode}): ${name}${company ? `, ${company}` : ""} — ${formatBerlinDateTime(slotStartIso)} Uhr`,
       html: ownerNoticeHtml({
-        heading: mode === "bestätigt" ? "Neue Terminbuchung" : "Neue Terminanfrage",
+        heading:
+          mode === "bestätigt" ? "Neue Terminbuchung" : "Neue Terminanfrage",
         rows: [
           ["Termin", `${formatBerlinDateTime(slotStartIso)} Uhr`],
           ["Kanal", channel === "video" ? "Online-Call" : `Telefon: ${phone}`],
           ["Name", name],
-          ["E-Mail", `${emailCheck.email}${emailCheck.freemail ? " (Freemail)" : ""}`],
+          [
+            "E-Mail",
+            `${emailCheck.email}${emailCheck.freemail ? " (Freemail)" : ""}`,
+          ],
           ["Unternehmen", company || "—"],
-          ["Größe / Branche", [companySize, industry].filter(Boolean).join(" / ") || "—"],
+          [
+            "Größe / Branche",
+            [companySize, industry].filter(Boolean).join(" / ") || "—",
+          ],
           ["Fall", caseSummary || "—"],
+          [
+            "Blueprint",
+            blueprintContext ||
+              "Kein gespeicherter Blueprint; Gespräch anhand der Prozessbeschreibung.",
+          ],
           ["Agenda", agenda || "—"],
-          ["Dialog-ID", typeof body.dialogId === "string" ? body.dialogId.slice(0, 64) : "—"],
+          [
+            "Dialog-ID",
+            typeof body.dialogId === "string"
+              ? body.dialogId.slice(0, 64)
+              : "—",
+          ],
           ["Herkunft", attr ? JSON.stringify(attr) : "—"],
         ],
       }),
-    }).catch((err) => console.warn("[booking] Owner-Benachrichtigung fehlgeschlagen:", err));
+    });
+    const [confirmationSent, ownerNotified] = await Promise.all([
+      confirmation,
+      ownerNotice,
+    ]);
+    return { confirmationSent, ownerNotified };
   };
 
   const requestMode = !bookingCalendarId();
@@ -155,7 +281,9 @@ export async function POST(req: Request) {
   if (db) {
     try {
       const created = await db.runTransaction(async (tx) => {
-        const ref = db.collection("bookings").doc(slotStartIso.replace(/[:.]/g, "-"));
+        const ref = db
+          .collection("bookings")
+          .doc(slotStartIso.replace(/[:.]/g, "-"));
         const snap = await tx.get(ref);
         if (snap.exists && snap.data()?.status !== "storniert") return false;
         tx.set(ref, {
@@ -169,8 +297,12 @@ export async function POST(req: Request) {
           industry: industry || null,
           channel,
           phone: channel === "telefon" ? phone : null,
-          dialogId: typeof body.dialogId === "string" ? body.dialogId.slice(0, 64) : null,
+          dialogId:
+            typeof body.dialogId === "string"
+              ? body.dialogId.slice(0, 64)
+              : null,
           caseSummary: caseSummary || null,
+          blueprint: storedBlueprint,
           agenda: agenda || null,
           attr,
           sessionId: trackSessionId || null,
@@ -181,27 +313,47 @@ export async function POST(req: Request) {
         return true;
       });
       if (!created) {
-        return bad(409, "Dieser Termin wurde gerade vergeben. Bitte wählen Sie einen anderen.");
+        return bad(
+          409,
+          "Dieser Termin wurde gerade vergeben. Bitte wählen Sie einen anderen.",
+        );
       }
     } catch (err) {
       console.error("[booking] Reservierung fehlgeschlagen:", err);
-      return bad(500, "Die Buchung ist gerade nicht möglich. Bitte versuchen Sie es erneut.");
+      return bad(
+        500,
+        "Die Buchung ist gerade nicht möglich. Bitte versuchen Sie es erneut.",
+      );
     }
   } else if (!requestMode) {
     // Ohne Datenbank schützt allein die Kalenderprüfung — funktioniert, aber loggen.
-    console.warn("[booking] Firestore nicht verfügbar — Doppelbuchungsschutz nur über Kalender.");
+    console.warn(
+      "[booking] Firestore nicht verfügbar — Doppelbuchungsschutz nur über Kalender.",
+    );
   }
 
-  const bookingRef = db ? db.collection("bookings").doc(slotStartIso.replace(/[:.]/g, "-")) : null;
+  const bookingRef = db
+    ? db.collection("bookings").doc(slotStartIso.replace(/[:.]/g, "-"))
+    : null;
 
   // --- Anfrage-Modus: kein Kalender konfiguriert, manuelle Bestätigung ---
   if (requestMode) {
-    queueConfirmationMail("angefragt");
+    if (!bookingRef) {
+      return bad(
+        503,
+        `Die Anfrage kann gerade nicht gespeichert werden. Bitte kontaktieren Sie uns unter ${SITE.email}.`,
+      );
+    }
+    const mail = await sendBookingMails("angefragt");
     recordBooked("angefragt");
     return NextResponse.json({
       ok: true,
       mode: "angefragt",
-      message: `Ihre Terminanfrage für ${formatBerlinDateTime(slotStartIso)} Uhr ist eingegangen. Sie erhalten kurzfristig eine Bestätigung per E-Mail.`,
+      persisted: true,
+      confirmationSent: mail.confirmationSent,
+      message: mail.confirmationSent
+        ? `Ihre Terminanfrage für ${formatBerlinDateTime(slotStartIso)} Uhr wurde gespeichert. Eine Eingangsbestätigung wurde an ${emailCheck.email} gesendet.`
+        : `Ihre Terminanfrage für ${formatBerlinDateTime(slotStartIso)} Uhr wurde gespeichert. Die persönliche Terminbestätigung steht noch aus.`,
     });
   }
 
@@ -210,12 +362,47 @@ export async function POST(req: Request) {
     const busy = await busyIntervals(slotStartIso, slotEnd);
     if (overlapsBusy(slotStartIso, slotEnd, busy)) {
       if (bookingRef) {
-        await safe(async () => bookingRef.update({ status: "storniert", reason: "Kalender belegt" }), "Reservierung stornieren");
+        await safe(
+          async () =>
+            bookingRef.update({
+              status: "storniert",
+              reason: "Kalender belegt",
+            }),
+          "Reservierung stornieren",
+        );
       }
-      return bad(409, "Dieser Termin wurde gerade vergeben. Bitte wählen Sie einen anderen.");
+      return bad(
+        409,
+        "Dieser Termin wurde gerade vergeben. Bitte wählen Sie einen anderen.",
+      );
     }
   } catch (err) {
-    console.error("[booking] Kalenderprüfung vor Buchung fehlgeschlagen — fahre fort:", err);
+    console.error("[booking] Kalenderprüfung vor Buchung fehlgeschlagen:", err);
+    if (!bookingRef) {
+      return bad(
+        503,
+        `Die Terminverfügbarkeit kann gerade nicht geprüft und die Anfrage nicht gespeichert werden. Bitte kontaktieren Sie uns unter ${SITE.email}.`,
+      );
+    }
+    await safe(
+      async () =>
+        bookingRef.update({
+          status: "angefragt",
+          reason: "Kalenderprüfung fehlgeschlagen",
+        }),
+      "Buchung als Anfrage markieren",
+    );
+    const mail = await sendBookingMails("angefragt");
+    recordBooked("angefragt");
+    return NextResponse.json({
+      ok: true,
+      mode: "angefragt",
+      persisted: true,
+      confirmationSent: mail.confirmationSent,
+      message: mail.confirmationSent
+        ? `Ihre Terminanfrage für ${formatBerlinDateTime(slotStartIso)} Uhr wurde gespeichert. Eine Eingangsbestätigung wurde an ${emailCheck.email} gesendet; die Verfügbarkeit ist noch nicht bestätigt.`
+        : `Ihre Terminanfrage für ${formatBerlinDateTime(slotStartIso)} Uhr wurde gespeichert. Verfügbarkeit und Terminbestätigung stehen noch aus.`,
+    });
   }
 
   // --- Termin anlegen ---
@@ -228,7 +415,9 @@ export async function POST(req: Request) {
       company: company || undefined,
       channel,
       phone: channel === "telefon" ? phone : undefined,
-      summaryOfCase: caseSummary || undefined,
+      summaryOfCase:
+        [caseSummary, blueprintContext].filter(Boolean).join("\n\n") ||
+        undefined,
       agenda: agenda || undefined,
     });
     if (bookingRef) {
@@ -240,32 +429,53 @@ export async function POST(req: Request) {
             meetLink: event.meetLink ?? null,
             attendeeInvited: event.attendeeInvited,
           }),
-        "Buchung bestätigen"
+        "Buchung bestätigen",
       );
     }
-    queueConfirmationMail("bestätigt", event.meetLink);
+    const mail = await sendBookingMails("bestätigt", event.meetLink);
     recordBooked("bestätigt");
     return NextResponse.json({
       ok: true,
       mode: "bestätigt",
+      persisted: Boolean(bookingRef),
+      eventCreated: true,
       meetLink: event.meetLink ?? null,
       attendeeInvited: event.attendeeInvited,
+      confirmationSent: mail.confirmationSent,
       message: event.attendeeInvited
-        ? `Ihr Termin am ${formatBerlinDateTime(slotStartIso)} Uhr steht. Die Kalendereinladung ist unterwegs an ${emailCheck.email}.`
-        : `Ihr Termin am ${formatBerlinDateTime(slotStartIso)} Uhr steht. Sie erhalten die Einladung kurzfristig per E-Mail an ${emailCheck.email}.`,
+        ? `Ihr Termin am ${formatBerlinDateTime(slotStartIso)} Uhr wurde im Kalender angelegt und ${emailCheck.email} als Teilnehmer eingetragen.`
+        : mail.confirmationSent
+          ? `Ihr Termin am ${formatBerlinDateTime(slotStartIso)} Uhr wurde im Kalender angelegt. Die Bestätigung wurde an ${emailCheck.email} gesendet; eine Kalendereinladung wurde nicht automatisch bestätigt.`
+          : `Ihr Termin am ${formatBerlinDateTime(slotStartIso)} Uhr wurde im Kalender angelegt. Eine automatische E-Mail oder Kalendereinladung konnte nicht bestätigt werden.`,
     });
   } catch (err) {
-    console.error("[booking] Kalendereintrag fehlgeschlagen — Buchung bleibt als Anfrage bestehen:", err);
+    console.error(
+      "[booking] Kalendereintrag fehlgeschlagen — Buchung bleibt als Anfrage bestehen:",
+      err,
+    );
     if (bookingRef) {
-      await safe(async () => bookingRef.update({ status: "angefragt", reason: "Kalenderfehler" }), "Buchung als Anfrage markieren");
+      await safe(
+        async () =>
+          bookingRef.update({ status: "angefragt", reason: "Kalenderfehler" }),
+        "Buchung als Anfrage markieren",
+      );
     }
-    // Funnel nicht brechen: Anfrage ist gespeichert, Bestätigung folgt manuell.
-    queueConfirmationMail("angefragt");
+    if (!bookingRef) {
+      return bad(
+        502,
+        `Der Termin konnte nicht angelegt oder gespeichert werden. Bitte kontaktieren Sie uns unter ${SITE.email}.`,
+      );
+    }
+    const mail = await sendBookingMails("angefragt");
     recordBooked("angefragt");
     return NextResponse.json({
       ok: true,
       mode: "angefragt",
-      message: `Ihre Terminanfrage für ${formatBerlinDateTime(slotStartIso)} Uhr ist eingegangen. Sie erhalten kurzfristig eine Bestätigung per E-Mail.`,
+      persisted: true,
+      confirmationSent: mail.confirmationSent,
+      message: mail.confirmationSent
+        ? `Ihre Terminanfrage für ${formatBerlinDateTime(slotStartIso)} Uhr wurde gespeichert. Eine Eingangsbestätigung wurde an ${emailCheck.email} gesendet.`
+        : `Ihre Terminanfrage für ${formatBerlinDateTime(slotStartIso)} Uhr wurde gespeichert. Die persönliche Terminbestätigung steht noch aus.`,
     });
   }
 }

@@ -9,7 +9,8 @@
 import { cookies } from "next/headers";
 import { env } from "./config";
 
-export const ADMIN_COOKIE = "vw_admin";
+export const ADMIN_COOKIE = "opsrid_admin";
+const LEGACY_ADMIN_COOKIE = "vw_admin";
 
 export async function sha256Hex(text: string): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
@@ -27,7 +28,7 @@ export async function isAdmin(): Promise<boolean> {
   const password = adminPassword();
   if (!password) return false;
   const store = await cookies();
-  const value = store.get(ADMIN_COOKIE)?.value;
+  const value = store.get(ADMIN_COOKIE)?.value ?? store.get(LEGACY_ADMIN_COOKIE)?.value;
   if (!value) return false;
   return value === (await sha256Hex(password));
 }

@@ -1,27 +1,18 @@
 import type { Metadata } from "next";
-import BrandNav, { Wordmark } from "@/components/v/BrandNav";
-import Skin from "@/components/v/Skin";
-import { SITE } from "@/lib/config";
 import AccessForm from "./AccessForm";
-import s from "@/components/v/brandnav.module.css";
-
-export const metadata: Metadata = { title: "Zugang" };
-
-/** Zugangsseite für die passwortgeschützte Vorschau (PROMPT.md §8, SITE_PASSWORD). */
+export const metadata: Metadata = {
+  title: "Vorschau-Zugang",
+  robots: { index: false, follow: false },
+};
 export default function Zugang() {
   return (
-    <div className={s.page}>
-      <Skin name="fixfertig" />
-      <BrandNav />
-      <div className={s.center}>
-        <div className="card access-card">
-          <h1>
-            <Wordmark />
-          </h1>
-          <p>Diese Vorschau ist passwortgeschützt.</p>
-          <AccessForm />
-        </div>
+    <main id="main" className="section container">
+      <div className="prose" style={{ maxWidth: 420, margin: "auto" }}>
+        <span className="eyebrow">OPSDONE VORSCHAU</span>
+        <h1 style={{ fontSize: 40, marginTop: 20 }}>Willkommen.</h1>
+        <p>Diese Vorschau ist passwortgeschützt.</p>
+        <AccessForm />
       </div>
-    </div>
+    </main>
   );
 }

@@ -11,14 +11,20 @@ export const dynamic = "force-dynamic";
 export async function POST(req: Request) {
   // Ratenbegrenzung gegen Durchprobieren.
   if (!checkMinuteLimit(`admin:${clientIp(req)}`)) {
-    return NextResponse.json({ ok: false, error: "Zu viele Versuche. Bitte kurz warten." }, { status: 429 });
+    return NextResponse.json(
+      { ok: false, error: "Zu viele Versuche. Bitte kurz warten." },
+      { status: 429 },
+    );
   }
 
   const password = adminPassword();
   if (!password) {
     return NextResponse.json(
-      { ok: false, error: "Die Auswertung ist nicht eingerichtet (ADMIN_PASSWORD fehlt)." },
-      { status: 503 }
+      {
+        ok: false,
+        error: "Die Auswertung ist nicht eingerichtet (ADMIN_PASSWORD fehlt).",
+      },
+      { status: 503 },
     );
   }
 
@@ -26,11 +32,17 @@ export async function POST(req: Request) {
   try {
     body = (await req.json()) as { password?: string };
   } catch {
-    return NextResponse.json({ ok: false, error: "Ungültige Anfrage." }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: "Ungültige Anfrage." },
+      { status: 400 },
+    );
   }
 
   if (typeof body.password !== "string" || body.password !== password) {
-    return NextResponse.json({ ok: false, error: "Das Passwort ist nicht richtig." }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "Das Passwort ist nicht richtig." },
+      { status: 401 },
+    );
   }
 
   const res = NextResponse.json({ ok: true });

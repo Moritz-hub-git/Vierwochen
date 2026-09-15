@@ -5,7 +5,11 @@ import { IS_LIVE, SITE } from "@/lib/config";
 export default function robots(): MetadataRoute.Robots {
   if (!IS_LIVE) return { rules: { userAgent: "*", disallow: "/" } };
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/v/", "/admin", "/api/", "/zugang"] },
+    rules: {
+      userAgent: "*",
+      allow: "/",
+      disallow: ["/v/", "/admin", "/api/", "/zugang"],
+    },
     sitemap: `${SITE.url}/sitemap.xml`,
   };
 }

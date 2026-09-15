@@ -44,8 +44,17 @@ export default function AccessForm() {
           autoFocus
         />
       </div>
-      {error && <div className="form-error" role="alert">{error}</div>}
-      <button type="submit" className="btn btn-primary" disabled={busy} style={{ width: "100%" }}>
+      {error && (
+        <div className="form-error" role="alert">
+          {error}
+        </div>
+      )}
+      <button
+        type="submit"
+        className="btn btn-primary"
+        disabled={busy}
+        style={{ width: "100%" }}
+      >
         {busy ? "Wird geprüft …" : "Zugang"}
       </button>
     </form>

@@ -9,7 +9,10 @@ import { env } from "@/lib/config";
 export const dynamic = "force-dynamic";
 
 async function sha256Hex(text: string): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(text),
+  );
   return Array.from(new Uint8Array(digest))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
@@ -24,13 +27,19 @@ export async function POST(req: Request) {
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ ok: false, error: "Ungültige Anfrage." }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: "Ungültige Anfrage." },
+      { status: 400 },
+    );
   }
   if (typeof body.password !== "string" || body.password !== password) {
-    return NextResponse.json({ ok: false, error: "Das Passwort ist nicht richtig." }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "Das Passwort ist nicht richtig." },
+      { status: 401 },
+    );
   }
   const res = NextResponse.json({ ok: true });
-  res.cookies.set("vw_access", await sha256Hex(password), {
+  res.cookies.set("opsrid_access", await sha256Hex(password), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",

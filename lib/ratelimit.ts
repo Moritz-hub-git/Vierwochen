@@ -12,6 +12,7 @@ import { LIMITS } from "./config";
 import { safe } from "./firestore";
 
 const windows = new Map<string, number[]>();
+const endpointWindows = new Map<string, number[]>();
 
 function pruneWindows() {
   // Verhindert unbegrenztes Wachstum der Map in langlebigen Instanzen.
@@ -48,6 +49,24 @@ export function checkMinuteLimit(ip: string): boolean {
   return true;
 }
 
+/** Small, endpoint-specific sliding window for public forms. */
+export function checkWindowLimit(key: string, limit: number, windowMs: number): boolean {
+  const now = Date.now();
+  const hits = (endpointWindows.get(key) ?? []).filter((time) => now - time < windowMs);
+  if (hits.length >= limit) {
+    endpointWindows.set(key, hits);
+    return false;
+  }
+  hits.push(now);
+  endpointWindows.set(key, hits);
+  if (endpointWindows.size >= 5000) {
+    for (const [storedKey, storedHits] of endpointWindows) {
+      if (!storedHits.some((time) => now - time < windowMs)) endpointWindows.delete(storedKey);
+    }
+  }
+  return true;
+}
+
 /** Linie 2: je IP höchstens LIMITS.perDay Modellaufrufe pro Kalendertag (UTC). */
 export async function checkDayLimit(ip: string): Promise<boolean> {
   const day = new Date().toISOString().slice(0, 10);
@@ -70,4 +89,26 @@ export async function checkDayLimit(ip: string): Promise<boolean> {
   // Firestore nicht erreichbar → nur Linie 1 greift; bewusst durchlassen.
   if (count === null) return true;
   return count <= LIMITS.perDay;
+}
+
+/** Distributed daily limit for non-model public endpoints. Falls back to the local window. */
+export async function checkPersistentDailyLimit(namespace: string, ip: string, limit: number): Promise<boolean> {
+  const day = new Date().toISOString().slice(0, 10);
+  const safeNamespace = namespace.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 40);
+  const safeIp = ip.replace(/[^a-zA-Z0-9_.-]/g, "_").slice(0, 120);
+  const key = `${safeNamespace}_${day}_${safeIp}`;
+  const count = await safe(async (db) => {
+    const ref = db.collection("rateLimits").doc(key);
+    return db.runTransaction(async (tx) => {
+      const snap = await tx.get(ref);
+      const current = (snap.data()?.count as number | undefined) ?? 0;
+      if (current >= limit) return current;
+      tx.set(ref, {
+        count: FieldValue.increment(1), day, ip, namespace: safeNamespace,
+        updatedAt: FieldValue.serverTimestamp(),
+      }, { merge: true });
+      return current + 1;
+    });
+  }, `${safeNamespace} Tageslimit`);
+  return count === null || count <= limit;
 }

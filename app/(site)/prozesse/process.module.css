@@ -1,0 +1,187 @@
+.processNav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 2rem;
+}
+
+.processNav a {
+  align-items: center;
+  border: 1px solid var(--border, #dcded8);
+  border-radius: 999px;
+  color: inherit;
+  display: inline-flex;
+  font-size: 0.86rem;
+  min-height: 44px;
+  padding: 0.65rem 0.9rem;
+  text-decoration: none;
+}
+
+.processNav a:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.flow {
+  counter-reset: process-step;
+  display: grid;
+  gap: 1px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 2.5rem;
+  overflow: hidden;
+  border: 1px solid var(--border, #dcded8);
+  border-radius: 1rem;
+  background: var(--border, #dcded8);
+}
+
+.flow article {
+  background: #fff;
+  min-height: 15rem;
+  padding: 1.75rem;
+}
+
+.flow article::before {
+  counter-increment: process-step;
+  content: "0" counter(process-step);
+  display: block;
+  color: var(--accent);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  margin-bottom: 3rem;
+}
+
+.flow h3 {
+  font-size: 1.15rem;
+  margin: 0 0 0.65rem;
+}
+
+.flow p {
+  color: #626b7f;
+  font-size: 0.94rem;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.splitList {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr 1fr;
+}
+
+.listBox {
+  border-top: 1px solid var(--border, #dcded8);
+  padding-top: 1.4rem;
+}
+
+.listBox h3 {
+  font-size: 1rem;
+  margin: 0 0 1rem;
+}
+
+.listBox ul {
+  color: #505d74;
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.output {
+  background: #263a61;
+  border-radius: 1.2rem;
+  color: #fff;
+  padding: clamp(2rem, 5vw, 4rem);
+}
+
+.output p {
+  color: #e1e9fc;
+  font-size: clamp(1.15rem, 2vw, 1.5rem);
+  line-height: 1.6;
+  margin: 1rem 0 0;
+  max-width: 46rem;
+}
+
+.output :global(.eyebrow) {
+  color: #e1e9fc;
+}
+
+.pageActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.pageActions :global(.button) {
+  margin-top: 0;
+}
+
+.calloutBlock h2 {
+  margin-top: 0.75rem;
+}
+
+.calloutBlock p {
+  line-height: 1.8;
+  margin-top: 1rem;
+  max-width: 46rem;
+}
+
+.calloutBlock :global(.button) {
+  margin-top: 1.5rem;
+}
+
+.faq {
+  display: grid;
+  gap: 0;
+  margin-top: 2rem;
+}
+
+.faq details {
+  border-top: 1px solid var(--border, #dcded8);
+  padding: 1.25rem 0;
+}
+
+.faq details:last-child {
+  border-bottom: 1px solid var(--border, #dcded8);
+}
+
+.faq summary {
+  cursor: pointer;
+  font-family: var(--font-grotesk), sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.faq p {
+  color: #63728b;
+  line-height: 1.7;
+  margin: 0.8rem 0 0;
+  max-width: 48rem;
+}
+
+@media (max-width: 860px) {
+  .flow {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .flow article {
+    min-height: 13rem;
+  }
+}
+
+@media (max-width: 620px) {
+  .flow,
+  .splitList {
+    grid-template-columns: 1fr;
+  }
+
+  .flow article {
+    min-height: auto;
+  }
+
+  .flow article::before {
+    margin-bottom: 1.5rem;
+  }
+}

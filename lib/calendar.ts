@@ -24,12 +24,18 @@ export function bookingCalendarId(): string | undefined {
 }
 
 /** Belegte Zeiträume [startMs, endMs] im Fenster laut freeBusy. */
-export async function busyIntervals(timeMinIso: string, timeMaxIso: string): Promise<[number, number][]> {
+export async function busyIntervals(
+  timeMinIso: string,
+  timeMaxIso: string,
+): Promise<[number, number][]> {
   const calendarId = bookingCalendarId();
   if (!calendarId) return [];
   const client = await auth.getClient();
   const res = await client.request<{
-    calendars?: Record<string, { busy?: { start: string; end: string }[]; errors?: unknown[] }>;
+    calendars?: Record<
+      string,
+      { busy?: { start: string; end: string }[]; errors?: unknown[] }
+    >;
   }>({
     url: "https://www.googleapis.com/calendar/v3/freeBusy",
     method: "POST",
@@ -43,12 +49,25 @@ export async function busyIntervals(timeMinIso: string, timeMaxIso: string): Pro
   });
   const entry = res.data.calendars?.[calendarId];
   if (entry?.errors?.length) {
-    console.error("[calendar] freeBusy meldet Fehler:", JSON.stringify(entry.errors));
+    console.error(
+      "[calendar] freeBusy meldet Fehler:",
+      JSON.stringify(entry.errors),
+    );
+    throw new Error("Kalenderverfügbarkeit konnte nicht geprüft werden");
   }
-  return (entry?.busy ?? []).map((b) => [Date.parse(b.start), Date.parse(b.end)]);
+  if (!entry)
+    throw new Error("Kalenderantwort enthält keinen Verfügbarkeitsstatus");
+  return (entry?.busy ?? []).map((b) => [
+    Date.parse(b.start),
+    Date.parse(b.end),
+  ]);
 }
 
-export function overlapsBusy(startUtcIso: string, endUtcIso: string, busy: [number, number][]): boolean {
+export function overlapsBusy(
+  startUtcIso: string,
+  endUtcIso: string,
+  busy: [number, number][],
+): boolean {
   const s = Date.parse(startUtcIso);
   const e = Date.parse(endUtcIso);
   return busy.some(([bs, be]) => s < be && e > bs);
@@ -108,7 +127,7 @@ export async function createEvent(input: EventInput): Promise<CreatedEvent> {
       ? {
           conferenceData: {
             createRequest: {
-              requestId: `vw-${input.startUtc.replace(/\D/g, "")}`,
+              requestId: `opsrid-${input.startUtc.replace(/\D/g, "")}`,
               conferenceSolutionKey: { type: "hangoutsMeet" },
             },
           },
@@ -123,12 +142,17 @@ export async function createEvent(input: EventInput): Promise<CreatedEvent> {
       data: withAttendee,
       timeout: 15_000,
     });
-    return { eventId: res.data.id, meetLink: res.data.hangoutLink, attendeeInvited: true };
+    return {
+      eventId: res.data.id,
+      meetLink: res.data.hangoutLink,
+      attendeeInvited: true,
+    };
   } catch (err) {
-    const status = (err as { response?: { status?: number } })?.response?.status;
+    const status = (err as { response?: { status?: number } })?.response
+      ?.status;
     console.warn(
       `[calendar] Termin mit Teilnehmer fehlgeschlagen (Status ${status ?? "unbekannt"}) — versuche ohne Teilnehmer.`,
-      err instanceof Error ? err.message : err
+      err instanceof Error ? err.message : err,
     );
     // Versuch 2: ohne Teilnehmer und ohne Konferenz — Kontaktdaten stehen in der
     // Beschreibung, die Einladung wird manuell nachgereicht.
@@ -138,6 +162,10 @@ export async function createEvent(input: EventInput): Promise<CreatedEvent> {
       data: baseEvent,
       timeout: 15_000,
     });
-    return { eventId: res.data.id, meetLink: res.data.hangoutLink, attendeeInvited: false };
+    return {
+      eventId: res.data.id,
+      meetLink: res.data.hangoutLink,
+      attendeeInvited: false,
+    };
   }
 }
