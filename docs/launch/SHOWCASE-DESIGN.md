@@ -20,3 +20,9 @@ Responsive compositions stack on narrow screens; category pills scroll horizonta
 `lib/showcase-economics.ts` is a deterministic illustrative hydrogen-project model: 1,000 MW, 50 kWh/kg, €4.90/kg revenue, €142.8 million annual fixed operating cost, 20 operating years and a 10% discount rate. The UI exposes these assumptions and exclusions. IRR uses the same annual cash flow as NPV and payback; unachievable payback and non-positive cash flow are handled explicitly. The requested sample figures are not hardcoded as calculated outcomes.
 
 Tests reconcile the formulas, verify sensitivity direction and cover invalid inputs and adverse scenarios. Downloads contain examples only and do not send data to third parties.
+
+## Product UI refresh — 16 September 2026
+
+Reviewed the actual product visuals on [Linear Planning](https://linear.app/plan) and [Attio](https://attio.com/) in the browser. Linear provides a reference for compact project information, clear properties and functional toolbars; Attio for neutral app canvases and persistent navigation. Mobbin was attempted but required a paid plan, so no Mobbin screens were accessed.
+
+All four demos now share a navigable workspace shell, compact top bar, sidebar (horizontal on mobile) and a navy completion strip. The visual system matches the site's shared indigo accent (`--accent`), uses white/slate surfaces and clear semantic green/amber/red statuses. Each app retains its own functional layout, with stronger type hierarchy, structured data panels and consistent controls. Sidebar buttons navigate to real sections of the current demo; no unimplemented app actions are shown.

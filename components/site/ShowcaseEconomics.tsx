@@ -231,6 +231,11 @@ export function EconomicsShowcase() {
             {saved.map((scenario, i) => (
               <button
                 key={i}
+                aria-pressed={
+                  input.electricity === scenario.electricity &&
+                  input.hours === scenario.hours &&
+                  input.capex === scenario.capex
+                }
                 onClick={() => {
                   setInput({
                     electricity: scenario.electricity,
