@@ -1,22 +1,22 @@
-# Opsrid showcase design
+# Opsrid showcases
 
-Four illustrative scenarios: invoice verification, management reporting, order handling and cross-team complaint resolution. None are customer references or promises of available integrations.
+Four independent, interactive example applications replace the invoice prototype and previous process comparisons:
 
-## Design references
+- Project management: 38 completed actions, a project Gantt and two prepared human decisions. Decisions can be marked in the demo; a steering report can be inspected.
+- Customer platform: order status, an illustrative certificate download and a local address-change example. A separate service queue exposes a prepared reply and customer context. Sending only updates the demo.
+- Document studio: five inputs, four document types and a progressive document preview. German/English and Standard/Premium change the output. A final approval and a downloadable, explicitly illustrative HTML document complete the example.
+- Economic model: electricity price, operating hours and CAPEX update cash flow, IRR, NPV, payback and sensitivity. Scenarios can be saved for the current page session and downloaded as a decision brief.
 
-- [Personio homepage](https://www.personio.de/), reviewed 13 September 2026, plus the owner's supplied screenshot: horizontal rounded category selectors, a generous soft-colour stage and a recognisable software interface.
-- [OpenAI AgentKit introduction](https://openai.com/index/introducing-agentkit/), reviewed 13 September 2026: connected sources, processing and human decisions as a readable visual flow. Visual inspiration only, not a technology dependency.
+Every application shares the “Von Opsrid erledigt” and remaining-human-decisions element. All data and interfaces are explicitly illustrative. Percentage reductions are labelled illustrative targets, not measured customer results or guarantees. No real messages, CRM access, integrations or customer references are claimed.
 
-## Implementation
+## Structure
 
-`components/site/LandingProduct.tsx` owns the selector and scenario content. The reusable `ProcessScene` in `ShowcaseScenes.tsx` renders the result interface. Desktop uses a 40/60 comparison: manual documents and follow-ups on the left, the prepared result in an Opsrid application on the right. `ShowcaseIcon.tsx` provides a consistent 24-unit SVG icon family with 1.65-unit rounded strokes. Each scenario has a distinct result visual and inspectable evidence. This is the basis for a later chat solution view; no runtime interface generation is claimed.
+`LandingProduct.tsx` controls four accessible tabs and a 20-second rotation, paused by hover/focus, manual selection or reduced-motion preference. All panels remain mounted so example state survives tab changes. `ShowcaseOperations.tsx`, `ShowcaseDocuments.tsx` and `ShowcaseEconomics.tsx` own the distinct interactions. `ShowcaseShared.tsx` provides the application frame, completion bar and escaped local HTML export. `ShowcaseIcon.tsx` provides one consistent SVG icon family.
 
-The carousel advances every ten seconds while visible, pauses on hover or interaction, supports keyboard navigation and respects reduced motion. Mobile pills scroll horizontally; the before and after panels stack vertically with an explicit transition arrow.
+Responsive compositions stack on narrow screens; category pills scroll horizontally. Reduced motion disables progressive animation. The contextual CTA opens the existing ChatDock with the selected example; the showcase itself does not collect contact details.
 
-The contextual call to action sends the selected process description to the existing ChatDock via `opsrid:chat`. It does not request contact details or create a lead itself.
+## Economic model
 
-The revised comparison removes the three-column technical workflow and long explanatory intro. Invoice matching, reporting, stock availability and case evidence each have their own result composition. Mobbin was attempted on 13 September 2026 but returned a paid-plan requirement; no Mobbin screenshots were accessed.
+`lib/showcase-economics.ts` is a deterministic illustrative hydrogen-project model: 1,000 MW, 50 kWh/kg, €4.90/kg revenue, €142.8 million annual fixed operating cost, 20 operating years and a 10% discount rate. The UI exposes these assumptions and exclusions. IRR uses the same annual cash flow as NPV and payback; unachievable payback and non-positive cash flow are handled explicitly. The requested sample figures are not hardcoded as calculated outcomes.
 
-## Invoice flow prototype
-
-The owner approved an invoice-only prototype of paired process flows. `InvoiceComparison.tsx` now compares the same three source documents through manual matching/follow-up versus software checking, a standard path and a human exception path. The application is revealed on demand below both flows. Other scenarios retain the preceding layout pending design feedback. The invoice slide stays visible for twenty seconds; other slides retain ten seconds. Connector animation has its own pause control and respects reduced motion.
+Tests reconcile the formulas, verify sensitivity direction and cover invalid inputs and adverse scenarios. Downloads contain examples only and do not send data to third parties.

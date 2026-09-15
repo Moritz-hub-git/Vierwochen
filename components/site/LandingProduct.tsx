@@ -1,153 +1,88 @@
 "use client";
-
 import { useEffect, useRef, useState } from "react";
-import s from "./Showcase.module.css";
 import Icon from "./ShowcaseIcon";
-import { ManualWork, ProcessScene, visualCopy } from "./ShowcaseScenes";
-import InvoiceComparison from "./InvoiceComparison";
+import { ProjectShowcase, CustomerShowcase } from "./ShowcaseOperations";
+import { DocumentShowcase } from "./ShowcaseDocuments";
+import { EconomicsShowcase } from "./ShowcaseEconomics";
+import s from "./Showcase.module.css";
 
 const examples = [
   {
-    id: "invoice",
-    label: "Rechnungen prüfen",
-    area: "FINANZEN",
-    title: "Aus einer Rechnung wird ein geprüfter Vorgang.",
-    description:
-      "Belege, Bestellungen und Freigaben zusammenführen. Ihr Team entscheidet über die Ausnahme – die Anwendung bereitet alles vor.",
-    before: [
-      "Rechnung aus dem Postfach öffnen",
-      "Bestellung und Wareneingang suchen",
-      "Positionen einzeln vergleichen",
-      "Freigabe per E-Mail nachhalten",
-    ],
-    files: ["Rechnung.pdf", "Bestellung", "Wareneingang"],
-    steps: ["Beleg erfassen", "Positionen abgleichen", "Freigabe vorbereiten"],
-    result: "Rechnung zur Freigabe",
-    detail: "Eine Preisabweichung braucht Ihre Entscheidung.",
-    decision: "Preisabweichung prüfen",
-    evidence: "Position 03 · Servicepauschale",
-    values: ["Bestellt", "120,00 €", "Berechnet", "145,00 €"],
-    note: "Die übrigen Positionen stimmen mit Bestellung und Wareneingang überein. Die Abweichung von 25,00 € wird zur Freigabe vorgelegt.",
-    outcome: "Geprüfte Belege. Klare Freigaben.",
+    id: "project",
+    icon: "folder",
+    label: "Projektmanagement",
+    title: "Projekte, die sich fast selbst managen.",
+    intro:
+      "Updates einsammeln, nachfassen, Berichte erstellen: erledigt. Sie kümmern sich um die Entscheidungen.",
+    impact: "Bis zu 90 % weniger Koordinations- und Reportingaufwand",
+    benefit: "Mehr Transparenz. Mehr Ownership. Weniger Hinterherlaufen.",
     prompt:
-      "Wir prüfen Eingangsrechnungen manuell gegen Bestellungen und Wareneingänge und verfolgen Freigaben per E-Mail.",
+      "Wir möchten Projektstatus, Voice-Updates, Terminabweichungen und Risiken automatisch zusammenführen, nachfassen und Steering Reports vorbereiten.",
   },
   {
-    id: "report",
-    label: "Reporting erstellen",
-    area: "CONTROLLING",
-    title: "Aus vielen Dateien wird ein entscheidungsreifer Bericht.",
-    description:
-      "Daten zusammenführen, Zahlen prüfen und Berichte vorbereiten. Ihr Team bewertet die Entwicklung und gibt das Ergebnis frei.",
-    before: [
-      "Zahlen aus den Bereichen anfordern",
-      "Excel-Dateien zusammenführen",
-      "Abweichungen und Formeln prüfen",
-      "Diagramme in den Bericht übertragen",
-    ],
-    files: ["Vertrieb.xlsx", "Finanzen.csv", "Planung.xlsx"],
-    steps: [
-      "Daten zusammenführen",
-      "Zahlen plausibilisieren",
-      "Bericht vorbereiten",
-    ],
-    result: "Managementbericht",
-    detail: "Quellen verknüpft. Eine Entwicklung zur Einordnung.",
-    decision: "Bericht prüfen",
-    evidence: "Monatsbericht · Ergebnisentwicklung",
-    values: ["Datenstand", "September", "Status", "Zur Prüfung"],
-    note: "Die Darstellung zeigt illustrative Beispieldaten. Vor der Veröffentlichung ergänzt das Controlling die fachliche Einordnung und gibt den Bericht frei.",
-    outcome: "Eine Datenbasis. Ein klarer Bericht.",
+    id: "customer",
+    icon: "case",
+    label: "Kundenplattform",
+    title: "Ihre Kunden brauchen Sie seltener. Und bekommen schneller Hilfe.",
+    intro:
+      "Lieferstatus, Dokumente, Änderungen: direkt gelöst. Ihr Team übernimmt die vorbereiteten Sonderfälle.",
+    impact:
+      "Bis zu 70 % Self-Service · bis zu 60 % schnellere Antworten beim Rest",
+    benefit:
+      "Weniger Unterbrechungen. Mehr Zeit für die Anliegen, die Sie brauchen.",
     prompt:
-      "Wir führen monatlich Excel-Dateien aus mehreren Bereichen zusammen, prüfen die Zahlen und erstellen einen Managementbericht.",
+      "Wir möchten eine Kundenplattform, die Lieferstatus, Dokumentenanfragen und Änderungen selbst erledigt und unserem Serviceteam Sonderfälle mit Antwortentwürfen vorbereitet.",
   },
   {
-    id: "order",
-    label: "Aufträge abwickeln",
-    area: "VERTRIEB & OPERATIONS",
-    title: "Aus einer Anfrage wird ein durchgängig geführter Auftrag.",
-    description:
-      "Kundenwunsch, Konditionen und Lieferfähigkeit in einem Vorgang verbinden. Ihr Team entscheidet, wenn eine Zusage abgestimmt werden muss.",
-    before: [
-      "Kundenanfrage aus E-Mails erfassen",
-      "Konditionen im System nachschlagen",
-      "Liefertermin mit dem Lager klären",
-      "Angebot und Auftragsstatus pflegen",
-    ],
-    files: ["Anfrage.eml", "Konditionen", "Bestandsdaten"],
-    steps: [
-      "Anfrage strukturieren",
-      "Konditionen prüfen",
-      "Auftrag vorbereiten",
-    ],
-    result: "Auftrag in Vorbereitung",
-    detail: "Positionen erfasst. Lieferoption zur Entscheidung.",
-    decision: "Lieferoption ansehen",
-    evidence: "Kundenwunsch · Lieferung in einer Sendung",
-    values: ["Verfügbar", "80 Stück", "Angefragt", "100 Stück"],
-    note: "Die Anwendung stellt die verfügbaren Mengen und den Kundenwunsch gegenüber. Ihr Team klärt, ob eine Teillieferung angeboten werden darf.",
-    outcome: "Vom Kundenwunsch zur klaren Zusage.",
+    id: "documents",
+    icon: "invoice",
+    label: "Dokumentenerstellung",
+    title: "Aus fünf Angaben wird ein fertiges Dokument.",
+    intro:
+      "Vom ersten Datenpunkt bis zum passenden Anhang. Ihr Team prüft, was wirklich eine Freigabe braucht.",
+    impact: "60–80 % weniger Erstellungsaufwand",
+    benefit:
+      "Weniger Fehler. Einheitliche Qualität. Ein Ergebnis statt Copy-and-paste.",
     prompt:
-      "Wir erfassen Kundenanfragen manuell, prüfen Konditionen und Bestände und stimmen Liefertermine zwischen Vertrieb und Lager ab.",
+      "Wir möchten Angebote, Verträge, Berichte und Spezifikationen aus wenigen Angaben und bestehenden Daten automatisch vorbereiten und gezielt freigeben.",
   },
   {
-    id: "case",
-    label: "Reklamationen lösen",
-    area: "SERVICE & QUALITÄT",
-    title: "Aus verstreuten Nachweisen wird ein lösbarer Fall.",
-    description:
-      "Kommunikation, Lieferung und Qualitätsnachweise zusammenbringen. Ihr Team erhält einen begründeten Lösungsvorschlag und behält die Entscheidung.",
-    before: [
-      "Kundenverlauf und Fotos zusammensuchen",
-      "Lieferung und Artikel zuordnen",
-      "Qualität und Service abstimmen",
-      "Lösung kommunizieren und dokumentieren",
-    ],
-    files: ["Kundennachricht", "Lieferbeleg", "Schadensfotos"],
-    steps: ["Fall zuordnen", "Nachweise auswerten", "Lösung vorbereiten"],
-    result: "Reklamation · Transportschaden",
-    detail: "Nachweise zugeordnet. Ersatzlieferung vorgeschlagen.",
-    decision: "Lösungsvorschlag öffnen",
-    evidence: "Fallübersicht · Beschädigte Lieferung",
-    values: ["Nachweise", "Vollständig", "Vorschlag", "Ersatzlieferung"],
-    note: "Kundenmeldung, Lieferbeleg und Schadensbeschreibung sind zugeordnet. Die vorgeschlagene Ersatzlieferung wird durch die zuständige Person geprüft; eine Zusage erfolgt erst nach Freigabe.",
-    outcome: "Alle Fakten im Fall. Eine klare Entscheidung.",
+    id: "economics",
+    icon: "report",
+    label: "Wirtschaftlichkeitsrechner",
+    title: "Von Annahmen zur Entscheidung – ohne Excel-Modell.",
+    intro:
+      "Annahmen ändern. Auswirkungen verstehen. Szenarien vergleichen. Die Rechenarbeit ist bereits erledigt.",
+    impact: "Berechnen, vergleichen und visualisieren in einem Schritt",
+    benefit:
+      "Keine Formeln suchen. Keine Charts neu bauen. Keine Dateiversionen verschicken.",
     prompt:
-      "Wir bearbeiten Reklamationen über mehrere Teams, suchen Nachweise zusammen und stimmen Ersatzlieferungen oder Gutschriften manuell ab.",
+      "Wir möchten unsere Wirtschaftlichkeitsberechnungen, Sensitivitäten und Szenarienvergleiche aus Excel in eine individuelle Entscheidungsplattform überführen.",
   },
 ] as const;
-
-export type ShowcaseProcess = (typeof examples)[number];
+const scenes = [
+  ProjectShowcase,
+  CustomerShowcase,
+  DocumentShowcase,
+  EconomicsShowcase,
+];
 
 export default function LandingProduct() {
-  const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const [hover, setHover] = useState(false);
-  const [visible, setVisible] = useState(false);
-  const [reduced, setReduced] = useState(true);
-  const root = useRef<HTMLElement>(null);
-  const tabs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [active, setActive] = useState(0),
+    [paused, setPaused] = useState(false),
+    [hover, setHover] = useState(false),
+    [visible, setVisible] = useState(false),
+    [reduced, setReduced] = useState(true);
+  const root = useRef<HTMLElement>(null),
+    tabs = useRef<(HTMLButtonElement | null)[]>([]);
   useEffect(() => {
-    const tab = tabs.current[active];
-    const row = tab?.parentElement;
-    if (tab && row && row.scrollWidth > row.clientWidth) {
-      row.scrollTo({
-        left:
-          tab.offsetLeft -
-          row.offsetLeft -
-          (row.clientWidth - tab.offsetWidth) / 2,
-        behavior: reduced ? "instant" : "smooth",
-      });
-    }
-  }, [active, reduced]);
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const media = matchMedia("(prefers-reduced-motion: reduce)");
     const update = () => setReduced(media.matches);
     update();
     media.addEventListener("change", update);
     const observer = new IntersectionObserver(
       ([entry]) => setVisible(entry.isIntersecting),
-      { threshold: 0.2 },
+      { threshold: 0.15 },
     );
     if (root.current) observer.observe(root.current);
     return () => {
@@ -155,54 +90,61 @@ export default function LandingProduct() {
       observer.disconnect();
     };
   }, []);
-  const running = !paused && !hover && !reduced && visible;
   useEffect(() => {
-    if (!running) return;
-    const timer = window.setInterval(
-      () => {
-        if (!document.hidden) setActive((a) => (a + 1) % examples.length);
-      },
-      active === 0 ? 20000 : 10000,
-    );
+    const tab = tabs.current[active],
+      row = tab?.parentElement;
+    if (tab && row && row.scrollWidth > row.clientWidth)
+      row.scrollTo({
+        left:
+          tab.offsetLeft -
+          row.offsetLeft -
+          (row.clientWidth - tab.offsetWidth) / 2,
+        behavior: reduced ? "instant" : "smooth",
+      });
+  }, [active, reduced]);
+  useEffect(() => {
+    if (paused || hover || !visible || reduced) return;
+    const timer = setInterval(() => {
+      if (!document.hidden) setActive((i) => (i + 1) % 4);
+    }, 20000);
     return () => clearInterval(timer);
-  }, [running, active]);
-  const process = examples[active];
-  const choose = (index: number) => {
+  }, [active, paused, hover, visible, reduced]);
+  function choose(index: number) {
     setActive(index);
     setPaused(true);
-  };
+  }
   return (
     <section
       ref={root}
       id="beispiel"
       className={s.section}
-      aria-label="Prozessbeispiele"
+      aria-label="Anwendungsbeispiele"
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       onFocusCapture={() => setPaused(true)}
     >
       <div className={s.picker}>
         <h2>Beispiele:</h2>
-        <div className={s.tabs} role="tablist" aria-label="Prozess auswählen">
-          {examples.map((item, index) => (
+        <div className={s.tabs} role="tablist" aria-label="Anwendung auswählen">
+          {examples.map((example, i) => (
             <button
-              ref={(el) => {
-                tabs.current[index] = el;
+              key={example.id}
+              ref={(node) => {
+                tabs.current[i] = node;
               }}
-              key={item.id}
-              id={"tab-" + item.id}
+              id={"tab-" + example.id}
               role="tab"
-              aria-selected={active === index}
-              aria-controls="process-showcase"
-              tabIndex={active === index ? 0 : -1}
-              className={active === index ? s.activeTab : ""}
-              onClick={() => choose(index)}
+              aria-selected={active === i}
+              aria-controls={"showcase-" + example.id}
+              tabIndex={active === i ? 0 : -1}
+              className={active === i ? s.activeTab : ""}
+              onClick={() => choose(i)}
               onKeyDown={(e) => {
                 const next =
                   e.key === "ArrowRight"
-                    ? (index + 1) % 4
+                    ? (i + 1) % 4
                     : e.key === "ArrowLeft"
-                      ? (index + 3) % 4
+                      ? (i + 3) % 4
                       : e.key === "Home"
                         ? 0
                         : e.key === "End"
@@ -215,8 +157,8 @@ export default function LandingProduct() {
                 }
               }}
             >
-              <Icon name={item.id} />
-              {item.label}
+              <Icon name={example.icon} />
+              {example.label}
             </button>
           ))}
         </div>
@@ -232,60 +174,60 @@ export default function LandingProduct() {
           <Icon name={paused ? "play" : "pause"} />
         </button>
       </div>
-      <div
-        id="process-showcase"
-        role="tabpanel"
-        aria-labelledby={"tab-" + process.id}
-        className={s.stage}
-      >
-        {process.id === "invoice" ? (
-          <InvoiceComparison process={process} />
-        ) : (
-          <div key={process.id} className={s.comparison}>
-            <div className={s.before}>
-              <header className={s.halfHeader}>
-                <span className={s.beforeBadge}>VORHER</span>
-                <h3>{visualCopy[process.id].before}</h3>
-                <p>Ihr Team erledigt die Arbeit dazwischen.</p>
-              </header>
-              <ManualWork process={process} />
-            </div>
-            <div className={s.bridge} aria-hidden="true">
-              <Icon name="arrow" />
-            </div>
-            <div className={s.after}>
-              <header className={s.halfHeader}>
-                <span className={s.afterBadge}>
-                  <Icon name="check" />
-                  MIT OPSRID
-                </span>
-                <h3>{visualCopy[process.id].after}</h3>
-                <p>Ihre Software übernimmt. Sie entscheiden.</p>
-              </header>
-              <ProcessScene key={process.id} process={process} />
-            </div>
-          </div>
-        )}
-        <div className={s.bottom}>
-          <p>{visualCopy[process.id].summary}</p>
-          <button
-            onClick={() =>
-              window.dispatchEvent(
-                new CustomEvent("opsrid:chat", {
-                  detail: { text: process.prompt, submit: true },
-                }),
-              )
-            }
+      {examples.map((example, i) => {
+        const Scene = scenes[i];
+        return (
+          <div
+            className={s.panel}
+            role="tabpanel"
+            id={"showcase-" + example.id}
+            aria-labelledby={"tab-" + example.id}
+            hidden={active !== i}
+            key={example.id}
           >
-            Das möchte ich für meinen Prozess
-            <Icon name="arrow" />
-          </button>
-        </div>
-      </div>
-      <p className={s.disclaimer}>
-        Vier Beispiele für individuelle Anwendungen. Der tatsächliche Umfang
-        hängt von Ihren Daten, Systemen und Freigaberegeln ab.
-      </p>
+            <header className={s.intro}>
+              <span className={s.eyebrow}>
+                0{i + 1} / SOFTWARE ERLEDIGT ARBEIT.
+              </span>
+              <h2>{example.title}</h2>
+              <p>{example.intro}</p>
+            </header>
+            <div className={s.stage}>
+              <Scene />
+            </div>
+            <div className={s.impact}>
+              <div>
+                <span className={s.eyebrow}>
+                  {i === 3
+                    ? "WAS DIE ANWENDUNG ÜBERNIMMT"
+                    : "ILLUSTRATIVES ENTLASTUNGSZIEL"}
+                </span>
+                <h3>{example.impact}</h3>
+                <p>{example.benefit}</p>
+              </div>
+              <button
+                onClick={() =>
+                  window.dispatchEvent(
+                    new CustomEvent("opsrid:chat", {
+                      detail: { text: example.prompt, submit: true },
+                    }),
+                  )
+                }
+              >
+                Das möchte ich für mein Unternehmen
+                <Icon name="arrow" />
+              </button>
+            </div>
+            <p className={s.disclaimer}>
+              {i === 3
+                ? "Vereinfachtes Rechenbeispiel mit offengelegten Annahmen."
+                : "Beispieldaten und illustrative Zielwerte, keine gemessenen Kundenergebnisse."}{" "}
+              Der tatsächliche Umfang und Nutzen werden anhand Ihres Prozesses
+              geprüft.
+            </p>
+          </div>
+        );
+      })}
     </section>
   );
 }
